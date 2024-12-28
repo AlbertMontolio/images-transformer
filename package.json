@@ -1,0 +1,45 @@
+{
+  "name": "images-transformer",
+  "version": "1.0.0",
+  "main": "src/run.ts",
+  "type": "module",
+  "scripts": {
+    "start": "npm run build:tsc && node dist/run.js",
+    "build:tsc": "tsc",
+    "build:babel": "babel . -d dist",
+    "build:webpack": "rm -rf dist && webpack --mode development",
+    "build:webpack:prisma": "rm -rf dist && webpack --mode development && mkdir -p dist/node_modules/.prisma/client && cp node_modules/.prisma/client/libquery_engine-darwin-arm64.dylib.node dist/node_modules/.prisma/client",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "bull": "^4.16.5",
+    "exif-reader": "^2.0.1",
+    "exifreader": "^4.26.0",
+    "express": "^4.21.2",
+    "fs-extra": "^11.2.0",
+    "heic-convert": "^2.1.0",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.13.1",
+    "redis": "^4.7.0",
+    "sharp": "^0.33.5",
+    "ts-node": "^10.9.2",
+    "typeorm": "^0.3.20"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.10.2",
+    "babel-loader": "^9.2.1",
+    "nodemon": "^3.1.9",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.7.2",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  }
+}
