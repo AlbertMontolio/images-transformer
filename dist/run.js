@@ -3,8 +3,20 @@ import { ReadImagesUseCase } from './image/application/use-cases/read-images.use
 import { AddWaterfallsUseCase } from './image/application/use-cases/add-waterfalls.use-case.js';
 import { HeicToJpegConverterService } from './image/infraestructure/services/heic-to-jpeg-converter.service.js';
 import { RecogniseImageUseCase } from './image/application/use-cases/recognise-image.use-case.js';
+import { ExpressAdapter } from '@bull-board/express';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js';
+import { createBullBoard } from '@bull-board/api';
+import { imageQueue } from './image/infraestructure/queues/image-transformation.queue.js';
+// Initialize BullMQ queue
+const serverAdapter = new ExpressAdapter();
+serverAdapter.setBasePath('/admin/queues');
+const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
+    queues: [new BullMQAdapter(imageQueue)],
+    serverAdapter: serverAdapter,
+});
 const app = express();
 app.use(express.json());
+app.use('/admin/queues', serverAdapter.getRouter());
 app.get('/run', async (req, res) => {
     // Logic for receiving source/target paths
     const inputImagesDir = '/Users/albertmontolio/Documents/coding_area/interviews/koerber/input_images';
@@ -17,7 +29,10 @@ app.get('/run', async (req, res) => {
     const heicToJpegConverterService = new HeicToJpegConverterService();
     await heicToJpegConverterService.execute(inputImagesDir);
     imagesPaths = await readImagesUseCase.execute();
-    const recogniseImageUseCase = new RecogniseImageUseCase();
+    const recogniseImageUseCase = new RecogniseImageUseCase(outputImagesDir);
+    for (const imagePath of imagesPaths) {
+        console.log('### imagePath', imagePath);
+    }
     imagesPaths.forEach(async (imagePath) => {
         await recogniseImageUseCase.execute(imagePath);
     });
