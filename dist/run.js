@@ -2,6 +2,7 @@ import express from 'express';
 import { ReadImagesUseCase } from './image/application/use-cases/read-images.use-case.js';
 import { AddWaterfallsUseCase } from './image/application/use-cases/add-waterfalls.use-case.js';
 import { HeicToJpegConverterService } from './image/infraestructure/services/heic-to-jpeg-converter.service.js';
+import { RecogniseImageUseCase } from './image/application/use-cases/recognise-image.use-case.js';
 const app = express();
 app.use(express.json());
 app.get('/run', async (req, res) => {
@@ -16,6 +17,11 @@ app.get('/run', async (req, res) => {
     const heicToJpegConverterService = new HeicToJpegConverterService();
     await heicToJpegConverterService.execute(inputImagesDir);
     imagesPaths = await readImagesUseCase.execute();
+    const recogniseImageUseCase = new RecogniseImageUseCase();
+    imagesPaths.forEach(async (imagePath) => {
+        await recogniseImageUseCase.execute(imagePath);
+    });
+    return;
     if (!imagesPaths) {
         res.send('sth went wrong');
     }

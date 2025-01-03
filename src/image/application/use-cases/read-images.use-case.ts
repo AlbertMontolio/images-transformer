@@ -22,16 +22,12 @@ export class ReadImagesUseCase {
     console.log({ files })
 
     files.forEach((file) => {
-      console.log('### file', file)
       const extName = path.extname(file).toLowerCase()
-      console.log('### extName', extName)
     })
-    console.log('### files a', files)
 
     const imageFiles: string[] = files.filter((file: string) =>
       IMAGE_EXTENSIONS.includes(path.extname(file).toLowerCase())
     );
-    console.log('### imageFiles b', imageFiles)
 
     const imagesPaths: string[] = []
     for (const imageFile of imageFiles) {
@@ -42,16 +38,12 @@ export class ReadImagesUseCase {
         const fileBuffer = await fs.readFile(imagePath);
         // Open and process each image
         const metadata: Metadata = await sharp(imagePath).metadata();
-        console.log(`Successfully opened: ${imageFile}, Size: ${metadata.width}x${metadata.height}, Format: ${metadata.format}`);
         if (metadata.exif) {
           const tags = ExifReader.load(fileBuffer)
           const imageDate = tags['DateTimeOriginal'].description;
 
-          console.log('### imageDate', imageDate)
           // const tags = await ExifReader.load(fileBuffer);
-          console.log('### hello world', metadata.exif)
         } else {
-          console.log("No EXIF data found in the image.");
         }
       } catch (err) {
         console.error(`Failed to open ${imageFile}: ${err.message}`);
