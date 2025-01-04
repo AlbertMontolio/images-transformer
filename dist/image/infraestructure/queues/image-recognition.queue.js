@@ -7,9 +7,10 @@ const redisConnection = new Redis({
     maxRetriesPerRequest: null,
 });
 // Define a shared queue instance
-export const imageQueue = new Queue('image-transformation', {
+// ### TODO: constant file, to store image-recognition
+export const imageQueue = new Queue('image-recognition', {
     connection: redisConnection,
 });
 // Optional: Export the Redis connection if you need it elsewhere
 export { redisConnection };
-//# sourceMappingURL=image-transformation.queue.js.map
+//# sourceMappingURL=image-recognition.queue.js.map

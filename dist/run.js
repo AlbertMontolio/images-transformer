@@ -6,7 +6,9 @@ import { RecogniseImageUseCase } from './image/application/use-cases/recognise-i
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js';
 import { createBullBoard } from '@bull-board/api';
-import { imageQueue } from './image/infraestructure/queues/image-transformation.queue.js';
+import { imageQueue } from './image/infraestructure/queues/image-recognition.queue.js';
+import { CreateImageInDbUseCase } from './image/application/use-cases/create-image-in-db.use-case.js';
+import { GetImagesInDbUseCase } from './image/application/use-cases/get-images-in-db.use-case.js';
 // Initialize BullMQ queue
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
@@ -30,12 +32,14 @@ app.get('/run', async (req, res) => {
     await heicToJpegConverterService.execute(inputImagesDir);
     imagesPaths = await readImagesUseCase.execute();
     const recogniseImageUseCase = new RecogniseImageUseCase(outputImagesDir);
+    const createImageInDbUseCase = new CreateImageInDbUseCase();
     for (const imagePath of imagesPaths) {
-        console.log('### imagePath', imagePath);
+        const imageId = await createImageInDbUseCase.execute(imagePath);
+        await recogniseImageUseCase.execute({
+            imagePath,
+            imageId,
+        });
     }
-    imagesPaths.forEach(async (imagePath) => {
-        await recogniseImageUseCase.execute(imagePath);
-    });
     return;
     if (!imagesPaths) {
         res.send('sth went wrong');
@@ -51,6 +55,12 @@ app.post('/transform', (req, res) => {
 app.get('/status', (req, res) => {
     // Logic for retrieving processing status
     res.send('Status endpoint');
+});
+app.get('/images', async (req, res) => {
+    // Logic for retrieving processing status
+    const getImagesInDbUseCase = new GetImagesInDbUseCase();
+    const images = await getImagesInDbUseCase.execute();
+    res.send(images);
 });
 const PORT = 3000;
 app.listen(PORT, () => {

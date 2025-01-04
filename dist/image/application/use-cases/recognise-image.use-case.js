@@ -1,19 +1,24 @@
-import { imageQueue } from '../../infraestructure/queues/image-transformation.queue.js';
+import { imageQueue } from '../../infraestructure/queues/image-recognition.queue.js';
+import { LogRepository } from '../../infraestructure/repositories/log.repository.js';
 export class RecogniseImageUseCase {
     outputImagesDir;
     constructor(outputImagesDir) {
         this.outputImagesDir = outputImagesDir;
     }
-    async execute(imagePath) {
+    async execute({ imagePath, imageId, }) {
         try {
-            console.log('### queue', imageQueue);
-            console.log('### 123 imagePath', imagePath);
             const jobData = {
                 imagePath,
                 outputImagesDir: this.outputImagesDir,
+                imageId,
             };
-            console.log('### adding jobData to queue');
+            console.log('### adding jobData to queue', imageQueue);
             await imageQueue.add('process-image', jobData);
+            const logRepository = new LogRepository();
+            await logRepository.createLog({
+                imageId,
+                status: 'sent-to-queue'
+            });
         }
         catch (err) {
             console.error('Error during classification:', err);

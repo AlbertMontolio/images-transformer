@@ -25,4 +25,7 @@ postgres=# \du
 
  sql -h localhost -U your_db_user -d your_db_name
 
+# apply migration in prisma
+npx prisma migrate dev --name image-optionals
+it creates file and fires it in db
 

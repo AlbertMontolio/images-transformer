@@ -1,15 +1,18 @@
 import { Worker } from 'bullmq';
-import { imageQueue } from '../queues/image-transformation.queue.js';
+import { imageQueue } from '../queues/image-recognition.queue.js';
 import { RecogniseImageService } from '../services/recognise-image.service.js';
-const worker = new Worker('image-transformation',
+const worker = new Worker('image-recognition',
     async (job) => {
         console.log('### worker job', job);
 
-        const { imagePath, outputImagesDir } = job.data;
+        const { imagePath, outputImagesDir, imageId } = job.data;
 
         const recogniseImageService = new RecogniseImageService()
 
-        await recogniseImageService.execute(imagePath)
+        await recogniseImageService.execute({
+            imageId,
+            imagePath,
+        })
     },
     { connection: imageQueue.opts.connection }
 );

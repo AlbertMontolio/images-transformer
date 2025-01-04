@@ -1,13 +1,22 @@
-import fs from 'fs';
 import * as tf from '@tensorflow/tfjs-node';  // TensorFlow.js for Node.js
 import * as mobilenet from '@tensorflow-models/mobilenet';  // MobileNet for image classification
 import sharp from 'sharp';
+import { LogRepository } from '../repositories/log.repository.js';
 
 export class RecogniseImageService {
   // constructor(private readonly queue: Queue) {}
 
-  async execute(imagePath: string) {
+  async execute({
+    imageId,
+    imagePath,
+  }) {
     try {
+      const logRepository = new LogRepository()
+
+      await logRepository.createLog({
+        imageId,
+        status: 'recognition-started',
+      })
       // Read the image using sharp (resize to 224x224 as required by MobileNet)
       const imageBuffer = await sharp(imagePath)
         .toBuffer();  // Get the image buffer
@@ -30,7 +39,11 @@ export class RecogniseImageService {
         console.log(`${prediction.className}: ${prediction.probability}`);
       });
 
-
+      console.log('### recognistion-finished')
+      await logRepository.createLog({
+        imageId,
+        status: 'recognition-finished',
+      })
     } catch (err) {
       console.error('Error during classification:', err);
     }

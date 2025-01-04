@@ -9,7 +9,8 @@ const redisConnection = new Redis({
 });
 
 // Define a shared queue instance
-export const imageQueue = new Queue('image-transformation', {
+// ### TODO: constant file, to store image-recognition
+export const imageQueue = new Queue('image-recognition', {
   connection: redisConnection,
 });
 
