@@ -22,7 +22,7 @@ model Image {
   height    Int?
 
   logs                  Log[]
-  classifications       Classification[]
+  categorizations       Categorization[]
   transformedImage      TransformedImage?
 }
 
@@ -36,7 +36,7 @@ model Log {
   image      Image      @relation(fields: [imageId], references: [id]) // A log belongs to an image
 }
 
-model Classification {
+model Categorization {
   id         Int        @id @default(autoincrement()) // Primary key
   createdAt  DateTime   @default(now()) // Log creation timestamp
   label      String     

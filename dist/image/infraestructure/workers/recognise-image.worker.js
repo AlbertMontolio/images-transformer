@@ -1,25 +1,21 @@
 import { Worker } from 'bullmq';
-import { imageRecognitionQueue, imageRecognitionQueueName } from '../queues/image-recognition.queue.js';
+import { imageCategorizationQueue, imageCategorizationQueueName } from '../queues/image-categorization.queue.js';
 import { RecogniseImageService } from '../services/recognise-image.service.js';
 import { LogRepository } from '../repositories/log.repository.js';
-import { ClassificationRepository } from '../repositories/classification.repository.js';
+import { CategorizationRepository } from '../repositories/categorization.repository.js';
 const recogniseImageService = new RecogniseImageService();
 const logRepository = new LogRepository();
-const classificationRepository = new ClassificationRepository();
-const recognitionImageWorker = new Worker(imageRecognitionQueueName, async (job) => {
-    console.log('### recognition worker job');
+const categorizationRepository = new CategorizationRepository();
+const recognitionImageWorker = new Worker(imageCategorizationQueueName, async (job) => {
     const { imagePath, imageId } = job.data;
-    console.log('### abc imageId', imageId);
     logRepository.create({
         imageId,
-        status: 'recognition-started',
+        status: 'categorization-started',
     });
     const predictions = await recogniseImageService.execute(imagePath);
-    console.log('### recognistion-finished');
-    console.log('### predictions', predictions);
     logRepository.create({
         imageId,
-        status: 'recognition-finished',
+        status: 'categorization-finished',
     });
     const inputs = predictions.map((prediction) => {
         return {
@@ -27,21 +23,21 @@ const recognitionImageWorker = new Worker(imageRecognitionQueueName, async (job)
             score: prediction.probability,
         };
     });
-    classificationRepository.createClassifications({
+    categorizationRepository.createMany({
         inputs,
         imageId,
     });
-}, { connection: imageRecognitionQueue.opts.connection });
+}, { connection: imageCategorizationQueue.opts.connection });
 // Log worker status
 recognitionImageWorker.on('completed', (job) => {
-    console.log(`recognitionImageWorker Job ${job.id} completed successfully.`);
-    console.log('### recognitionImageWorker job.data', job.data);
+    console.log(`categorizationImageWorker Job ${job.id} completed successfully.`);
+    console.log('### categorizationImageWorker job.data', job.data);
 });
 recognitionImageWorker.on('failed', (job, err) => {
-    console.error(`recognitionImageWorker Job ${job.id} failed: ${err.message}`);
+    console.error(`categorizationImageWorker Job ${job.id} failed: ${err.message}`);
 });
 recognitionImageWorker.on('error', (err) => {
-    console.error('recognitionImageWorker error:', err);
+    console.error('categorizationImageWorker error:', err);
 });
-console.log('recognitionImageWorker is running...');
+console.log('categorizationImageWorker is running...');
 //# sourceMappingURL=recognise-image.worker.js.map

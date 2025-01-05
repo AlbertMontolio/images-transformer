@@ -1,19 +1,19 @@
-import { imageRecognitionQueue } from '../../infraestructure/queues/image-recognition.queue.js';
+import { imageCategorizationQueue } from '../../infraestructure/queues/image-categorization.queue.js';
 import { LogRepository } from '../../infraestructure/repositories/log.repository.js';
 import { Image } from '@prisma/client';
 
-export class RecogniseImagesUseCase {
+export class CategorizeImagesUseCase {
   constructor() {}
 
   async execute(images: Image[]) {
     for (const image of images) {
       const imageId = image.id
       const imagePath = image.path
-      this.recogniseImage({ imagePath, imageId })
+      this.categorizeImage({ imagePath, imageId })
     }
   }
 
-  private async recogniseImage({
+  private async categorizeImage({
     imagePath,
     imageId,
   }: {
@@ -27,7 +27,7 @@ export class RecogniseImagesUseCase {
       };
 
       console.log('### adding jobData to queue')
-      await imageRecognitionQueue.add('process-image', jobData);
+      await imageCategorizationQueue.add('process-image', jobData);
       const logRepository = new LogRepository()
       await logRepository.create({
         imageId,

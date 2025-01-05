@@ -2,7 +2,7 @@ import express from 'express';
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js';
 import { createBullBoard } from '@bull-board/api';
-import { imageRecognitionQueue } from './image/infraestructure/queues/image-recognition.queue.js';
+import { imageCategorizationQueue } from './image/infraestructure/queues/image-categorization.queue.js';
 import { imageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue.js';
 import { GetImagesInDbUseCase } from './image/application/use-cases/get-images-in-db.use-case.js';
 import { ProcessImagesUseCase } from './image/application/use-cases/process-images.use-case.js';
@@ -11,7 +11,7 @@ import { GetTransformedImagesInDbUseCase } from './image/application/use-cases/g
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
 const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-    queues: [new BullMQAdapter(imageRecognitionQueue), new BullMQAdapter(imageTransformationQueue)],
+    queues: [new BullMQAdapter(imageCategorizationQueue), new BullMQAdapter(imageTransformationQueue)],
     serverAdapter: serverAdapter,
 });
 const app = express();

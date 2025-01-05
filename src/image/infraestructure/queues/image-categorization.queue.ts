@@ -8,11 +8,10 @@ const redisConnection = new Redis({
   maxRetriesPerRequest: null,
 });
 
-export const imageRecognitionQueueName = 'image-recognition-queue'
+export const imageCategorizationQueueName = 'image-categorization-queue'
 
 // Define a shared queue instance
-// ### TODO: constant file, to store image-recognition
-export const imageRecognitionQueue = new Queue('image-recognition-queue', {
+export const imageCategorizationQueue = new Queue(imageCategorizationQueueName, {
   connection: redisConnection,
 });
 

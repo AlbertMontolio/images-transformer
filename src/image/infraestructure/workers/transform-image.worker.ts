@@ -14,12 +14,9 @@ const logRepository = new LogRepository()
 const transformImageWorker = new Worker(
   imageTransformationQueueName,
   async (job: Job) => {
-    console.log('### transformation worker job', job.data)
     const { outputImagesDir, imagePath, watermarkText, imageId } = job.data
 
-    console.log('### albert 1')
     await logRepository.create({ imageId, status: 'transformation-started' })
-    console.log('### albert 2')
 
     await transformImageService.execute({
       imagePath,

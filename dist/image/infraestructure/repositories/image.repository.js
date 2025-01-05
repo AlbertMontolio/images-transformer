@@ -16,7 +16,7 @@ export class ImageRepository {
             },
             include: {
                 logs: true,
-                classifications: true,
+                categorizations: true,
             },
         });
         return imageWithLogs;
@@ -25,7 +25,7 @@ export class ImageRepository {
         const images = await prisma.image.findMany({
             include: {
                 logs: true,
-                classifications: true,
+                categorizations: true,
             }
         });
         return images;
