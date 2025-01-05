@@ -1,13 +1,18 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 export class LogRepository {
-    async createLog({ imageId, status, }) {
-        await prisma.log.create({
-            data: {
-                imageId,
-                status,
-            }
-        });
+    async create({ imageId, status, }) {
+        try {
+            await prisma.log.create({
+                data: {
+                    imageId,
+                    status,
+                }
+            });
+        }
+        catch (err) {
+            console.log('### err:::', err);
+        }
     }
     async findLogByImageIdAndStatus({ imageId, status, }) {
         const log = await prisma.log.findFirst({

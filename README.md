@@ -6,7 +6,8 @@ mobilenet, image recognisition
 # start queues and worker
 docker run --name redis -p 6379:6379 -d redis
 
-node dist/image/infraestructure/workers/transform-image.worker.js
+node dist/image/infraestructure/workers/image-transformation.worker.js
+node dist/image/infraestructure/workers/image-recognition.worker.js
 
 # bullmq
 read please: https://docs.bullmq.io/guide/telemetry about bullmq
@@ -29,3 +30,5 @@ postgres=# \du
 npx prisma migrate dev --name image-optionals
 it creates file and fires it in db
 
+npx prisma migrate reset
+npx prisma generate

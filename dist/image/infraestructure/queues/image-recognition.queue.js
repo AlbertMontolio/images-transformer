@@ -6,9 +6,10 @@ const redisConnection = new Redis({
     port: 6379, // Default Redis port
     maxRetriesPerRequest: null,
 });
+export const imageRecognitionQueueName = 'image-recognition-queue';
 // Define a shared queue instance
 // ### TODO: constant file, to store image-recognition
-export const imageQueue = new Queue('image-recognition', {
+export const imageRecognitionQueue = new Queue('image-recognition-queue', {
     connection: redisConnection,
 });
 // Optional: Export the Redis connection if you need it elsewhere

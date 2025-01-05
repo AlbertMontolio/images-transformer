@@ -1,16 +1,18 @@
 import express from 'express';
 import { ReadImagesUseCase } from './image/application/use-cases/read-images.use-case.js';
-import { AddWaterfallsUseCase } from './image/application/use-cases/add-waterfalls.use-case.js';
+import { TransformImagesUseCase } from './image/application/use-cases/transform-images.use-case.js';
 import { HeicToJpegConverterService } from './image/infraestructure/services/heic-to-jpeg-converter.service.js';
-import { RecogniseImageUseCase } from './image/application/use-cases/recognise-image.use-case.js';
 
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 
 import { createBullBoard } from '@bull-board/api'
-import { imageQueue } from './image/infraestructure/queues/image-recognition.queue.js';
-import { CreateImageInDbUseCase } from './image/application/use-cases/create-image-in-db.use-case.js';
+import { imageRecognitionQueue } from './image/infraestructure/queues/image-recognition.queue.js';
+import { imageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue.js';
 import { GetImagesInDbUseCase } from './image/application/use-cases/get-images-in-db.use-case.js';
+import { ProcessImagesUseCase } from './image/application/use-cases/process-images.use-case.js';
+import { RecogniseImagesUseCase } from './image/application/use-cases/recognise-images.use-case.js';
+import { GetTransformedImagesInDbUseCase } from './image/application/use-cases/get-transformed-images-in-db.use-case.js';
 
 // Initialize BullMQ queue
 
@@ -18,7 +20,7 @@ const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
 
 const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
-    queues: [new BullMQAdapter(imageQueue)],
+    queues: [new BullMQAdapter(imageRecognitionQueue), new BullMQAdapter(imageTransformationQueue)],
     serverAdapter: serverAdapter,
 });
 
@@ -30,42 +32,26 @@ app.use('/admin/queues', serverAdapter.getRouter());
 app.get('/run', async (req, res) => {
     // Logic for receiving source/target paths
     const inputImagesDir = '/Users/albertmontolio/Documents/coding_area/interviews/koerber/input_images'
-    const readImagesUseCase = new ReadImagesUseCase(inputImagesDir);
-    let imagesPaths = await readImagesUseCase.execute()
-
-    if (!imagesPaths) {
-        res.send('sth went wrong')
-    }
-
     const outputImagesDir = '/Users/albertmontolio/Documents/coding_area/interviews/koerber/output_images'
 
-    const heicToJpegConverterService = new HeicToJpegConverterService()
-    await heicToJpegConverterService.execute(inputImagesDir)
+    
 
-    imagesPaths = await readImagesUseCase.execute()
-
-    const recogniseImageUseCase = new RecogniseImageUseCase(outputImagesDir)
-    const createImageInDbUseCase = new CreateImageInDbUseCase()
-    for (const imagePath of imagesPaths) {
-        const imageId = await createImageInDbUseCase.execute(imagePath);
-        await recogniseImageUseCase.execute({
-            imagePath,
-            imageId,
-        });
-    }
-
-    return;
-
-    if (!imagesPaths) {
-        res.send('sth went wrong')
-    }
-
-    const addWaterfallsUseCase = new AddWaterfallsUseCase(
-        'el rincón real',
+    const processImagesUseCase = new ProcessImagesUseCase(
+        inputImagesDir,
         outputImagesDir,
     )
 
-    addWaterfallsUseCase.execute(imagesPaths);
+    await processImagesUseCase.execute();
+
+    // const heicToJpegConverterService = new HeicToJpegConverterService()
+    // await heicToJpegConverterService.execute(inputImagesDir)
+
+    // const transformImagesUseCase = new TransformImagesUseCase(
+    //     imagesPaths,
+    //     outputImagesDir,
+    // )
+
+    // transformImagesUseCase.execute('koerber');
     res.send('test');
 });
 
@@ -80,11 +66,17 @@ app.get('/status', (req, res) => {
 });
 
 app.get('/images', async (req, res) => {
-    // Logic for retrieving processing status
     const getImagesInDbUseCase = new GetImagesInDbUseCase()
 
     const images = await getImagesInDbUseCase.execute()
     res.send(images);
+});
+
+app.get('/transformed-images', async (req, res) => {
+    const getTransformedImagesInDbUseCase = new GetTransformedImagesInDbUseCase()
+
+    const transformedImages = await getTransformedImagesInDbUseCase.execute()
+    res.send(transformedImages);
 });
 
 const PORT = 3000;

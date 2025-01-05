@@ -21,7 +21,9 @@ model Image {
   width     Int?
   height    Int?
 
-  logs      Log[]
+  logs                  Log[]
+  classifications       Classification[]
+  transformedImage      TransformedImage?
 }
 
 model Log {
@@ -31,5 +33,32 @@ model Log {
   status     String     // Status of the log (e.g., 'pending', 'completed', 'failed')
 
   imageId    Int        // Foreign key to the Image model
+  image      Image      @relation(fields: [imageId], references: [id]) // A log belongs to an image
+}
+
+model Classification {
+  id         Int        @id @default(autoincrement()) // Primary key
+  createdAt  DateTime   @default(now()) // Log creation timestamp
+  label      String     
+  score      Float     
+
+  imageId    Int        // Foreign key to the Image model
+  image      Image      @relation(fields: [imageId], references: [id]) // A log belongs to an image
+}
+
+model TransformedImage {
+  id          Int        @id @default(autoincrement()) // Primary key
+  createdAt   DateTime   @default(now()) // Log creation timestamp
+
+  width                 Float?     
+  height                Float?    
+  size                  Float?
+  path                  String
+  name                  String?
+  watermarkText         String?
+  filterType            String?
+  filterValue           String?
+
+  imageId    Int        @unique()
   image      Image      @relation(fields: [imageId], references: [id]) // A log belongs to an image
 }
