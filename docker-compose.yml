@@ -1,5 +1,45 @@
 version: '3.8'
 services:
+  # Node.js App
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile # Add this Dockerfile to build the Node.js app
+    container_name: node_app
+    restart: always
+    ports:
+      - "3000:3000" # Change this to your app's port
+    volumes:
+      - /Users/albertmontolio/Documents/coding_area/interviews/koerber/input_images:/usr/src/app/input_images
+      - /Users/albertmontolio/Documents/coding_area/interviews/koerber/transformed_images:/usr/src/app/transformed_images
+      - /Users/albertmontolio/Documents/coding_area/interviews/koerber/detected_images:/usr/src/app/detected_images
+
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: albertmontolio
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: images-transformer-db
+      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - postgres
+      - redis
+    command: node dist/run.js # The command to run your main app
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: prisma_migrate
+    entrypoint: ["npx", "prisma", "migrate", "deploy"]
+    environment:
+      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+    depends_on:
+      - app
+      - postgres
+
   postgres:
     image: postgres:14
     container_name: postgres_db
@@ -12,6 +52,56 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+
+  # Redis for Queues
+  redis:
+    image: redis:7
+    container_name: redis_queue
+    restart: always
+    ports:
+      - "6379:6379"
+
+  categorize_image_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: categorize_image_worker
+    restart: always
+    command: ["node", "dist/image/infraestructure/workers/categorize-image.worker.js"]
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: albertmontolio
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: images-transformer-db
+      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+    depends_on:
+      - app
+      - redis
+      - postgres
+
+  transform_image_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: transform_image_worker
+    restart: always
+    command: ["node", "dist/image/infraestructure/workers/transform-image.worker.js"]
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: albertmontolio
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: images-transformer-db
+      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+    depends_on:
+      - app
+      - redis
+      - postgres
 
 volumes:
   db_data:

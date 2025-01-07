@@ -10,7 +10,7 @@ export class CreateImagesInDbUseCase {
   async execute(imagesPaths: string[]) {
     const images = []; 
     for (const imagePath of imagesPaths) {
-      const image = await this.imageRepository.createImage(imagePath)
+      const image = await this.imageRepository.create(imagePath)
       images.push(image)
     }
 

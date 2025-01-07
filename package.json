@@ -11,7 +11,8 @@
     "build:webpack:prisma": "rm -rf dist && webpack --mode development && mkdir -p dist/node_modules/.prisma/client && cp node_modules/.prisma/client/libquery_engine-darwin-arm64.dylib.node dist/node_modules/.prisma/client",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "postinstall": "npm rebuild @tensorflow/tfjs-node --build-from-source"
   },
   "keywords": [],
   "author": "",
@@ -20,12 +21,14 @@
   "dependencies": {
     "@bull-board/express": "^6.5.4",
     "@prisma/client": "^6.1.0",
+    "@tensorflow-models/coco-ssd": "^2.2.3",
     "@tensorflow-models/mobilenet": "^2.1.1",
     "@tensorflow/tfjs": "^4.22.0",
     "@tensorflow/tfjs-converter": "^4.22.0",
     "@tensorflow/tfjs-node": "^4.22.0",
     "bull": "^4.16.5",
     "bullmq": "^5.34.6",
+    "cors": "^2.8.5",
     "exif-reader": "^2.0.1",
     "exifreader": "^4.26.0",
     "express": "^4.21.2",

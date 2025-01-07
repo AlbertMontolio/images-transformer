@@ -18,12 +18,15 @@ model Image {
   path      String    @unique
   name      String?    
   createdAt DateTime  @default(now()) // Automatically set timestamp
-  width     Int?
-  height    Int?
+
+  size      Float? 
+  width     Float?
+  height    Float?
 
   logs                  Log[]
   categorizations       Categorization[]
   transformedImage      TransformedImage?
+  detectedObjects       DetectedObject[]
 }
 
 model Log {
@@ -44,6 +47,22 @@ model Categorization {
 
   imageId    Int        // Foreign key to the Image model
   image      Image      @relation(fields: [imageId], references: [id]) // A log belongs to an image
+}
+
+model DetectedObject {
+  id          Int        @id @default(autoincrement()) // Primary key
+  createdAt   DateTime   @default(now()) // Log creation timestamp
+
+  x           Float     
+  y           Float     
+  width       Float
+  height      Float
+  
+  class       String
+  score       Float
+
+  imageId     Int        // Foreign key to the Image model
+  image       Image      @relation(fields: [imageId], references: [id]) // A log belongs to an image
 }
 
 model TransformedImage {

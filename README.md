@@ -32,3 +32,32 @@ it creates file and fires it in db
 
 npx prisma migrate reset
 npx prisma generate
+
+node v working
+v22.12.0
+
+docker-compose down --volumes
+docker system prune -af
+rm -rf node_modules package-lock.json dist
+
+docker-compose build --no-cache
+docker-compose up -d
+
+docker execute -it node_app batch
+
+scale!!!
+
+# todo: dockerfile improvements, do not copy . .
+it requires to remove node_modules and dist
+
+663020a5ccd3
+
+docker exec -it images-transformer-app bash
+
+'IMG_5302 4.jpeg'       'IMG_5306 4.jpeg'       'IMG_5311 4.HEIC.jpeg'  'IMG_5316 4.HEIC.jpeg'  'IMG_5320 4.HEIC.jpeg'   heics
+'IMG_5303 4.jpeg'       'IMG_5307 4.HEIC.jpeg'  'IMG_5312 4.HEIC.jpeg'  'IMG_5317 4.HEIC.jpeg'  'IMG_5321 4.HEIC.jpeg'   jpegs
+'IMG_5304 4.HEIC.jpeg'  'IMG_5308 4.HEIC.jpeg'  'IMG_5313 4.HEIC.jpeg'  'IMG_5317 4.jpeg'       'IMG_5322 4.HEIC.jpeg'   others
+'IMG_5305 4.HEIC.jpeg'  'IMG_5309 4.HEIC.jpeg'  'IMG_5314 4.HEIC.jpeg'  'IMG_5318 4.HEIC.jpeg'   flower.jpg
+'IMG_5306 4.HEIC.jpeg'  'IMG_5310 4.HEIC.jpeg'  'IMG_5315 4.HEIC.jpeg'  'IMG_5319 4.HEIC.jpeg'   flower_photos
+
+/usr/src/app/input_images/IMG_5322 4.HEIC.jpeg
