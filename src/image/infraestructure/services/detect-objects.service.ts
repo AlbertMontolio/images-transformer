@@ -2,6 +2,8 @@ import * as tf from '@tensorflow/tfjs-node';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import sharp from 'sharp';
 import { Image } from '@prisma/client';
+import path from 'path';
+import { inputImagesDir } from '../../config.js';
 
 export interface DetectedObject {
   class: string;
@@ -11,27 +13,24 @@ export interface DetectedObject {
 
 export class DetectObjectsService {
   async execute(image: Image): Promise<DetectedObject[]> {
-    const imagePath = image.path;
+    const imagePath = path.join(inputImagesDir, image.name);
+
     const metadata = await sharp(imagePath).metadata();
     const originalWidth = metadata.width!;
     const originalHeight = metadata.height!;
-    console.log('### Original Dimensions:', originalWidth, originalHeight);
     // Step 1: Load and Resize the Image
     const resizedImageBuffer = await sharp(imagePath)
         .resize(640, 640) // Resize image to 640x640 (Coco SSD works with flexible sizes)
         .toFormat('jpeg')
         .toBuffer();
-    console.log('### resizedImageBuffer', resizedImageBuffer)
 
     // Step 2: Decode the Image into a Tensor
     let imageTensor = tf.node.decodeImage(resizedImageBuffer, 3); // Decode to RGB tensor
-    console.log('### imageTensor', imageTensor)
 
     // Step 3: Remove Extra Dimensions
     // If the tensor has a batch dimension of size 1, remove it
     while (imageTensor.shape.length > 3) {
       imageTensor = imageTensor.squeeze();
-      console.log('Squeezed imageTensor shape:', imageTensor.shape);
     }
 
     // Step 4: Convert Tensor to `int32`
@@ -44,15 +43,12 @@ export class DetectObjectsService {
       throw new Error(`Unexpected tensor shape after squeezing: ${imageTensor.shape}`);
     }
 
-    console.log('### albert 1')
     // Load the Coco SSD model
     const model = await cocoSsd.load();
-    console.log('### model', model)
     // Perform object detection
     try {
     // @ts-ignore: Ignore the type error for this line
       const predictions = await model.detect(inputTensor);
-      console.log('### Detected Objects:', predictions);
       imageTensor.dispose();
       inputTensor.dispose();
 

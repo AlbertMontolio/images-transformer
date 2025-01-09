@@ -2,8 +2,9 @@ import { DetectedObject, Image } from "@prisma/client";
 import { ImageRepository } from "../../infraestructure/repositories/image.repository.js"
 import sharp from 'sharp';
 import path from 'path';
+import { inputImagesDir, outputImagesDir } from "../../config.js";
 
-export class DrawObjectsIntoImage {
+export class DrawObjectsIntoImageUseCase {
   imageRepository: ImageRepository;
 
   constructor () {
@@ -13,7 +14,8 @@ export class DrawObjectsIntoImage {
     console.log('### fiu fiu')
     // ### TODO: remove. you have the image in the caller
     const image = await this.imageRepository.findOne(imageId);
-    const imagePath = image.path
+    const imagePath = path.join(inputImagesDir, image.name);
+    // const imagePath = image.path
 
     const detectedObjects = image.detectedObjects
     console.log('### detectedObjects', detectedObjects)
@@ -30,9 +32,8 @@ export class DrawObjectsIntoImage {
     `;
 
     const fileName = image.name;
-    // const outputImagesDir = '/Users/albertmontolio/Documents/coding_area/interviews/koerber/detected-images'
-    const outputImagesDir = '/usr/src/app/detected_images'
-    const outputFilePath = path.join(outputImagesDir, fileName); // Create output file path
+    console.log('### doiiuc outputImagesDir', outputImagesDir)
+    const outputFilePath = path.join(outputImagesDir, 'detected_images', fileName); // Create output file path
 
     // Step 3: Overlay the SVG on the Original Image
     const bufferWithBoundingBoxes = await sharp(imagePath)

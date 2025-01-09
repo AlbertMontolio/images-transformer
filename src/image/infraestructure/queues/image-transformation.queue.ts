@@ -1,5 +1,8 @@
 import { Queue } from 'bullmq';
 import Redis from 'ioredis';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Create a shared Redis connection
 // const redisConnection = new Redis({
@@ -8,6 +11,9 @@ import Redis from 'ioredis';
 //   maxRetriesPerRequest: null,
 // });
 
+console.log(process.env.REDIS_HOST)
+
+console.log(process.env.REDIS_HOST)
 const redisConnection = new Redis({
   host: process.env.REDIS_HOST || 'redis', // Use 'redis' as the default hostname for the Redis service
   port: Number(process.env.REDIS_PORT) || 6379, // Use 6379 as the default port

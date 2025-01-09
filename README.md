@@ -6,8 +6,8 @@ mobilenet, image recognisition
 # start queues and worker
 docker run --name redis -p 6379:6379 -d redis
 
-node dist/image/infraestructure/workers/image-transformation.worker.js
-node dist/image/infraestructure/workers/image-recognition.worker.js
+node dist/image/infraestructure/workers/transform-image.worker.js
+node dist/image/infraestructure/workers/recognize-image.worker.js
 
 # bullmq
 read please: https://docs.bullmq.io/guide/telemetry about bullmq

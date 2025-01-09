@@ -1,6 +1,7 @@
 import sharp, { Sharp } from 'sharp';
 import path from 'path';
 import { TransformedImageRepository } from '../repositories/transformed-image.repository.js';
+import { hostOutputImagesDir, outputImagesDir } from '../../config.js';
 
 type FilterOption = {
   name: string;
@@ -17,25 +18,22 @@ export class TransformImageService {
 
   async execute({
     imagePath,
+    imageName,
     watermarkText,
-    outputImagesDir,
     imageId,
   }: {
-    imagePath: string;
+    imagePath: string; // ### TODO: remove
+    imageName: string;
     watermarkText: string;
-    outputImagesDir: string;
     imageId: number;
   }) {
-    console.log('### -------')
-    console.log('### 123 inputImagePath', imagePath)
-    const fileName = path.basename(imagePath);
-    const outputFilePath = path.join(outputImagesDir, fileName); // Create output file path
-    console.log('### 1 imageId', imageId)
+    // const fileName = path.basename(imagePath);
 
-    console.log('### transformedImageRepository', this.transformedImageRepository)
+    const repositoryOutputFilePath = path.join(hostOutputImagesDir, 'transformed_images', imageName); // Create output file path
+    console.log('### tis repositoryOutputFilePath', repositoryOutputFilePath)
 
     const transformedImage = await this.transformedImageRepository.create({
-      path: outputFilePath,
+      path: repositoryOutputFilePath,
       imageId,
     })
 
@@ -87,9 +85,12 @@ export class TransformImageService {
         transformedId,
       })
 
+      const storeOutputFilePath = path.join(outputImagesDir, 'transformed_images', imageName); // Create output file path
+      console.log('### tis storeOutputFilePath', storeOutputFilePath)
+
       await sharpImage
         .withMetadata()
-        .toFile(outputFilePath);
+        .toFile(storeOutputFilePath);
   
       console.log('Watermark added successfully!');
     } catch (err) {

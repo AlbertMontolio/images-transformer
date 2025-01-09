@@ -2,21 +2,27 @@ import { prisma } from '../prisma/prisma-client.js'
 import fs from 'fs/promises';
 import sharp from 'sharp';
 import path from 'path';
+import { hostInputImagesDir, inputImagesDir } from '../../config.js';
 
 export class ImageRepository {
-  async create(imagePath: string) {
+  async create(imageName: string) {
     console.log('### creating image...')
+
+    const hostImagePath = path.join(hostInputImagesDir, imageName);
+    const imagePath = path.join(inputImagesDir, imageName);
+
+    // ### TODO: not the place, do it somehwere else
     const stats = await fs.stat(imagePath);
 
+    // const imageName = path.basename(imagePath);
     const metadata = await sharp(imagePath).metadata();
-    const imageName = path.basename(imagePath);
 
     const imageWithLogs = await prisma.image.upsert({
-      where: { path: imagePath }, // Unique constraint field
+      where: { name: imageName }, // Unique constraint field
       update: {}, // Leave the existing record unchanged
       create: {
         name: imageName,
-        path: imagePath,
+        path: hostImagePath,
         size: stats.size,
         width: metadata.width,
         height: metadata.height,
@@ -57,6 +63,24 @@ export class ImageRepository {
       }
     });
     return images;
+  }
+
+  async deleteAllImagesAndRelations() {
+    // only for prototyping
+    try {
+      // Delete child tables first to avoid foreign key constraints
+      await prisma.transformedImage.deleteMany({});
+      await prisma.logs.deleteMany({});
+      await prisma.categorizations.deleteMany({});
+      await prisma.detectedObjects.deleteMany({});
+  
+      // Delete parent table
+      await prisma.image.deleteMany({});
+  
+      console.log('All rows from all tables have been deleted.');
+    } catch (error) {
+      console.error('Error deleting rows:', error);
+    }
   }
 }
 

@@ -1,17 +1,17 @@
 import { Image } from "@prisma/client";
 import { DetectObjectsService } from "../../infraestructure/services/detect-objects.service.js";
 import { DetectedObjectRepository } from "../../infraestructure/repositories/detected-object.repository.js";
-import { DrawObjectsIntoImage } from "./draw-objects-into-image.js";
+import { DrawObjectsIntoImageUseCase } from "./draw-objects-into-image.use-case.js";
 
 export class DetectObjectsUseCase {
   detectObjectsService: DetectObjectsService;
   detectedObjectRepository: DetectedObjectRepository;
-  drawObjectsIntoImage: DrawObjectsIntoImage;
+  drawObjectsIntoImageUseCase: DrawObjectsIntoImageUseCase;
 
   constructor() {
     this.detectObjectsService = new DetectObjectsService()
     this.detectedObjectRepository = new DetectedObjectRepository()
-    this.drawObjectsIntoImage = new DrawObjectsIntoImage()
+    this.drawObjectsIntoImageUseCase = new DrawObjectsIntoImageUseCase()
   }
   async execute(images: Image[]): Promise<void> {
     for (const image of images) {
@@ -45,7 +45,7 @@ export class DetectObjectsUseCase {
         await this.detectedObjectRepository.create(input, imageId)
       }
 
-      this.drawObjectsIntoImage.execute(imageId)
+      this.drawObjectsIntoImageUseCase.execute(imageId)
     }
   }
 }

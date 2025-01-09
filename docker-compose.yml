@@ -9,12 +9,9 @@ services:
     restart: always
     ports:
       - "3000:3000" # Change this to your app's port
-    volumes:
-      - /Users/albertmontolio/Documents/coding_area/interviews/koerber/input_images:/usr/src/app/input_images
-      - /Users/albertmontolio/Documents/coding_area/interviews/koerber/transformed_images:/usr/src/app/transformed_images
-      - /Users/albertmontolio/Documents/coding_area/interviews/koerber/detected_images:/usr/src/app/detected_images
-
     environment:
+      CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
+      CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: albertmontolio
@@ -23,6 +20,9 @@ services:
       DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
       REDIS_HOST: redis
       REDIS_PORT: 6379
+    volumes:
+      - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
+      - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
     depends_on:
       - postgres
       - redis
@@ -68,7 +68,13 @@ services:
     container_name: categorize_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/categorize-image.worker.js"]
+    volumes:
+      - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
+      - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
+
     environment:
+      CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
+      CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
       REDIS_HOST: redis
       REDIS_PORT: 6379
       POSTGRES_HOST: postgres
@@ -89,7 +95,13 @@ services:
     container_name: transform_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/transform-image.worker.js"]
+    volumes:
+      - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
+      - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
+
     environment:
+      CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
+      CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
       REDIS_HOST: redis
       REDIS_PORT: 6379
       POSTGRES_HOST: postgres

@@ -3,13 +3,15 @@ import { imageCategorizationQueue, imageCategorizationQueueName } from '../queue
 import { CategorizeImageService } from '../services/categorize-image.service.js';
 import { LogRepository } from '../repositories/log.repository.js';
 import { CategorizationRepository, CreateCategorizationProp } from '../repositories/categorization.repository.js';
+import { CatejorizationJobData } from '../types/categorization.job-data.js';
 
 const categorizeImageService = new CategorizeImageService()
 const logRepository = new LogRepository()
 const categorizationRepository = new CategorizationRepository()
 
 const categorizeImageWorker = new Worker(imageCategorizationQueueName,
-    async (job) => {
+    async (job: { data: CatejorizationJobData }) => {
+        // ### TODO: add type
         const { imagePath, imageId } = job.data;
         console.log({ imagePath, imageId })
 

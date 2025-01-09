@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev
 
+
 # Add NodeSource repository for Node.js 22.x
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 
@@ -22,6 +23,11 @@ RUN apt-get install -y nodejs
 
 # Verify Node.js and npm versions
 RUN node -v && npm -v
+
+# install sharp dependencies
+RUN apt-get update && apt-get install -y \
+    libvips-dev \
+    libheif-dev
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
@@ -39,7 +45,11 @@ COPY prisma ./prisma
 RUN npx prisma generate
 
 # Copy the source code
-COPY . .
+# COPY . .
+COPY src ./src
+COPY .env .env
+COPY tsconfig.json tsconfig.json
+COPY webpack.config.js webpack.config.js
 
 # Build the app
 RUN npm run build:tsc

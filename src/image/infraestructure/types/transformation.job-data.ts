@@ -1,6 +1,6 @@
 export type TransformationJobData = {
-  imagePath: string;
+  imagePath: string; // ### TODO: remove
+  imageName: string;
   watermarkText: string;
-  outputImagesDir: string;
   imageId: number;
 }

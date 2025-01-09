@@ -14,14 +14,15 @@ const logRepository = new LogRepository()
 const transformImageWorker = new Worker(
   imageTransformationQueueName,
   async (job: Job) => {
-    const { outputImagesDir, imagePath, watermarkText, imageId } = job.data
+    // ### TODO: remove name?
+    const { imagePath, watermarkText, imageId, imageName } = job.data
 
     await logRepository.create({ imageId, status: 'transformation-started' })
 
     await transformImageService.execute({
       imagePath,
+      imageName,
       watermarkText,
-      outputImagesDir,
       imageId,
     })
     console.log('### albert 3')

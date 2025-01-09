@@ -8,7 +8,7 @@ dotenv.config();
 
 const IMAGE_EXTENSIONS: string[] = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.heic', '.webp'];
 
-export class ReadImagesUseCase {
+export class ReadImagesNamesUseCase {
   async execute() {
     const inputPath = inputImagesDir
     const exists: boolean = await this.folderExists(inputPath);
@@ -27,6 +27,8 @@ export class ReadImagesUseCase {
     const imageFiles: string[] = files.filter((file: string) =>
       IMAGE_EXTENSIONS.includes(path.extname(file).toLowerCase())
     );
+
+    return imageFiles;
 
     const imagesPaths: string[] = []
     for (const imageFile of imageFiles) {

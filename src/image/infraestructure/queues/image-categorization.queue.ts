@@ -1,5 +1,8 @@
 import { Queue } from 'bullmq';
 import Redis from 'ioredis';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Create a shared Redis connection
 // const redisConnection = new Redis({
