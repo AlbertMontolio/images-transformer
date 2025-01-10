@@ -2,7 +2,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import sharp, { Metadata } from 'sharp';
 import ExifReader from 'exifreader';
-import { inputImagesDir } from '../../config.js';
+import { inputImagesDir } from '../../config';
 import dotenv from 'dotenv';
 dotenv.config();
 

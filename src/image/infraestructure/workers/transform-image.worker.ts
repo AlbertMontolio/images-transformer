@@ -1,8 +1,8 @@
 import { Worker } from 'bullmq';
-import { imageTransformationQueueName, imageTransformationQueue } from "../queues/image-transformation.queue.js";
-import { TransformImageService } from '../services/transform-image.service.js';
-import { TransformationJobData } from '../types/transformation.job-data.js';
-import { LogRepository } from '../repositories/log.repository.js';
+import { imageTransformationQueueName, imageTransformationQueue } from "../queues/image-transformation.queue";
+import { TransformImageService } from '../services/transform-image.service';
+import { TransformationJobData } from '../types/transformation.job-data';
+import { LogRepository } from '../repositories/log.repository';
 
 type Job = {
   data: TransformationJobData;

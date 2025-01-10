@@ -1,4 +1,4 @@
-import { ImageRepository } from "../../infraestructure/repositories/image.repository.js"
+import { ImageRepository } from "../../infraestructure/repositories/image.repository"
 
 export class CreateImagesInDbUseCase {
   imageRepository: ImageRepository;

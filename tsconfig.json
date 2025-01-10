@@ -1,14 +1,34 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "sourceMap": true,
-    "outDir": "dist",
-    "rootDir": "src",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": false,
+    "incremental": true,
+    "module": "CommonJS",
     "moduleResolution": "node",
-    "esModuleInterop": true,            // Allows CommonJS interop
-    "skipLibCheck": true
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitAny": false,
+    "outDir": "./dist",
+    "paths": {
+      "src/*": ["./src/*"],
+      "@shared/*": ["src/shared/*"],
+      "@emails/*": ["src/emails/*"]
+    },
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "strictBindCallApply": false,
+    "strictNullChecks": false,
+    "target": "es2017"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "ts-node": {
+    "require": [
+      "tsconfig-paths/register"
+    ]
+  }
 }

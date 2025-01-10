@@ -1,12 +1,12 @@
-import { CreateImagesInDbUseCase } from "./create-images-in-db.use-case.js";
-import { ReadImagesUseCase } from "./read-images.use-case.js";
-import { CategorizeImagesUseCase } from "./categorize-images.use-case.js";
-import { TransformImagesUseCase } from "./transform-images.use-case.js";
-import { DetectObjectsUseCase } from "./detect-objects.use-case.js";
-import { ReadImagesNamesUseCase } from "./read-images-names.use-case.js";
+import { CreateImagesInDbUseCase } from "./create-images-in-db.use-case";
+import { ReadImagesUseCase } from "./read-images.use-case";
+import { CategorizeImagesUseCase } from "./categorize-images.use-case";
+import { TransformImagesUseCase } from "./transform-images.use-case";
+import { DetectObjectsUseCase } from "./detect-objects.use-case";
+import { ReadImagesNamesUseCase } from "./read-images-names.use-case";
 import path from 'path';
 import dotenv from 'dotenv';
-import { hostInputImagesDir } from "../../config.js";
+import { hostInputImagesDir } from "../../config";
 dotenv.config();
 
 export class ProcessImagesUseCase {

@@ -1,9 +1,9 @@
 import { Worker } from 'bullmq';
-import { imageCategorizationQueue, imageCategorizationQueueName } from '../queues/image-categorization.queue.js';
-import { CategorizeImageService } from '../services/categorize-image.service.js';
-import { LogRepository } from '../repositories/log.repository.js';
-import { CategorizationRepository, CreateCategorizationProp } from '../repositories/categorization.repository.js';
-import { CatejorizationJobData } from '../types/categorization.job-data.js';
+import { imageCategorizationQueue, imageCategorizationQueueName } from '../queues/image-categorization.queue';
+import { CategorizeImageService } from '../services/categorize-image.service';
+import { LogRepository } from '../repositories/log.repository';
+import { CategorizationRepository, CreateCategorizationProp } from '../repositories/categorization.repository';
+import { CatejorizationJobData } from '../types/categorization.job-data';
 
 const categorizeImageService = new CategorizeImageService()
 const logRepository = new LogRepository()

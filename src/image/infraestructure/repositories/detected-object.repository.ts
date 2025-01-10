@@ -1,4 +1,4 @@
-import { prisma } from '../prisma/prisma-client.js'
+import { prisma } from '../prisma/prisma-client'
 
 type DetectedObjectCreateInput = {
   x: number;

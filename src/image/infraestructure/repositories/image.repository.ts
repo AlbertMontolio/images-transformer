@@ -1,8 +1,8 @@
-import { prisma } from '../prisma/prisma-client.js'
+import { prisma } from '../prisma/prisma-client'
 import fs from 'fs/promises';
 import sharp from 'sharp';
 import path from 'path';
-import { hostInputImagesDir, inputImagesDir } from '../../config.js';
+import { hostInputImagesDir, inputImagesDir } from '../../config';
 
 export class ImageRepository {
   async create(imageName: string) {
@@ -70,9 +70,9 @@ export class ImageRepository {
     try {
       // Delete child tables first to avoid foreign key constraints
       await prisma.transformedImage.deleteMany({});
-      await prisma.logs.deleteMany({});
-      await prisma.categorizations.deleteMany({});
-      await prisma.detectedObjects.deleteMany({});
+      await prisma.log.deleteMany({});
+      await prisma.categorization.deleteMany({});
+      await prisma.detectedObject.deleteMany({});
   
       // Delete parent table
       await prisma.image.deleteMany({});

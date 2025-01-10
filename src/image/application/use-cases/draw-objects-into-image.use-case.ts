@@ -1,8 +1,8 @@
-import { DetectedObject, Image } from "@prisma/client";
-import { ImageRepository } from "../../infraestructure/repositories/image.repository.js"
+import { DetectedObject } from "@prisma/client";
+import { ImageRepository } from "../../infraestructure/repositories/image.repository"
 import sharp from 'sharp';
 import path from 'path';
-import { inputImagesDir, outputImagesDir } from "../../config.js";
+import { inputImagesDir, outputImagesDir } from "../../config";
 
 export class DrawObjectsIntoImageUseCase {
   imageRepository: ImageRepository;
@@ -11,11 +11,9 @@ export class DrawObjectsIntoImageUseCase {
     this.imageRepository = new ImageRepository()
   }
   async execute(imageId: number) {
-    console.log('### fiu fiu')
     // ### TODO: remove. you have the image in the caller
     const image = await this.imageRepository.findOne(imageId);
     const imagePath = path.join(inputImagesDir, image.name);
-    // const imagePath = image.path
 
     const detectedObjects = image.detectedObjects
     console.log('### detectedObjects', detectedObjects)

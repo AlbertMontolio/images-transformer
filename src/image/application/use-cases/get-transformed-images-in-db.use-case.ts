@@ -1,4 +1,4 @@
-import { TransformedImageRepository } from "../../infraestructure/repositories/transformed-image.repository.js";
+import { TransformedImageRepository } from "../../infraestructure/repositories/transformed-image.repository";
 
 export class GetTransformedImagesInDbUseCase {
   async execute() {

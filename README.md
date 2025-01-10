@@ -61,3 +61,17 @@ docker exec -it images-transformer-app bash
 'IMG_5306 4.HEIC.jpeg'  'IMG_5310 4.HEIC.jpeg'  'IMG_5315 4.HEIC.jpeg'  'IMG_5319 4.HEIC.jpeg'   flower_photos
 
 /usr/src/app/input_images/IMG_5322 4.HEIC.jpeg
+
+
+todo 
+Add a request logger to monitor incoming requests. Use a library like morgan:
+
+Uncaught promise rejections in your route handlers (e.g., if findOne or deleteAllImagesAndRelations fails) could crash the app. Use an error-handling middleware or a wrapper for async routes.
+
+Refactor Example: Create an asyncHandler utility:
+
+javascript
+Copiar código
+const asyncHandler = (fn) => (req, res, next) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+};

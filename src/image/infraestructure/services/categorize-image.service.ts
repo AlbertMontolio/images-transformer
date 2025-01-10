@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs-node';  // TensorFlow.js for Node.js
 import * as mobilenet from '@tensorflow-models/mobilenet';  // MobileNet for image classification
 import sharp from 'sharp';
-import { Prediction } from '../types/prediction.js';
+import { Prediction } from '../types/prediction';
 import fs from 'fs';
 
 export class CategorizeImageService {

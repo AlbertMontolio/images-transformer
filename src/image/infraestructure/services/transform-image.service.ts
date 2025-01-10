@@ -1,7 +1,7 @@
 import sharp, { Sharp } from 'sharp';
 import path from 'path';
-import { TransformedImageRepository } from '../repositories/transformed-image.repository.js';
-import { hostOutputImagesDir, outputImagesDir } from '../../config.js';
+import { TransformedImageRepository } from '../repositories/transformed-image.repository';
+import { hostOutputImagesDir, outputImagesDir } from '../../config';
 
 type FilterOption = {
   name: string;

@@ -1,9 +1,9 @@
-import { imageCategorizationQueue } from '../../infraestructure/queues/image-categorization.queue.js';
-import { LogRepository } from '../../infraestructure/repositories/log.repository.js';
+import { imageCategorizationQueue } from '../../infraestructure/queues/image-categorization.queue';
+import { LogRepository } from '../../infraestructure/repositories/log.repository';
 import { Image } from '@prisma/client';
-import { CatejorizationJobData } from '../../infraestructure/types/categorization.job-data.js';
+import { CatejorizationJobData } from '../../infraestructure/types/categorization.job-data';
 import path from 'path';
-import { inputImagesDir } from '../../config.js';
+import { inputImagesDir } from '../../config';
 
 export class CategorizeImagesUseCase {
   constructor() {}

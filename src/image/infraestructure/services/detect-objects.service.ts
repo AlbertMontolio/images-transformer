@@ -3,7 +3,7 @@ import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import sharp from 'sharp';
 import { Image } from '@prisma/client';
 import path from 'path';
-import { inputImagesDir } from '../../config.js';
+import { inputImagesDir } from '../../config';
 
 export interface DetectedObject {
   class: string;

@@ -1,7 +1,7 @@
 import { Image } from "@prisma/client";
-import { DetectObjectsService } from "../../infraestructure/services/detect-objects.service.js";
-import { DetectedObjectRepository } from "../../infraestructure/repositories/detected-object.repository.js";
-import { DrawObjectsIntoImageUseCase } from "./draw-objects-into-image.use-case.js";
+import { DetectObjectsService } from "../../infraestructure/services/detect-objects.service";
+import { DetectedObjectRepository } from "../../infraestructure/repositories/detected-object.repository";
+import { DrawObjectsIntoImageUseCase } from "./draw-objects-into-image.use-case";
 
 export class DetectObjectsUseCase {
   detectObjectsService: DetectObjectsService;

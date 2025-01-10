@@ -1,6 +1,5 @@
-import { PrismaClient, Categorization } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { Categorization } from "@prisma/client";
+import { prisma } from "../prisma/prisma-client";
 
 export type CreateCategorizationProp = Pick<Categorization, 'label' | 'score'>
 
