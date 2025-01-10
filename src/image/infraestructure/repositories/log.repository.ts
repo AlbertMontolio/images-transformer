@@ -36,27 +36,4 @@ export class LogRepository {
 
     return log;
   }
-
-  async updateLogById({
-    logId,
-    status,
-    finishedAt,
-  }: {
-    logId: number;
-    status?: string;
-    finishedAt?: Date;
-  }) {
-    try {
-      await prisma.log.update({
-        where: {
-          id: logId,
-        },
-        data: {
-          finishedAt,
-        },
-      });
-    } catch (err) {
-      console.log('### err:', err);
-    }
-  }
 }

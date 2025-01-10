@@ -1,43 +1,38 @@
-import { Queue } from 'bullmq';
-import dotenv from 'dotenv';
+import { Queue, QueueOptions } from 'bullmq';
 import { redisConnection } from './redis-connection';
 
-dotenv.config();
+export type ImageCategorizationJobData = {
+  imagePath: string;
+  imageId: number;
+};
 
-export class ImageCategorizationQueue {
+// ### TODO: refactor in a base queue
+export class ImageCategorizationQueue extends Queue<ImageCategorizationJobData> {
+  public static readonly queueName = 'image-categorization-queue';
+
   private static instance: ImageCategorizationQueue | null = null;
-  private queue: Queue;
 
-  private constructor() {
-    this.queue = new Queue('image-categorization-queue', {
+  private constructor(options?: QueueOptions) {
+    super(ImageCategorizationQueue.queueName, {
       connection: redisConnection,
+      ...options,
     });
   }
 
   /**
    * Get the singleton instance of the queue
    */
-  public static getInstance(): ImageCategorizationQueue {
+  public static getInstance(options?: QueueOptions): ImageCategorizationQueue {
     if (!this.instance) {
-      this.instance = new ImageCategorizationQueue();
+      this.instance = new ImageCategorizationQueue(options);
     }
     return this.instance;
   }
 
   /**
-   * Get the underlying BullMQ Queue instance
+   * Expose the Redis connection
    */
-  public getQueue(): Queue {
-    return this.queue;
-  }
-
-  /**
-   * Close the queue connection
-   */
-  public async close(): Promise<void> {
-    await this.queue.close();
+  public static getConnection() {
+    return redisConnection;
   }
 }
-
-// Example usage:
-// const queue = ImageCategorizationQueue.getInstance().getQueue();

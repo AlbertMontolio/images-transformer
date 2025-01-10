@@ -84,36 +84,4 @@ describe('LogRepository', () => {
       expect(result).toBeNull();
     });
   });
-
-  describe('updateLogById', () => {
-    it('should update the log with the correct data', async () => {
-      // Arrange
-      const updateData = { logId: 1, status: 'completed', finishedAt: new Date() };
-
-      // Act
-      await logRepository.updateLogById(updateData);
-
-      // Assert
-      expect(prisma.log.update).toHaveBeenCalledTimes(1);
-      expect(prisma.log.update).toHaveBeenCalledWith({
-        where: { id: updateData.logId },
-        data: { finishedAt: updateData.finishedAt },
-      });
-    });
-
-    it('should handle errors gracefully when update fails', async () => {
-      // Arrange
-      const updateData = { logId: 1, status: 'completed', finishedAt: new Date() };
-      const mockError = new Error('Database error');
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-      (prisma.log.update as jest.Mock).mockRejectedValueOnce(mockError);
-
-      // Act
-      await logRepository.updateLogById(updateData);
-
-      // Assert
-      expect(consoleSpy).toHaveBeenCalledWith('### err:', mockError);
-      consoleSpy.mockRestore();
-    });
-  });
 });

@@ -1,10 +1,14 @@
 import { Image } from "@prisma/client";
-import { imageTransformationQueue } from "../../infraestructure/queues/image-transformation.queue"
-import { TransformationJobData } from "../../infraestructure/types/transformation.job-data";
 import path from 'path';
 import { inputImagesDir } from "../../config";
+import { ImageTransformationJobData, ImageTransformationQueue } from "src/image/infraestructure/queues/image-transformation.queue";
 
 export class TransformImagesUseCase {
+  imageTransformationQueue: ImageTransformationQueue;
+
+  constructor() {
+    this.imageTransformationQueue = ImageTransformationQueue.getInstance()
+  }
   async execute({
     images,
     watermarkText,
@@ -15,13 +19,13 @@ export class TransformImagesUseCase {
     for (const image of images) {
       const inputPath = inputImagesDir
       const imagePath = path.join(inputPath, image.name)
-      const jobData: TransformationJobData = {
+      const jobData: ImageTransformationJobData = {
         imagePath: imagePath,
         imageName: image.name,
         watermarkText,
         imageId: image.id,
       }
-      imageTransformationQueue.add('transform-image', jobData)
+      this.imageTransformationQueue.add('transform-image', jobData)
     }
   }
 }

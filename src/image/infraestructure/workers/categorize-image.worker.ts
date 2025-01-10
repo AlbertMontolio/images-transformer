@@ -1,17 +1,15 @@
 import { Worker } from 'bullmq';
-import { imageCategorizationQueue, imageCategorizationQueueName } from '../queues/image-categorization.queue';
 import { CategorizeImageService } from '../services/categorize-image.service';
 import { LogRepository } from '../repositories/log.repository';
 import { CategorizationRepository, CreateCategorizationProp } from '../repositories/categorization.repository';
-import { CatejorizationJobData } from '../types/categorization.job-data';
+import { ImageCategorizationJobData, ImageCategorizationQueue } from '../queues/image-categorization.queue';
 
 const categorizeImageService = new CategorizeImageService()
 const logRepository = new LogRepository()
 const categorizationRepository = new CategorizationRepository()
 
-export const categorizeImageWorker = new Worker(imageCategorizationQueueName,
-    async (job: { data: CatejorizationJobData }) => {
-        // ### TODO: add type
+export const categorizeImageWorker = new Worker(ImageCategorizationQueue.queueName,
+    async (job: { data: ImageCategorizationJobData }) => {
         const { imagePath, imageId } = job.data;
         console.log({ imagePath, imageId })
 
@@ -36,7 +34,7 @@ export const categorizeImageWorker = new Worker(imageCategorizationQueueName,
             imageId,
         })
     },
-    { connection: imageCategorizationQueue.opts.connection }
+    { connection: ImageCategorizationQueue.getConnection() }
 );
 
 // Log worker status

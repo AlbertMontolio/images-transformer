@@ -1,5 +1,5 @@
 import { CategorizeImagesUseCaseError } from "../../../domain/errors/categorize-images.use-case.error";
-import { imageCategorizationQueue } from "../../../infraestructure/queues/image-categorization.queue";
+import { ImageCategorizationQueue } from "../../../infraestructure/queues/image-categorization.queue";
 import { CategorizeImagesUseCase } from "../categorize-images.use-case";
 import { createImage } from "./__fixtures__/image.fixture";
 
@@ -11,8 +11,10 @@ jest.mock('../../../infraestructure/queues/image-categorization.queue', () => ({
 
 describe('CategorizeImagesUseCase', () => {
   let categorizeImagesUseCase: CategorizeImagesUseCase;
+  let imageCategorizationQueue: ImageCategorizationQueue
 
   beforeEach(() => {
+    imageCategorizationQueue = ImageCategorizationQueue.getInstance()
     categorizeImagesUseCase = new CategorizeImagesUseCase()
     jest.spyOn(categorizeImagesUseCase.logRepository, 'create').mockResolvedValue();
   })
@@ -24,17 +26,17 @@ describe('CategorizeImagesUseCase', () => {
 
     describe('when successful', () => {
       it('should call categorizeImage for each image', async () => {
-        (imageCategorizationQueue.add as jest.Mock).mockResolvedValue(undefined);
+        (imageCategorizationQueue.addJob as jest.Mock).mockResolvedValue(undefined);
 
         await categorizeImagesUseCase.execute(images);
 
-        expect(imageCategorizationQueue.add).toHaveBeenCalledTimes(2);
+        expect(imageCategorizationQueue.addJob).toHaveBeenCalledTimes(2);
 
-        expect(imageCategorizationQueue.add).toHaveBeenCalledWith('process-image', {
+        expect(imageCategorizationQueue.addJob).toHaveBeenCalledWith('process-image', {
           imagePath: expect.stringContaining(imageOne.name),
           imageId: 1,
         });
-        expect(imageCategorizationQueue.add).toHaveBeenCalledWith('process-image', {
+        expect(imageCategorizationQueue.addJob).toHaveBeenCalledWith('process-image', {
           imagePath: expect.stringContaining(imageTwo.name),
           imageId: 2,
         });
@@ -50,7 +52,7 @@ describe('CategorizeImagesUseCase', () => {
     describe('when error in categorizeImage use case', () => {
       it('raises CategorizeImagesUseCaseError', async () => {
         const mockError = new Error();
-        (imageCategorizationQueue.add as jest.Mock).mockRejectedValueOnce(mockError);
+        (imageCategorizationQueue.addJob as jest.Mock).mockRejectedValueOnce(mockError);
 
         await expect(categorizeImagesUseCase.execute(images)).rejects.toThrow(
           CategorizeImagesUseCaseError

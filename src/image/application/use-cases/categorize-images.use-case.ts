@@ -1,16 +1,18 @@
-import { imageCategorizationQueue } from '../../infraestructure/queues/image-categorization.queue';
 import { LogRepository } from '../../infraestructure/repositories/log.repository';
 import { Image } from '@prisma/client';
 import { CatejorizationJobData } from '../../infraestructure/types/categorization.job-data';
 import path from 'path';
 import { inputImagesDir } from '../../config';
 import { CategorizeImagesUseCaseError } from '../../domain/errors/categorize-images.use-case.error';
+import { ImageCategorizationQueue } from 'src/image/infraestructure/queues/image-categorization.queue';
 
 export class CategorizeImagesUseCase {
   logRepository: LogRepository;
+  imageCategorizationQueue: ImageCategorizationQueue;
 
   constructor() {
     this.logRepository = new LogRepository()
+    this.imageCategorizationQueue = ImageCategorizationQueue.getInstance()
   }
 
   async execute(images: Image[]) {
@@ -29,18 +31,13 @@ export class CategorizeImagesUseCase {
     imagePath: string;
     imageId: number;
   }) {
-    console.log('### ccc imageCategorizationQueue.add', imageCategorizationQueue.add)
     try {
       const jobData: CatejorizationJobData = {
         imagePath,
         imageId,
       };
 
-      await imageCategorizationQueue.add('process-image', jobData);
-      await this.logRepository.create({
-        imageId,
-        status: 'sent-to-queue'
-      })
+      await this.imageCategorizationQueue.add('categorize-image', jobData);
     } catch (err) {
       throw new CategorizeImagesUseCaseError();
     }

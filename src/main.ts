@@ -6,8 +6,8 @@ import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 import { createBullBoard } from '@bull-board/api'
 
-import { imageCategorizationQueue } from './image/infraestructure/queues/image-categorization.queue';
-import { imageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
+import { ImageCategorizationQueue } from './image/infraestructure/queues/image-categorization.queue';
+import { imageTransformationQueue } from './image/infraestructure/queues/image-transformation-old.queue';
 import { dependencies } from './image/utils/dependencies';
 import imagesRoutes from './image/infraestructure/routes/image.routes';
 
@@ -18,6 +18,7 @@ const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
 
 // create dashboard to monitor and manage queues with bull-dashboard
+const imageCategorizationQueue = ImageCategorizationQueue.getInstance().getQueue()
 createBullBoard({
     queues: [new BullMQAdapter(imageCategorizationQueue), new BullMQAdapter(imageTransformationQueue)],
     serverAdapter: serverAdapter,

@@ -1,18 +1,17 @@
 import { Worker } from 'bullmq';
-import { imageTransformationQueueName, imageTransformationQueue } from "../queues/image-transformation.queue";
 import { TransformImageService } from '../services/transform-image.service';
-import { TransformationJobData } from '../types/transformation.job-data';
 import { LogRepository } from '../repositories/log.repository';
+import { ImageTransformationJobData, ImageTransformationQueue } from '../queues/image-transformation.queue';
 
 type Job = {
-  data: TransformationJobData;
+  data: ImageTransformationJobData;
 }
 
 const transformImageService = new TransformImageService()
 const logRepository = new LogRepository()
 
 const transformImageWorker = new Worker(
-  imageTransformationQueueName,
+  ImageTransformationQueue.queueName,
   async (job: Job) => {
     // ### TODO: remove name?
     const { imagePath, watermarkText, imageId, imageName } = job.data
@@ -25,17 +24,15 @@ const transformImageWorker = new Worker(
       watermarkText,
       imageId,
     })
-    console.log('### albert 3')
 
     logRepository.create({ imageId, status: 'transformation-finished' })
   },
-  { connection: imageTransformationQueue.opts.connection }
+  { connection: ImageTransformationQueue.getConnection() }
 )
 
 // Log worker status
 transformImageWorker.on('completed', (job) => {
   console.log(`transformImageWorker Job ${job.id} completed successfully.`);
-  console.log('### transformImageWorker job.data', job.data)
 });
 
 transformImageWorker.on('failed', (job, err) => {
@@ -45,5 +42,3 @@ transformImageWorker.on('failed', (job, err) => {
 transformImageWorker.on('error', (err) => {
 console.error('transformImageWorker error:', err);
 });
-
-console.log('transformImageWorker is running...');

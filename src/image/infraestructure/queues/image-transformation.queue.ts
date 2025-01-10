@@ -1,32 +1,39 @@
-import { Queue } from 'bullmq';
-import Redis from 'ioredis';
-import dotenv from 'dotenv';
+import { Queue, QueueOptions } from 'bullmq';
+import { redisConnection } from './redis-connection';
 
-dotenv.config();
+export type ImageTransformationJobData = {
+  imagePath: string; // ### TODO: remove
+  imageName: string;
+  watermarkText: string;
+  imageId: number;
+};
 
-// Create a shared Redis connection
-// const redisConnection = new Redis({
-//   host: 'localhost', // Change if Redis is on another host
-//   port: 6379,        // Default Redis port
-//   maxRetriesPerRequest: null,
-// });
+export class ImageTransformationQueue extends Queue<ImageTransformationJobData> {
+  public static readonly queueName = 'image-transformation-queue';
 
-console.log(process.env.REDIS_HOST)
+  private static instance: ImageTransformationQueue | null = null;
 
-console.log(process.env.REDIS_HOST)
-const redisConnection = new Redis({
-  host: process.env.REDIS_HOST || 'redis', // Use 'redis' as the default hostname for the Redis service
-  port: Number(process.env.REDIS_PORT) || 6379, // Use 6379 as the default port
-  maxRetriesPerRequest: null,
-});
+  private constructor(options?: QueueOptions) {
+    super(ImageTransformationQueue.queueName, {
+      connection: redisConnection,
+      ...options,
+    });
+  }
 
-export const imageTransformationQueueName = 'image-transformation-queue'
+  /**
+   * Get the singleton instance of the queue
+   */
+  public static getInstance(options?: QueueOptions): ImageTransformationQueue {
+    if (!this.instance) {
+      this.instance = new ImageTransformationQueue(options);
+    }
+    return this.instance;
+  }
 
-// Define a shared queue instance
-// ### TODO: constant file, to store image-recognition
-export const imageTransformationQueue = new Queue(imageTransformationQueueName, {
-  connection: redisConnection,
-});
-
-// Optional: Export the Redis connection if you need it elsewhere
-export { redisConnection };
+  /**
+   * Expose the Redis connection
+   */
+  public static getConnection() {
+    return redisConnection;
+  }
+}

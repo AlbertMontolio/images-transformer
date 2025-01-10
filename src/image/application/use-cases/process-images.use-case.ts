@@ -32,6 +32,8 @@ export class ProcessImagesUseCase {
     }
 
     const images = await this.createImagesInDbUseCase.execute(imagesFilesNames)
+
+    // ### TODO: do only one loop?
     this.categorizeImagesUseCase.execute(images)
     this.transformImagesUseCase.execute({
       images,

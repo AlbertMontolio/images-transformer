@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { dependencies } from './image/utils/dependencies';
 import { app, server, shutdown, startServer, getCorsOrigin } from './main';
-import { imageCategorizationQueue } from './image/infraestructure/queues/image-categorization.queue';
-import { imageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
+import { ImageCategorizationQueue } from './image/infraestructure/queues/image-categorization.queue';
+import { ImageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
 
 jest.mock('./image/utils/dependencies');
 jest.mock('ioredis', () => require('ioredis-mock'));
@@ -52,6 +52,8 @@ describe('main', () => {
     describe('when process exits with error', () => {
       beforeEach(() => {
         const mockError = new Error('Queue close error');
+        const imageCategorizationQueue = ImageCategorizationQueue.getInstance()
+        const imageTransformationQueue = ImageTransformationQueue.getInstance()
 
         jest.spyOn(imageCategorizationQueue, 'close').mockRejectedValueOnce(mockError);
         jest.spyOn(imageTransformationQueue, 'close').mockResolvedValueOnce(undefined);
