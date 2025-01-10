@@ -1,24 +1,43 @@
 import { Queue } from 'bullmq';
-import Redis from 'ioredis';
 import dotenv from 'dotenv';
+import { redisConnection } from './redis-connection';
 
 dotenv.config();
 
-const redisConnection = new Redis({
-  host: process.env.REDIS_HOST || 'redis', // Use 'redis' as the default hostname for the Redis service
-  port: Number(process.env.REDIS_PORT) || 6379, // Use 6379 as the default port
-  maxRetriesPerRequest: null,
-});
+export class ImageCategorizationQueue {
+  private static instance: ImageCategorizationQueue | null = null;
+  private queue: Queue;
 
-// console.log('### Redis', Redis)
-// console.log('### redisConnection', redisConnection)
+  private constructor() {
+    this.queue = new Queue('image-categorization-queue', {
+      connection: redisConnection,
+    });
+  }
 
-export const imageCategorizationQueueName = 'image-categorization-queue'
+  /**
+   * Get the singleton instance of the queue
+   */
+  public static getInstance(): ImageCategorizationQueue {
+    if (!this.instance) {
+      this.instance = new ImageCategorizationQueue();
+    }
+    return this.instance;
+  }
 
-// Define a shared queue instance
-export const imageCategorizationQueue = new Queue(imageCategorizationQueueName, {
-  connection: redisConnection,
-});
+  /**
+   * Get the underlying BullMQ Queue instance
+   */
+  public getQueue(): Queue {
+    return this.queue;
+  }
 
-// Optional: Export the Redis connection if you need it elsewhere
-export { redisConnection };
+  /**
+   * Close the queue connection
+   */
+  public async close(): Promise<void> {
+    await this.queue.close();
+  }
+}
+
+// Example usage:
+// const queue = ImageCategorizationQueue.getInstance().getQueue();

@@ -30,12 +30,6 @@ app.use(express.json());
 // setup endpoint for bull-dashboard
 app.use('/admin/queues', serverAdapter.getRouter());
 
-app.post('/process', async (_req, res) => {
-    await dependencies.processImagesUseCase.execute();
-
-    res.status(200).send();
-});
-
 app.use('/images', imagesRoutes);
 
 app.get('/stats', async (_req, res) => {

@@ -1,9 +1,9 @@
 {
   "name": "images-transformer",
   "version": "1.0.0",
-  "main": "src/run.ts",
+  "main": "src/main.ts",
   "scripts": {
-    "start": "npm run build:tsc && node dist/run.js",
+    "start": "npm run build:tsc && node dist/main.js",
     "build:tsc": "tsc",
     "build:babel": "babel . -d dist",
     "build:webpack": "rm -rf dist && webpack --mode development",

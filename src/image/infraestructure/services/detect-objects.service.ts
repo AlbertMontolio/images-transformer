@@ -1,18 +1,18 @@
 import * as tf from '@tensorflow/tfjs-node';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import sharp from 'sharp';
-import { Image } from '@prisma/client';
+import { DetectedObject, Image } from '@prisma/client';
 import path from 'path';
 import { inputImagesDir } from '../../config';
 
-export interface DetectedObject {
+export interface DetectedObjectPrediction {
   class: string;
   score: number;
   bbox: [number, number, number, number]; // [x, y, width, height]
 }
 
 export class DetectObjectsService {
-  async execute(image: Image): Promise<DetectedObject[]> {
+  async execute(image: Image): Promise<DetectedObjectPrediction[]> {
     const imagePath = path.join(inputImagesDir, image.name);
 
     let imageTensor: tf.Tensor3D | undefined;

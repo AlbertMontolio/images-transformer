@@ -1,16 +1,16 @@
 import sharp from 'sharp';
 import path from 'path';
-import { DrawObjectsIntoImageUseCase } from '../draw-objects-into-image.use-case';
+import { SaveObjectPredictionsIntoImageUseCase } from '../draw-objects-into-image.use-case';
 import { inputImagesDir, outputImagesDir } from '../../../config';
 import { createImage } from './__fixtures__/image.fixture';
 
 jest.mock('sharp');
 
-describe('DrawObjectsIntoImageUseCase', () => {
-  let drawObjectsIntoImageUseCase: DrawObjectsIntoImageUseCase;
+describe('SaveObjectPredictionsIntoImageUseCase', () => {
+  let saveObjectPredictionsIntoImageUseCase: SaveObjectPredictionsIntoImageUseCase;
 
   beforeEach(() => {
-    drawObjectsIntoImageUseCase = new DrawObjectsIntoImageUseCase();
+    saveObjectPredictionsIntoImageUseCase = new SaveObjectPredictionsIntoImageUseCase();
   });
 
   describe('execute', () => {
@@ -31,7 +31,7 @@ describe('DrawObjectsIntoImageUseCase', () => {
       const outputFilePath = path.join(outputImagesDir, 'detected_images', image.name);
 
       // Act
-      await drawObjectsIntoImageUseCase.execute(image);
+      await saveObjectPredictionsIntoImageUseCase.execute(image, []);
 
       // Assert
       expect(sharp).toHaveBeenCalledWith(imagePath); // Check sharp was initialized with the correct image path
@@ -59,7 +59,7 @@ describe('DrawObjectsIntoImageUseCase', () => {
       };
       (sharp as unknown as jest.Mock).mockReturnValue(mockSharpInstance);
 
-      await drawObjectsIntoImageUseCase.execute(image);
+      await saveObjectPredictionsIntoImageUseCase.execute(image, []);
 
       expect(mockSharpInstance.composite).toHaveBeenCalledWith([
         {
@@ -102,7 +102,7 @@ describe('DrawObjectsIntoImageUseCase', () => {
       const detectedObjects = [];
 
       // Act
-      const result = drawObjectsIntoImageUseCase['createRectangles'](detectedObjects);
+      const result = saveObjectPredictionsIntoImageUseCase['createRectangles'](detectedObjects);
 
       // Assert
       expect(result).toBe('');

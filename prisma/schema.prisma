@@ -32,7 +32,6 @@ model Image {
 model Log {
   id         Int        @id @default(autoincrement()) // Primary key
   createdAt  DateTime   @default(now()) // Log creation timestamp
-  finishedAt DateTime?  // When the log is completed (nullable)
   status     String     // Status of the log (e.g., 'pending', 'completed', 'failed')
 
   imageId    Int        // Foreign key to the Image model

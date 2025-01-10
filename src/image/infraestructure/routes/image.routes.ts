@@ -33,4 +33,10 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+router.post('/process', async (_req, res) => {
+  await dependencies.processImagesUseCase.execute();
+
+  res.status(200).send();
+});
+
 export default router;

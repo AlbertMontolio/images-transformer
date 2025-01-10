@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1736517564808" clover="3.2.0">
-  <project timestamp="1736517564809" name="All files">
-    <metrics statements="461" coveredstatements="349" conditionals="38" coveredconditionals="25" methods="82" coveredmethods="49" elements="581" coveredelements="423" complexity="0" loc="461" ncloc="461" packages="12" files="28" classes="28"/>
+<coverage generated="1736517962874" clover="3.2.0">
+  <project timestamp="1736517962874" name="All files">
+    <metrics statements="411" coveredstatements="364" conditionals="33" coveredconditionals="25" methods="70" coveredmethods="60" elements="514" coveredelements="449" complexity="0" loc="411" ncloc="411" packages="12" files="27" classes="27"/>
     <package name="src">
       <metrics statements="50" coveredstatements="50" conditionals="4" coveredconditionals="4" methods="8" coveredmethods="8"/>
       <file name="main.ts" path="/Users/albertmontolio/Documents/coding_area/interviews/koerber/images-transformer/src/main.ts">
@@ -214,25 +214,25 @@
       </file>
     </package>
     <package name="src.image.domain.services">
-      <metrics statements="16" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="10" coveredmethods="0"/>
+      <metrics statements="16" coveredstatements="16" conditionals="0" coveredconditionals="0" methods="11" coveredmethods="11"/>
       <file name="filter-selector.service.ts" path="/Users/albertmontolio/Documents/coding_area/interviews/koerber/images-transformer/src/image/domain/services/filter-selector.service.ts">
-        <metrics statements="16" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="10" coveredmethods="0"/>
-        <line num="9" count="1" type="stmt"/>
-        <line num="11" count="0" type="stmt"/>
-        <line num="18" count="0" type="stmt"/>
-        <line num="19" count="0" type="stmt"/>
-        <line num="23" count="0" type="stmt"/>
-        <line num="25" count="0" type="stmt"/>
-        <line num="30" count="0" type="stmt"/>
-        <line num="31" count="0" type="stmt"/>
-        <line num="33" count="0" type="stmt"/>
-        <line num="39" count="0" type="stmt"/>
-        <line num="40" count="0" type="stmt"/>
-        <line num="42" count="0" type="stmt"/>
-        <line num="48" count="0" type="stmt"/>
-        <line num="53" count="0" type="stmt"/>
-        <line num="55" count="0" type="stmt"/>
-        <line num="61" count="0" type="stmt"/>
+        <metrics statements="16" coveredstatements="16" conditionals="0" coveredconditionals="0" methods="11" coveredmethods="11"/>
+        <line num="9" count="2" type="stmt"/>
+        <line num="13" count="6" type="stmt"/>
+        <line num="17" count="1" type="stmt"/>
+        <line num="18" count="1" type="stmt"/>
+        <line num="22" count="2" type="stmt"/>
+        <line num="24" count="1" type="stmt"/>
+        <line num="29" count="1" type="stmt"/>
+        <line num="30" count="1" type="stmt"/>
+        <line num="32" count="1" type="stmt"/>
+        <line num="38" count="1" type="stmt"/>
+        <line num="39" count="1" type="stmt"/>
+        <line num="41" count="1" type="stmt"/>
+        <line num="47" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="54" count="1" type="stmt"/>
+        <line num="60" count="4" type="stmt"/>
       </file>
     </package>
     <package name="src.image.infraestructure.prisma">
@@ -378,7 +378,7 @@
       </file>
     </package>
     <package name="src.image.infraestructure.services">
-      <metrics statements="117" coveredstatements="65" conditionals="17" coveredconditionals="8" methods="19" coveredmethods="6"/>
+      <metrics statements="67" coveredstatements="65" conditionals="12" coveredconditionals="8" methods="6" coveredmethods="6"/>
       <file name="categorize-image.service.ts" path="/Users/albertmontolio/Documents/coding_area/interviews/koerber/images-transformer/src/image/infraestructure/services/categorize-image.service.ts">
         <metrics statements="15" coveredstatements="15" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
         <line num="1" count="1" type="stmt"/>
@@ -419,59 +419,6 @@
         <line num="52" count="2" type="stmt"/>
         <line num="55" count="3" type="cond" truecount="1" falsecount="0"/>
         <line num="56" count="3" type="cond" truecount="0" falsecount="1"/>
-      </file>
-      <file name="transform-image-old.service.ts" path="/Users/albertmontolio/Documents/coding_area/interviews/koerber/images-transformer/src/image/infraestructure/services/transform-image-old.service.ts">
-        <metrics statements="50" coveredstatements="0" conditionals="5" coveredconditionals="0" methods="13" coveredmethods="0"/>
-        <line num="1" count="0" type="stmt"/>
-        <line num="2" count="0" type="stmt"/>
-        <line num="3" count="0" type="stmt"/>
-        <line num="4" count="0" type="stmt"/>
-        <line num="12" count="0" type="stmt"/>
-        <line num="16" count="0" type="stmt"/>
-        <line num="30" count="0" type="stmt"/>
-        <line num="32" count="0" type="stmt"/>
-        <line num="37" count="0" type="cond" truecount="0" falsecount="1"/>
-        <line num="38" count="0" type="stmt"/>
-        <line num="41" count="0" type="stmt"/>
-        <line num="43" count="0" type="stmt"/>
-        <line num="44" count="0" type="stmt"/>
-        <line num="45" count="0" type="stmt"/>
-        <line num="47" count="0" type="stmt"/>
-        <line num="48" count="0" type="stmt"/>
-        <line num="49" count="0" type="stmt"/>
-        <line num="50" count="0" type="stmt"/>
-        <line num="52" count="0" type="stmt"/>
-        <line num="53" count="0" type="stmt"/>
-        <line num="61" count="0" type="stmt"/>
-        <line num="62" count="0" type="stmt"/>
-        <line num="66" count="0" type="stmt"/>
-        <line num="71" count="0" type="stmt"/>
-        <line num="77" count="0" type="stmt"/>
-        <line num="82" count="0" type="stmt"/>
-        <line num="84" count="0" type="stmt"/>
-        <line num="89" count="0" type="stmt"/>
-        <line num="104" count="0" type="stmt"/>
-        <line num="118" count="0" type="stmt"/>
-        <line num="120" count="0" type="stmt"/>
-        <line num="123" count="0" type="stmt"/>
-        <line num="124" count="0" type="stmt"/>
-        <line num="126" count="0" type="stmt"/>
-        <line num="128" count="0" type="stmt"/>
-        <line num="133" count="0" type="stmt"/>
-        <line num="134" count="0" type="stmt"/>
-        <line num="136" count="0" type="stmt"/>
-        <line num="138" count="0" type="stmt"/>
-        <line num="143" count="0" type="stmt"/>
-        <line num="144" count="0" type="stmt"/>
-        <line num="146" count="0" type="stmt"/>
-        <line num="148" count="0" type="stmt"/>
-        <line num="153" count="0" type="stmt"/>
-        <line num="155" count="0" type="stmt"/>
-        <line num="156" count="0" type="stmt"/>
-        <line num="157" count="0" type="stmt"/>
-        <line num="159" count="0" type="stmt"/>
-        <line num="161" count="0" type="stmt"/>
-        <line num="165" count="0" type="stmt"/>
       </file>
       <file name="transform-image.service.ts" path="/Users/albertmontolio/Documents/coding_area/interviews/koerber/images-transformer/src/image/infraestructure/services/transform-image.service.ts">
         <metrics statements="32" coveredstatements="31" conditionals="8" coveredconditionals="6" methods="3" coveredmethods="3"/>

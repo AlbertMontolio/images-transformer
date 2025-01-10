@@ -3,17 +3,22 @@ import sharp from 'sharp';
 import path from 'path';
 import { inputImagesDir, outputImagesDir } from "../../config";
 import { ImageWithRelations } from "src/image/domain/interfaces/image-with-relations";
+import { DetectedObjectPrediction } from "src/image/infraestructure/services/detect-objects.service";
 
-export class DrawObjectsIntoImageUseCase {
-  async execute(image: ImageWithRelations) {
+export class SaveObjectPredictionsIntoImageUseCase {
+  async execute(image: ImageWithRelations, predictions: DetectedObjectPrediction[]) {
+    console.log('### image', image)
     const imagePath = path.join(inputImagesDir, image.name);
 
-    const detectedObjects = image.detectedObjects
+    console.log('### predictions', predictions)
+    if (!predictions) {
+      return;
+    }
 
     const originalWidth = image.width;
     const originalHeight = image.height;
 
-    const svgRectangles = this.createRectangles(detectedObjects)
+    const svgRectangles = this.createRectangles(predictions)
 
     const svgImage = `
       <svg width="${originalWidth}" height="${originalHeight}">
@@ -30,10 +35,12 @@ export class DrawObjectsIntoImageUseCase {
       .toFile(outputFilePath);
   }
 
-  private createRectangles(detectedObjects: DetectedObject[]) {
+  private createRectangles(detectedObjects: DetectedObjectPrediction[]) {
     const svgRects = detectedObjects
       .map((prediction) => {
-        const {x, y, width, height} = prediction;
+        const { bbox } = prediction;
+        const [x, y, width, height] = bbox
+
         return `
           <rect 
             x="${x}" 

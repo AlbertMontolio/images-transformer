@@ -4,6 +4,7 @@ import { TransformImagesUseCase } from "./transform-images.use-case";
 import { DetectObjectsUseCase } from "./detect-objects.use-case";
 import { ReadImagesNamesUseCase } from "./read-images-names.use-case";
 import dotenv from 'dotenv';
+import { SaveObjectPredictionsIntoImageUseCase } from "./draw-objects-into-image.use-case";
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ export class ProcessImagesUseCase {
   createImagesInDbUseCase: CreateImagesInDbUseCase;
   transformImagesUseCase: TransformImagesUseCase;
   detectObjectsUseCase: DetectObjectsUseCase;
+  saveObjectPredictionsIntoImageUseCase: SaveObjectPredictionsIntoImageUseCase;
 
   constructor() {
     this.readImagesNamesUseCase = new ReadImagesNamesUseCase();

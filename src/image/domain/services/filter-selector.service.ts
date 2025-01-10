@@ -2,21 +2,25 @@ import { Sharp } from 'sharp';
 
 export type FilterOption = {
   name: string;
-  applyFilter: (sharp: Sharp) => void;
+  applyFilter: (sharp: Sharp) => Sharp;
   value?: unknown;
 };
 
 export class FilterSelectorService {
-  getRandomFilter(): FilterOption {
-    const filters: (() => FilterOption)[] = [
-      this.greyScale,
-      this.blur,
-      this.sharpen,
-      this.tint,
-    ];
+  private readonly filters: (() => FilterOption)[];
 
-    const randomFilter = filters[Math.floor(Math.random() * filters.length)];
-    return randomFilter();
+  constructor() {
+    this.filters = [
+      () => this.greyScale(),
+      () => this.blur(),
+      () => this.sharpen(),
+      () => this.tint(),
+    ];
+  }
+
+  getRandomFilter(): FilterOption {
+    const randomIndex = Math.floor(Math.random() * this.filters.length);
+    return this.filters[randomIndex]();
   }
 
   private greyScale(): FilterOption {
@@ -36,7 +40,8 @@ export class FilterSelectorService {
   }
 
   private sharpen(): FilterOption {
-    const value = { sigma: Math.random() * 2 + 1 };
+    const value = { sigma: Math.random() * (1000 - 0.3) + 0.3 }; // Ensures sigma is between 0.3 and 1000
+
     return {
       name: 'sharpen',
       applyFilter: (img: Sharp) => img.sharpen(value),

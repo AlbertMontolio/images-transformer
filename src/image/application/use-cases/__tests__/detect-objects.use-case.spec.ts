@@ -1,5 +1,5 @@
 import { DetectObjectsUseCase } from "../detect-objects.use-case";
-import { DrawObjectsIntoImageUseCase } from "../draw-objects-into-image.use-case";
+import { SaveObjectPredictionsIntoImageUseCase } from "../draw-objects-into-image.use-case";
 import { createImages } from "./__fixtures__/image.fixture";
 
 jest.mock('../../../infraestructure/services/detect-objects.service');
@@ -8,7 +8,7 @@ jest.mock('../draw-objects-into-image.use-case');
 
 describe('DetectObjectsUseCase', () => {
   let detectObjectsUseCase: DetectObjectsUseCase;
-  let drawObjectsIntoImageUseCase: DrawObjectsIntoImageUseCase;
+  let saveObjectPredictionsIntoImageUseCase: SaveObjectPredictionsIntoImageUseCase;
   let mockDetectObjectsServiceExecute: jest.Mock;
   let mockDetectedObjectRepository: jest.Mock;
   let mockDrawObjectsIntoImageUseCaseExecute: jest.Mock;
@@ -17,13 +17,13 @@ describe('DetectObjectsUseCase', () => {
 
   beforeEach(() => {
     detectObjectsUseCase = new DetectObjectsUseCase();
-    drawObjectsIntoImageUseCase = new DrawObjectsIntoImageUseCase()
+    saveObjectPredictionsIntoImageUseCase = new SaveObjectPredictionsIntoImageUseCase()
 
     mockDetectObjectsServiceExecute = jest.fn();
     detectObjectsUseCase.detectObjectsService.execute = mockDetectObjectsServiceExecute;
 
     mockDrawObjectsIntoImageUseCaseExecute = jest.fn();
-    detectObjectsUseCase.drawObjectsIntoImageUseCase.execute = mockDrawObjectsIntoImageUseCaseExecute;
+    detectObjectsUseCase.saveObjectPredictionsIntoImageUseCase.execute = mockDrawObjectsIntoImageUseCaseExecute;
   })
 
   describe('execute', () => {

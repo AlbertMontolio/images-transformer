@@ -1,18 +1,17 @@
-import { Image } from "@prisma/client";
 import { DetectObjectsService } from "../../infraestructure/services/detect-objects.service";
 import { DetectedObjectRepository } from "../../infraestructure/repositories/detected-object.repository";
-import { DrawObjectsIntoImageUseCase } from "./draw-objects-into-image.use-case";
+import { SaveObjectPredictionsIntoImageUseCase } from "./draw-objects-into-image.use-case";
 import { ImageWithRelations } from "src/image/domain/interfaces/image-with-relations";
 
 export class DetectObjectsUseCase {
   detectObjectsService: DetectObjectsService;
   detectedObjectRepository: DetectedObjectRepository;
-  drawObjectsIntoImageUseCase: DrawObjectsIntoImageUseCase;
+  saveObjectPredictionsIntoImageUseCase: SaveObjectPredictionsIntoImageUseCase;
 
   constructor() {
     this.detectObjectsService = new DetectObjectsService()
     this.detectedObjectRepository = new DetectedObjectRepository()
-    this.drawObjectsIntoImageUseCase = new DrawObjectsIntoImageUseCase()
+    this.saveObjectPredictionsIntoImageUseCase = new SaveObjectPredictionsIntoImageUseCase()
   }
   async execute(images: ImageWithRelations[]): Promise<void> {
     for (const image of images) {
@@ -45,7 +44,7 @@ export class DetectObjectsUseCase {
         await this.detectedObjectRepository.create(input, imageId)
       }
 
-      this.drawObjectsIntoImageUseCase.execute(image)
+      await this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions)
     }
   }
 }

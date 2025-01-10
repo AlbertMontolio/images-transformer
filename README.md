@@ -7,7 +7,7 @@ mobilenet, image recognisition
 docker run --name redis -p 6379:6379 -d redis
 
 node dist/image/infraestructure/workers/transform-image.worker.js
-node dist/image/infraestructure/workers/recognize-image.worker.js
+node dist/image/infraestructure/workers/categorize-image.worker.js
 
 # bullmq
 read please: https://docs.bullmq.io/guide/telemetry about bullmq
@@ -77,3 +77,5 @@ const asyncHandler = (fn) => (req, res, next) => {
 };
 
 # TODO: add enums to filtertype and other places
+# TODO: detec-objectsuse case, you save detected objects in db, and, you save image in detected folder
+pretty sure you can do batches and transactions
