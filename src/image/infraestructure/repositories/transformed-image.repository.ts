@@ -18,7 +18,6 @@ export class TransformedImageRepository {
     path: string;
     imageId: number;
   }): Promise<TransformedImage> {
-    console.log('### 2 imageId', imageId)
     try {
       const transformedImage = await prisma.transformedImage.create({
         data: {
@@ -41,14 +40,18 @@ export class TransformedImageRepository {
     input: InputUpdate;
     transformedId: number;
   }): Promise<void> {
-    await prisma.transformedImage.update({
-      where: {
-        id: transformedId,
-      },
-      data: {
-        ...input
-      }
-    })
+    try {
+      await prisma.transformedImage.update({
+        where: {
+          id: transformedId,
+        },
+        data: {
+          ...input,
+        },
+      });
+    } catch (err) {
+      console.log('### TransformedImageRepository#update err: ', err);
+    }
   }
 
   async findAll(): Promise<TransformedImage[]> {

@@ -15,46 +15,45 @@ export class DetectObjectsService {
   async execute(image: Image): Promise<DetectedObject[]> {
     const imagePath = path.join(inputImagesDir, image.name);
 
-    const metadata = await sharp(imagePath).metadata();
-    const originalWidth = metadata.width!;
-    const originalHeight = metadata.height!;
-    // Step 1: Load and Resize the Image
-    const resizedImageBuffer = await sharp(imagePath)
+    let imageTensor: tf.Tensor3D | undefined;
+    let inputTensor: tf.Tensor3D | undefined;
+
+    try {
+      // Step 1: Load and Resize the Image
+      const resizedImageBuffer = await sharp(imagePath)
         .resize(640, 640) // Resize image to 640x640 (Coco SSD works with flexible sizes)
         .toFormat('jpeg')
         .toBuffer();
 
-    // Step 2: Decode the Image into a Tensor
-    let imageTensor = tf.node.decodeImage(resizedImageBuffer, 3); // Decode to RGB tensor
+      // Step 2: Decode the Image into a Tensor
+      imageTensor = tf.node.decodeImage(resizedImageBuffer, 3) as tf.Tensor3D;
 
-    // Step 3: Remove Extra Dimensions
-    // If the tensor has a batch dimension of size 1, remove it
-    while (imageTensor.shape.length > 3) {
-      imageTensor = imageTensor.squeeze();
-    }
+      // Step 3: Ensure the Tensor Shape is Correct
+      if (imageTensor.shape.length !== 3) {
+        throw new Error(`Unexpected tensor shape: ${imageTensor.shape}`);
+      }
 
-    // Step 4: Convert Tensor to `int32`
-    const inputTensor = imageTensor.toInt(); // Add batch dimension [1, height, width, 3]
-    console.log('Final inputTensor shape:', inputTensor.shape);
-    console.log('Final inputTensor dtype:', inputTensor.dtype);
+      // Step 4: Convert Tensor to `int32`
+      inputTensor = imageTensor.toInt();
 
-    // Ensure the tensor is now of shape [height, width, 3]
-    if (imageTensor.shape.length !== 3) {
-      throw new Error(`Unexpected tensor shape after squeezing: ${imageTensor.shape}`);
-    }
+      // Load the Coco SSD model
+      const model = await cocoSsd.load();
 
-    // Load the Coco SSD model
-    const model = await cocoSsd.load();
-    // Perform object detection
-    try {
-    // @ts-ignore: Ignore the type error for this line
+      // Perform object detection
       const predictions = await model.detect(inputTensor);
-      imageTensor.dispose();
-      inputTensor.dispose();
 
-      return predictions
+      return predictions.map((prediction) => ({
+        class: prediction.class,
+        score: prediction.score,
+        bbox: prediction.bbox as [number, number, number, number],
+      }));
     } catch (err) {
-      console.log('### coco err: ', err)
+      console.error('Error during object detection:', err);
+      throw new Error('Object detection failed.');
+    } finally {
+      // Dispose of tensors to free memory
+      if (imageTensor) imageTensor.dispose();
+      if (inputTensor) inputTensor.dispose();
     }
   }
 }

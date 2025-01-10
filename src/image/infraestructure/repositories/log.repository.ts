@@ -16,7 +16,7 @@ export class LogRepository {
         }
       })
     } catch (err) {
-      console.log('### err:::', err)
+      console.log('### err:', err)
     }
   }
 
@@ -46,16 +46,17 @@ export class LogRepository {
     status?: string;
     finishedAt?: Date;
   }) {
-    await prisma.log.update({
-      where: {
-        id: logId,
-      },
-      data: {
-        finishedAt,
-      }
-    })
+    try {
+      await prisma.log.update({
+        where: {
+          id: logId,
+        },
+        data: {
+          finishedAt,
+        },
+      });
+    } catch (err) {
+      console.log('### err:', err);
+    }
   }
 }
-
-// ### TODO: move prisma client creation into a single file, single instance
-// ### handle prisma.$disconnect()

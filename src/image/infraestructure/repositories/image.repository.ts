@@ -6,15 +6,11 @@ import { hostInputImagesDir, inputImagesDir } from '../../config';
 
 export class ImageRepository {
   async create(imageName: string) {
-    console.log('### creating image...')
-
     const hostImagePath = path.join(hostInputImagesDir, imageName);
     const imagePath = path.join(inputImagesDir, imageName);
 
-    // ### TODO: not the place, do it somehwere else
     const stats = await fs.stat(imagePath);
 
-    // const imageName = path.basename(imagePath);
     const metadata = await sharp(imagePath).metadata();
 
     const imageWithLogs = await prisma.image.upsert({
@@ -83,6 +79,3 @@ export class ImageRepository {
     }
   }
 }
-
-// ### TODO: move prisma client creation into a single file, single instance
-// ### handle prisma.$disconnect()

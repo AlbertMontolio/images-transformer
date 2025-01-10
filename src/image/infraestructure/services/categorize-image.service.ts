@@ -1,48 +1,35 @@
-import * as tf from '@tensorflow/tfjs-node';  // TensorFlow.js for Node.js
-import * as mobilenet from '@tensorflow-models/mobilenet';  // MobileNet for image classification
+import * as tf from '@tensorflow/tfjs-node'; // TensorFlow.js for Node.js
+import * as mobilenet from '@tensorflow-models/mobilenet'; // MobileNet for image classification
 import sharp from 'sharp';
 import { Prediction } from '../types/prediction';
-import fs from 'fs';
 
 export class CategorizeImageService {
-  // constructor(private readonly queue: Queue) {}
-
   async execute(imagePath: string): Promise<Prediction[]> {
-    // Read the image using sharp (resize to 224x224 as required by MobileNet)
-    console.log('### Processing file at path:', imagePath);
-    if (!fs.existsSync(imagePath)) {
-      console.error('### cis File does not exist:', imagePath);
-      throw new Error(`### cis File not found: ${imagePath}`);
-    }
+    let imageTensor3D: tf.Tensor3D | undefined;
 
-    let imageBuffer = null;
     try {
-      imageBuffer = await sharp(imagePath).toBuffer();  // Get the image buffer
-    } catch (err) {
-      console.log('### fucking imageBuffer err', err)
-    }
-    try {
+      // Read and process the image using Sharp
+      const imageBuffer = await sharp(imagePath).toBuffer();
 
-      console.log('### imageBuffer', imageBuffer)
-      const metadata = await sharp(imageBuffer).metadata();
-      console.log('### Image Metadata:', metadata);
+      // Decode image to a tensor
+      const imageTensor = tf.node.decodeImage(imageBuffer, 3);
+      imageTensor3D = imageTensor as tf.Tensor3D;
 
-      const imageTensor = tf.node.decodeImage(imageBuffer, 3); // Decode image to 3 channels (RGB)
-      console.log({ imageTensor })
-      const imageTensor3D = imageTensor.squeeze(); // Remove the batch dimension
-
+      // Load the MobileNet model
       const model = await mobilenet.load();
-      // @ts-ignore: Ignore the type error for this line
+
+      // Perform classification
       const predictions: Prediction[] = await model.classify(imageTensor3D);
-      console.log('### Predictions:');
-      predictions.forEach((prediction) => {
-        console.log(`### ${prediction.className}: ${prediction.probability}`);
-      });
 
       return predictions;
     } catch (err) {
       console.error('Error during classification:', err);
-      return [];
+      throw new Error('Image classification failed.');
+    } finally {
+      // Dispose of the tensor to free memory
+      if (imageTensor3D) {
+        imageTensor3D.dispose();
+      }
     }
   }
 }

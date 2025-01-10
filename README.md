@@ -75,3 +75,5 @@ Copiar código
 const asyncHandler = (fn) => (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
 };
+
+# TODO: add enums to filtertype and other places

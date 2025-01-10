@@ -16,7 +16,6 @@ export class DetectedObjectRepository {
       imageId,
     }
 
-    console.log('### inputWithImageId', inputWithImageId)
     try {
       await prisma.detectedObject.create({
         data: inputWithImageId,

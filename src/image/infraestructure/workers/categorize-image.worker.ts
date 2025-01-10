@@ -9,7 +9,7 @@ const categorizeImageService = new CategorizeImageService()
 const logRepository = new LogRepository()
 const categorizationRepository = new CategorizationRepository()
 
-const categorizeImageWorker = new Worker(imageCategorizationQueueName,
+export const categorizeImageWorker = new Worker(imageCategorizationQueueName,
     async (job: { data: CatejorizationJobData }) => {
         // ### TODO: add type
         const { imagePath, imageId } = job.data;

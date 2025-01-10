@@ -23,6 +23,3 @@ export class CategorizationRepository {
     })
   }
 }
-
-// ### TODO: move prisma client creation into a single file, single instance
-// ### handle prisma.$disconnect()
