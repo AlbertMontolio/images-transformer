@@ -13,7 +13,7 @@ describe('CreateImagesInDbUseCase', () => {
     createImagesInDbUseCase = new CreateImagesInDbUseCase()
 
     mockCreate = jest.fn();
-    (createImagesInDbUseCase.imageRepository.create as jest.Mock) = mockCreate;
+    createImagesInDbUseCase.imageRepository.create = mockCreate;
   })
 
   it('calls imageRepository.create with proper args', async () => {

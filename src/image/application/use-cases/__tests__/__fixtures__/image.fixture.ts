@@ -1,13 +1,11 @@
-import { Categorization, DetectedObject, Image, Log, TransformedImage } from "@prisma/client";
+import { ImageWithRelations } from "src/image/domain/interfaces/image-with-relations";
 
-interface ImageWithRelations extends Image {
-  logs: Log[];
-  categorizations: Categorization[];
-  detectedObjects: DetectedObject[];
-  transformedImage: TransformedImage;
-}
+const detectedObjects = [
+  { id: 1, imageId: 1, createdAt: new Date(), x: 10, y: 20, width: 30, height: 40, class: 'object1', score: 0.9 },
+  { id: 2, imageId: 1, createdAt: new Date(), x: 50, y: 60, width: 70, height: 80, class: 'object2', score: 0.8 },
+]
 
-export const createImage = (overrides: Partial<Image> = {}): ImageWithRelations => ({
+export const createImage = (overrides: Partial<ImageWithRelations> = {}): ImageWithRelations => ({
   id: 1,
   name: 'default-name',
   createdAt: new Date(),
@@ -18,7 +16,7 @@ export const createImage = (overrides: Partial<Image> = {}): ImageWithRelations 
   logs: [],
   categorizations: [],
   transformedImage: null,
-  detectedObjects: [],
+  detectedObjects,
   ...overrides,
 });
 

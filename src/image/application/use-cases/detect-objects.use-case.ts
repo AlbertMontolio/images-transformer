@@ -2,6 +2,7 @@ import { Image } from "@prisma/client";
 import { DetectObjectsService } from "../../infraestructure/services/detect-objects.service";
 import { DetectedObjectRepository } from "../../infraestructure/repositories/detected-object.repository";
 import { DrawObjectsIntoImageUseCase } from "./draw-objects-into-image.use-case";
+import { ImageWithRelations } from "src/image/domain/interfaces/image-with-relations";
 
 export class DetectObjectsUseCase {
   detectObjectsService: DetectObjectsService;
@@ -13,10 +14,9 @@ export class DetectObjectsUseCase {
     this.detectedObjectRepository = new DetectedObjectRepository()
     this.drawObjectsIntoImageUseCase = new DrawObjectsIntoImageUseCase()
   }
-  async execute(images: Image[]): Promise<void> {
+  async execute(images: ImageWithRelations[]): Promise<void> {
     for (const image of images) {
       const imageId = image.id
-      const imagePath = image.path
 
       const predictions = await this.detectObjectsService.execute(image) 
 
@@ -45,7 +45,7 @@ export class DetectObjectsUseCase {
         await this.detectedObjectRepository.create(input, imageId)
       }
 
-      this.drawObjectsIntoImageUseCase.execute(imageId)
+      this.drawObjectsIntoImageUseCase.execute(image)
     }
   }
 }
