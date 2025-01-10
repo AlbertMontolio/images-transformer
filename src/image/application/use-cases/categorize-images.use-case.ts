@@ -4,45 +4,45 @@ import { Image } from '@prisma/client';
 import { CatejorizationJobData } from '../../infraestructure/types/categorization.job-data';
 import path from 'path';
 import { inputImagesDir } from '../../config';
+import { CategorizeImagesUseCaseError } from '../../domain/errors/categorize-images.use-case.error';
 
 export class CategorizeImagesUseCase {
-  constructor() {}
+  logRepository: LogRepository;
+
+  constructor() {
+    this.logRepository = new LogRepository()
+  }
 
   async execute(images: Image[]) {
     for (const image of images) {
       const imageId = image.id
-      const imagePath = image.path
       const imageName = image.name
-      this.categorizeImage({ imageName, imageId })
+      const imagePath = path.join(inputImagesDir, imageName);
+      await this.categorizeImage({ imagePath, imageId })
     }
   }
 
   private async categorizeImage({
-    imageName,
+    imagePath,
     imageId,
   }: {
-    imageName: string;
+    imagePath: string;
     imageId: number;
   }) {
+    console.log('### ccc imageCategorizationQueue.add', imageCategorizationQueue.add)
     try {
-      const inputPath = inputImagesDir
-      console.log('### ciuc inputPath', inputPath)
-      const imagePath = path.join(inputPath, imageName);
       const jobData: CatejorizationJobData = {
         imagePath,
         imageId,
       };
 
-      console.log('### adding jobData to queue')
       await imageCategorizationQueue.add('process-image', jobData);
-      const logRepository = new LogRepository()
-      await logRepository.create({
+      await this.logRepository.create({
         imageId,
         status: 'sent-to-queue'
       })
     } catch (err) {
-      console.error('Error during classification:', err);
+      throw new CategorizeImagesUseCaseError();
     }
-    return true;
   }
 }

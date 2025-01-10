@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { dependencies } from './image/utils/dependencies';
-import { app, server, shutdown } from './main';
+import { app, server, shutdown, startServer, getCorsOrigin } from './main';
 import { imageCategorizationQueue } from './image/infraestructure/queues/image-categorization.queue';
 import { imageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
 
@@ -70,13 +70,6 @@ describe('main', () => {
 
       expect(response.status).toBe(200);
       expect(dependencies.processImagesUseCase.execute).toHaveBeenCalled();
-
-      // const listenSpy = jest.spyOn(app, 'listen').mockImplementation((port, callback) => {
-      //   callback(); // Call the callback to simulate server startup
-      //   return server; // Return a dummy server object
-      // });
-
-      // expect(listenSpy).toHaveBeenLastCalledWith(3000)
     })
 
     it('should serve stats on GET /stats', async () => {
@@ -94,22 +87,71 @@ describe('main', () => {
     })
   })
 
-  // describe.only('envirionment variables', () => {
-  //   let listenSpy: jest.SpyInstance;
-  //   beforeEach(async () => {
-  //     jest.resetModules();
-  //     listenSpy = jest.spyOn(app, 'listen').mockImplementation((port, callback) => {
-  //       callback(); // Call the callback to simulate server startup
-  //       return server; // Return a dummy server object
-  //     });
-  //   })
+  describe('start server', () => {
+    let listenSpy: jest.SpyInstance;
 
-  //   it('should use default port 3000 when process.env.PORT is not set', async () => {
+    beforeEach(() => {
+      jest.resetModules(); // Clear module cache to reload fresh
+      process.env = {}; // Reset environment variables for each test
 
-  //     require('./main');
+      // Mock the `listen` method
+      listenSpy = jest.spyOn(app, 'listen').mockImplementation((port, callback) => {
+        if (callback) callback(); // Simulate server startup callback
+        return {} as any; // Return a mock server object
+      });
+    });
 
-  //     console.log('### process.env', process.env)
-  //     expect(listenSpy).toHaveBeenLastCalledWith(3000)
-  //   });
-  // })
+    afterEach(() => {
+      listenSpy.mockRestore(); // Restore the original implementation
+      jest.clearAllMocks(); // Clear all mocks
+    });
+
+    describe('when PORT is not in env', () => {
+      it('should use default port 3000', () => {
+        // Call startServer
+        const server = startServer();
+        const DEFAULT_PORT = 3000
+        console.log('### process.env', process.env)
+    
+        // Verify that app.listen was called with the default port
+        expect(listenSpy).toHaveBeenCalledWith(DEFAULT_PORT, expect.any(Function));
+        expect(server).toEqual({}); // Check the return value (mock server object)
+      });
+    })
+
+    describe('when PORT is in env', () => {
+      it('should use PORT in env', () => {
+        process.env.PORT = '8080';
+        // Call startServer
+        const server = startServer();
+        console.log('### process.env', process.env)
+    
+        // Verify that app.listen was called with the default port
+        expect(listenSpy).toHaveBeenCalledWith("8080", expect.any(Function));
+        expect(server).toEqual({}); // Check the return value (mock server object)
+      });
+    })
+  })
+
+  describe('getCorsOrigin', () => {
+    beforeEach(() => {
+      process.env = {}
+    })
+
+    describe('when CORS_ORIGIN is in env vars', () => {
+      it('should return env value', () => {
+        process.env.CORS_ORIGIN = 'http://localhost:3001';
+
+        const corsOrigin = getCorsOrigin();
+        expect(corsOrigin).toBe('http://localhost:3001'); 
+      })
+    })
+
+    describe('when CORS_ORIGIN is not in env vars', () => {
+      it('should return default value', () => {
+        const corsOrigin = getCorsOrigin();
+        expect(corsOrigin).toBe('*'); 
+      })
+    })
+  })
 })

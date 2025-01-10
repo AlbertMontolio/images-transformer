@@ -2,6 +2,8 @@ import express, { Response, Request, Router } from 'express';
 import { dependencies } from '../../utils/dependencies';
 import { z } from 'zod';
 
+console.log('### images express', express)
+
 const router = express.Router();
 
 const idSchema = z.object({

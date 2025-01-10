@@ -8,7 +8,6 @@ export class CreateImagesInDbUseCase {
   }
   async execute(imageNames: string[]) {
     const images = []; 
-    console.log('### ciiduc imageNames', imageNames)
     for (const imageName of imageNames) {
       const image = await this.imageRepository.create(imageName)
       images.push(image)

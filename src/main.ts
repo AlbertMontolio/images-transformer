@@ -13,9 +13,6 @@ import imagesRoutes from './image/infraestructure/routes/image.routes';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
-
 // create express adapter for bull-dashboard
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
@@ -29,10 +26,6 @@ createBullBoard({
 const app = express();
 app.use(express.json());
 
-// allow requests from nextjs app in development
-app.use(cors({
-    origin: CORS_ORIGIN,
-}));
 
 // setup endpoint for bull-dashboard
 app.use('/admin/queues', serverAdapter.getRouter());
@@ -55,9 +48,24 @@ app.get('/remove', async (_req, res) => {
     res.send();
 });
 
-const server = app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+export const getCorsOrigin = (): string => process.env.CORS_ORIGIN || '*';
+
+export const startServer = () => {
+    const PORT = process.env.PORT || 3000;
+    const CORS_ORIGIN = getCorsOrigin();
+    // allow requests from nextjs app in development
+    app.use(cors({
+        origin: CORS_ORIGIN,
+    }));
+
+    const server = app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`)
+    });
+
+    return server;
+}
+
+const server = startServer()
 
 export { app, server };
 

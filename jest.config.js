@@ -10,6 +10,7 @@ const config = {
   coverageDirectory: '../coverage', // Store coverage reports outside 'src'
   testMatch: ['**/*.spec.ts', '**/*.test.ts'], // Test file patterns
   coveragePathIgnorePatterns: [
+    'coverage',
     'config',
     'test',
     'dist'
