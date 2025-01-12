@@ -10,18 +10,21 @@ export class ImageRepository {
     const imagePath = path.join(inputImagesDir, imageName);
 
     const stats = await fs.stat(imagePath);
-
     const metadata = await sharp(imagePath).metadata();
 
     const imageWithLogs = await prisma.image.upsert({
-      where: { name: imageName }, // Unique constraint field
-      update: {}, // Leave the existing record unchanged
+      where: { name: imageName },
+      update: {},
       create: {
         name: imageName,
         path: hostImagePath,
         size: stats.size,
         width: metadata.width,
         height: metadata.height,
+      },
+      include: {
+        logs: true,
+        categorizations: true,
       },
     });
 

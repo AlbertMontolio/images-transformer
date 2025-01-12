@@ -26,7 +26,7 @@ export class TransformImageService {
   }: {
     image: Image;
     watermarkText: string;
-  }): Promise<Sharp> {
+  }): Promise<Sharp | undefined> {
     const { id, name } = image;
     const repositoryOutputFilePath = path.join(hostOutputImagesDir, 'transformed_images', name);
 
@@ -40,6 +40,7 @@ export class TransformImageService {
         console.error('Failed to create transformed image record');
         return;
       }
+
       const inputImagePath = path.join(inputImagesDir, name);
       const sharpImage = sharp(inputImagePath);
       const metadata = await sharpImage.metadata();
@@ -83,13 +84,10 @@ export class TransformImageService {
         transformedId: transformedImage.id,
       });
 
-      // const storeOutputFilePath = path.join(outputImagesDir, 'transformed_images', name);
-
-      // await sharpImage.withMetadata().toFile(storeOutputFilePath);
-
       return sharpImage;
     } catch (err) {
       console.error('Error during image transformation:', err);
+      return undefined;
     }
   }
 

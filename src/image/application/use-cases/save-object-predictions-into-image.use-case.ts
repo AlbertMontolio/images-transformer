@@ -2,22 +2,19 @@ import { Image } from "@prisma/client";
 import sharp from 'sharp';
 import path from 'path';
 import { inputImagesDir, outputImagesDir } from "../../config";
-import { DetectedObjectPrediction } from "src/image/infraestructure/services/detect-objects.service";
+import { DetectedObjectPrediction } from "../../infraestructure/services/detect-objects.service";
 
 export class SaveObjectPredictionsIntoImageUseCase {
-  async execute(image: Image, predictions: DetectedObjectPrediction[]) {
-    console.log('### image', image)
-    const imagePath = path.join(inputImagesDir, image.name);
-
-    console.log('### predictions', predictions)
+  async execute(image: Image, predictions: DetectedObjectPrediction[] | undefined) {
     if (!predictions || predictions.length === 0) {
       return;
     }
 
+    const imagePath = path.join(inputImagesDir, image.name);
     const originalWidth = image.width;
     const originalHeight = image.height;
 
-    const svgRectangles = this.createRectangles(predictions)
+    const svgRectangles = this.createRectangles(predictions);
 
     const svgImage = `
       <svg width="${originalWidth}" height="${originalHeight}">
@@ -26,19 +23,18 @@ export class SaveObjectPredictionsIntoImageUseCase {
     `;
 
     const fileName = image.name;
-    const outputFilePath = path.join(outputImagesDir, 'detected_images', fileName); // Create output file path
+    const outputFilePath = path.join(outputImagesDir, 'detected_images', fileName);
 
-    // Overlay the SVG on the Original Image
     await sharp(imagePath)
       .composite([{ input: Buffer.from(svgImage), top: 0, left: 0 }])
       .toFile(outputFilePath);
   }
 
   private createRectangles(detectedObjects: DetectedObjectPrediction[]) {
-    const svgRects = detectedObjects
+    return detectedObjects
       .map((prediction) => {
-        const { bbox } = prediction;
-        const [x, y, width, height] = bbox
+        const { bbox, class: className, score } = prediction;
+        const [x, y, width, height] = bbox;
 
         return `
           <rect 
@@ -57,12 +53,10 @@ export class SaveObjectPredictionsIntoImageUseCase {
             font-size="200" 
             font-family="Arial"
           >
-            ${prediction.class} (${(prediction.score * 100).toFixed(1)}%)
+            ${className} (${(score * 100).toFixed(1)}%)
           </text>
         `;
       })
       .join('');
-
-    return svgRects;
   }
 }

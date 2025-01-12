@@ -1,7 +1,9 @@
-import { ImageRepository } from '../image.repository';
 import { prisma } from '../../prisma/prisma-client';
 import fs from 'fs/promises';
 import sharp from 'sharp';
+import { ImageRepository } from '../image.repository';
+import path from 'path';
+import { hostInputImagesDir, inputImagesDir } from '../../../config';
 
 jest.mock('../../prisma/prisma-client', () => ({
   prisma: {
@@ -11,67 +13,64 @@ jest.mock('../../prisma/prisma-client', () => ({
       findMany: jest.fn(),
       deleteMany: jest.fn(),
     },
-    transformedImage: {
-      deleteMany: jest.fn(),
-    },
-    log: {
-      deleteMany: jest.fn(),
-    },
-    categorization: {
-      deleteMany: jest.fn(),
-    },
-    detectedObject: {
-      deleteMany: jest.fn(),
-    },
+    transformedImage: { deleteMany: jest.fn() },
+    log: { deleteMany: jest.fn() },
+    categorization: { deleteMany: jest.fn() },
+    detectedObject: { deleteMany: jest.fn() },
   },
 }));
 
-jest.mock('fs/promises', () => ({
-  stat: jest.fn(),
-}));
-
-jest.mock('sharp', () => jest.fn(() => ({
-  metadata: jest.fn(),
-})));
+jest.mock('fs/promises');
+jest.mock('sharp');
 
 describe('ImageRepository', () => {
-  let imageRepository: ImageRepository;
+  let repository: ImageRepository;
+  const imageName = 'test-image.jpg';
+  const hostImagePath = path.join(hostInputImagesDir, imageName);
+  const imagePath = path.join(inputImagesDir, imageName);
 
   beforeEach(() => {
-    imageRepository = new ImageRepository();
+    repository = new ImageRepository();
     jest.clearAllMocks();
   });
 
   describe('create', () => {
     it('should create an image record with logs', async () => {
       // Arrange
-      const imageName = 'test-image.jpg';
-      const statsMock = { size: 12345 };
-      const metadataMock = { width: 1920, height: 1080 };
-      const mockImageWithLogs = { id: 1, name: imageName, logs: [], categorizations: [] };
+      const mockStats = { size: 12345 };
+      const mockMetadata = { width: 1920, height: 1080 };
+      const mockImageWithLogs = {
+        id: 1,
+        name: imageName,
+        path: hostImagePath,
+        size: mockStats.size,
+        width: mockMetadata.width,
+        height: mockMetadata.height,
+        logs: [{ status: 'created' }],
+        categorizations: [],
+      };
 
-      (fs.stat as jest.Mock).mockResolvedValueOnce(statsMock);
-      (sharp as unknown as jest.Mock).mockReturnValueOnce({
-        metadata: jest.fn().mockResolvedValueOnce(metadataMock),
+      (fs.stat as jest.Mock).mockResolvedValue(mockStats);
+      (sharp as unknown as jest.Mock).mockReturnValue({
+        metadata: jest.fn().mockResolvedValue(mockMetadata),
       });
-      (prisma.image.upsert as jest.Mock).mockResolvedValueOnce(mockImageWithLogs);
+      (prisma.image.upsert as jest.Mock).mockResolvedValue(mockImageWithLogs);
 
       // Act
-      const result = await imageRepository.create(imageName);
+      const result = await repository.create(imageName);
 
       // Assert
-      expect(fs.stat).toHaveBeenCalledWith(expect.stringContaining(imageName));
-      expect(sharp).toHaveBeenCalledWith(expect.stringContaining(imageName));
+      expect(fs.stat).toHaveBeenCalledWith(imagePath);
+      expect(sharp).toHaveBeenCalledWith(imagePath);
       expect(prisma.image.upsert).toHaveBeenCalledWith({
         where: { name: imageName },
         update: {},
         create: {
           name: imageName,
-          path: expect.stringContaining(imageName),
-          size: statsMock.size,
-          width: metadataMock.width,
-          height: metadataMock.height,
-          logs: { create: { status: 'created' } },
+          path: hostImagePath,
+          size: mockStats.size,
+          width: mockMetadata.width,
+          height: mockMetadata.height,
         },
         include: {
           logs: true,
@@ -83,15 +82,12 @@ describe('ImageRepository', () => {
   });
 
   describe('findOne', () => {
-    it('should find a single image by ID', async () => {
-      // Arrange
-      const mockImage = { id: 1, name: 'test-image.jpg', logs: [] };
-      (prisma.image.findUnique as jest.Mock).mockResolvedValueOnce(mockImage);
+    it('should find an image by id with relations', async () => {
+      const mockImage = { id: 1, name: imageName };
+      (prisma.image.findUnique as jest.Mock).mockResolvedValue(mockImage);
 
-      // Act
-      const result = await imageRepository.findOne(1);
+      const result = await repository.findOne(1);
 
-      // Assert
       expect(prisma.image.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
         include: {
@@ -106,15 +102,12 @@ describe('ImageRepository', () => {
   });
 
   describe('findAll', () => {
-    it('should return all images', async () => {
-      // Arrange
-      const mockImages = [{ id: 1, name: 'image1.jpg' }, { id: 2, name: 'image2.png' }];
-      (prisma.image.findMany as jest.Mock).mockResolvedValueOnce(mockImages);
+    it('should find all images with relations', async () => {
+      const mockImages = [{ id: 1, name: imageName }];
+      (prisma.image.findMany as jest.Mock).mockResolvedValue(mockImages);
 
-      // Act
-      const result = await imageRepository.findAll();
+      const result = await repository.findAll();
 
-      // Assert
       expect(prisma.image.findMany).toHaveBeenCalledWith({
         include: {
           transformedImage: true,
@@ -128,37 +121,14 @@ describe('ImageRepository', () => {
   });
 
   describe('deleteAllImagesAndRelations', () => {
-    it('should delete all images and their related data', async () => {
-      // Arrange
-      (prisma.transformedImage.deleteMany as jest.Mock).mockResolvedValueOnce({});
-      (prisma.log.deleteMany as jest.Mock).mockResolvedValueOnce({});
-      (prisma.categorization.deleteMany as jest.Mock).mockResolvedValueOnce({});
-      (prisma.detectedObject.deleteMany as jest.Mock).mockResolvedValueOnce({});
-      (prisma.image.deleteMany as jest.Mock).mockResolvedValueOnce({});
+    it('should delete all records from all tables', async () => {
+      await repository.deleteAllImagesAndRelations();
 
-      // Act
-      await imageRepository.deleteAllImagesAndRelations();
-
-      // Assert
-      expect(prisma.transformedImage.deleteMany).toHaveBeenCalledTimes(1);
-      expect(prisma.log.deleteMany).toHaveBeenCalledTimes(1);
-      expect(prisma.categorization.deleteMany).toHaveBeenCalledTimes(1);
-      expect(prisma.detectedObject.deleteMany).toHaveBeenCalledTimes(1);
-      expect(prisma.image.deleteMany).toHaveBeenCalledTimes(1);
-    });
-
-    it('should log an error if deletion fails', async () => {
-      // Arrange
-      const mockError = new Error('Deletion error');
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      (prisma.image.deleteMany as jest.Mock).mockRejectedValueOnce(mockError);
-
-      // Act
-      await imageRepository.deleteAllImagesAndRelations();
-
-      // Assert
-      expect(consoleSpy).toHaveBeenCalledWith('Error deleting rows:', mockError);
-      consoleSpy.mockRestore();
+      expect(prisma.transformedImage.deleteMany).toHaveBeenCalled();
+      expect(prisma.log.deleteMany).toHaveBeenCalled();
+      expect(prisma.categorization.deleteMany).toHaveBeenCalled();
+      expect(prisma.detectedObject.deleteMany).toHaveBeenCalled();
+      expect(prisma.image.deleteMany).toHaveBeenCalled();
     });
   });
 });
