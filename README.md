@@ -1,6 +1,6 @@
 # Image Processing Service
 
-A Node.js/Express microservice that processes images using machine learning for categorization and object detection, with queue-based processing for scalability.
+A Node.js/Express microservice that processes images using machine learning for categorization and object detection, and sharp for image transformation,with queue-based processing for scalability and cqrs pattern.
 
 ## Table of Contents
 - [Technical Overview](#technical-overview)
@@ -25,7 +25,7 @@ A Node.js/Express microservice that processes images using machine learning for 
 - **ML Models**: TensorFlow.js (MobileNet, COCO-SSD)
 - **Image Processing**: Sharp
 - **Containerization**: Docker & Docker Compose
-- **Testing**: Jest with Istanbul for coverage
+- **Testing**: Jest with coverage
 - **Dependency Injection**: TSyringe
 - **Type Safety**: TypeScript
 
@@ -76,5 +76,3 @@ The project follows Clean Architecture principles with clear separation of conce
 - Performance metrics collection
 - Job status tracking
 - Error logging and reporting
-
-## Project Structure
