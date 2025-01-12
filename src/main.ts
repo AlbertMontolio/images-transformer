@@ -38,12 +38,6 @@ app.use(express.json());
 app.use('/admin/queues', serverAdapter.getRouter());
 app.use('/images', imagesRoutes);
 
-app.get('/stats', async (_req, res) => {
-    const imageRepository = container.resolve(ImageRepository);
-    const stats = await imageRepository.getStats();
-    res.send(stats);
-});
-
 app.get('/remove', async (_req, res) => {
     const imageRepository = container.resolve(ImageRepository);
     await imageRepository.deleteAllImagesAndRelations();

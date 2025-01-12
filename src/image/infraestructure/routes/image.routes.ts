@@ -2,6 +2,7 @@ import express from 'express';
 import { container } from '../../../shared/container';
 import { ProcessImagesUseCase } from '../../application/use-cases/process-images.use-case';
 import { ImageRepository } from '../repositories/image.repository';
+import { GetStatsUseCase } from '../../application/use-cases/get-stats.use-case';
 
 const router = express.Router();
 
@@ -13,6 +14,21 @@ router.get('/', async (_req, res) => {
   } catch (error) {
     res.status(500).send({ error: 'Failed to fetch images' });
   }
+});
+
+
+router.post('/process', async (_req, res) => {
+  const processImagesUseCase = container.resolve(ProcessImagesUseCase);
+  await processImagesUseCase.execute();
+
+  res.status(200).send();
+});
+
+router.get('/stats', async (_req, res) => {
+  const getStatsUseCase = container.resolve(GetStatsUseCase);
+  const stats = await getStatsUseCase.execute();
+
+  res.status(200).send(stats);
 });
 
 router.get('/:id', async (req, res) => {
@@ -35,12 +51,6 @@ router.get('/:id', async (req, res) => {
   } catch (error) {
     res.status(500).send({ error: 'Failed to fetch image' });
   }
-});
-
-router.post('/process', async (_req, res) => {
-  const processImagesUseCase = container.resolve(ProcessImagesUseCase);
-  await processImagesUseCase.execute();
-  res.status(200).send();
 });
 
 export default router;

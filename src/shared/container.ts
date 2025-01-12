@@ -11,6 +11,7 @@ import { ImageTransformationQueue } from '../image/infraestructure/queues/image-
 import { ImageDetectionQueue } from '../image/infraestructure/queues/image-detection.queue';
 import { INJECTION_TOKENS } from './injection-tokens';
 import { ImageRepository } from '../image/infraestructure/repositories/image.repository';
+import { GetStatsUseCase } from '../image/application/use-cases/get-stats.use-case';
 
 // Register services
 container.registerSingleton(TransformImageService);
@@ -22,7 +23,7 @@ container.registerSingleton(CommandBus);
 container.registerSingleton(ProcessImagesUseCase);
 container.registerSingleton(ReadImagesNamesUseCase);
 container.registerSingleton(CreateImagesInDbUseCase);
-
+container.registerSingleton(GetStatsUseCase);
 // Register queues
 container.register(INJECTION_TOKENS.IMAGE_CATEGORIZATION_QUEUE, {
   useValue: ImageCategorizationQueue.getInstance()

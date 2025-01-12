@@ -43,6 +43,7 @@ model Log {
   @@index([imageId])
   @@index([status])
   @@index([processName])
+  @@unique([imageId, processName, status])
 }
 
 model Categorization {

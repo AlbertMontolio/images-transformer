@@ -25,4 +25,32 @@ export class LogRepository {
       throw err;
     }
   }
+
+  async findByImageIdAndStatusAndProcessName({
+    imageId,
+    processName,
+    status,
+  }: {
+    imageId: number;
+    processName: string;
+    status: string;
+  }) {
+    return await prisma.log.findUnique({
+      where: {
+        imageId_processName_status: {
+          imageId,
+          processName,
+          status,
+        }
+      }
+    })
+  }
+
+  async findAllByImageId(imageId: number) {
+    return await prisma.log.findMany({
+      where: {
+        imageId,
+      }
+    });
+  }
 }
