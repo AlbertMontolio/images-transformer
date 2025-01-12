@@ -21,7 +21,10 @@ describe('CategorizeImageService', () => {
   };
 
   beforeEach(() => {
-    service = new CategorizeImageService();
+    const mockModel = {
+      classify: jest.fn()
+    };
+    service = new CategorizeImageService(mockModel as unknown as mobilenet.MobileNet);
   });
 
   afterEach(() => {

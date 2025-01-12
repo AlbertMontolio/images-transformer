@@ -1,5 +1,5 @@
-import * as tf from '@tensorflow/tfjs-node'; // TensorFlow.js for Node.js
-import * as mobilenet from '@tensorflow-models/mobilenet'; // MobileNet for image classification
+import * as tf from '@tensorflow/tfjs-node';
+import * as mobilenet from '@tensorflow-models/mobilenet';
 import sharp from 'sharp';
 import { Prediction } from '../types/prediction';
 import { Image } from '@prisma/client';
@@ -7,6 +7,8 @@ import { inputImagesDir } from '../../config';
 import path from 'path';
 
 export class CategorizeImageService {
+  constructor(private readonly model: mobilenet.MobileNet) {}
+
   async execute(image: Image): Promise<Prediction[]> {
     const { name } = image;
     let imageTensor3D: tf.Tensor3D | undefined;
@@ -21,12 +23,8 @@ export class CategorizeImageService {
       const imageTensor = tf.node.decodeImage(imageBuffer, 3);
       imageTensor3D = imageTensor as tf.Tensor3D;
 
-      // Load the MobileNet model
-      // TODO: do not load it by every image iteration...
-      const model = await mobilenet.load();
-
       // Perform classification
-      const predictions: Prediction[] = await model.classify(imageTensor3D);
+      const predictions: Prediction[] = await this.model.classify(imageTensor3D);
 
       return predictions;
     } catch (err) {

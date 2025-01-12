@@ -3,6 +3,7 @@ import { CategorizeImageService } from 'src/image/infraestructure/services/categ
 import { CategorizeImageCommand } from '../commands/categorize-image.command';
 import { CategorizationRepository, CreateCategorizationProp } from 'src/image/infraestructure/repositories/categorization.repository';
 
+// ### TODO: add extend type
 export class CategorizeImageHandler {
   constructor(
     private readonly categorizeImageService: CategorizeImageService,

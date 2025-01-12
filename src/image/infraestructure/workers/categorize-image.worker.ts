@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { CategorizeImageService } from '../services/categorize-image.service';
+import * as mobilenet from '@tensorflow-models/mobilenet';
 import { LogRepository } from '../repositories/log.repository';
 import { CategorizationRepository } from '../repositories/categorization.repository';
 import { ImageCategorizationQueue } from '../queues/image-categorization.queue';
@@ -7,41 +7,59 @@ import { Image } from '@prisma/client';
 import { CommandBus } from '../../../shared/command-bus/command-bus';
 import { CategorizeImageHandler } from '../../application/handlers/categorize-image.handler';
 import { CategorizeImageCommand } from '../../application/commands/categorize-image.command';
+import { CategorizeImageService } from '../services/categorize-image.service';
 
+// Initialize worker
+async function initializeWorker() {
+  console.log('Loading MobileNet model...');
+  const model = await mobilenet.load();
+  console.log('MobileNet model loaded successfully');
 
-// Setup command bus
-const commandBus = new CommandBus();
-const categorizeImageHandler = new CategorizeImageHandler(
-  new CategorizeImageService(),
-  new LogRepository(),
-  new CategorizationRepository()
-);
+  const categorizeImageService = new CategorizeImageService(model);
+  
+  // Setup command bus
+  const commandBus = new CommandBus();
+  const categorizeImageHandler = new CategorizeImageHandler(
+    categorizeImageService,
+    new LogRepository(),
+    new CategorizationRepository()
+  );
 
-// Register handler
-console.log('Registering CategorizeImageCommand handler...');
-// TODO: use symbol instead of string
-commandBus.register('CategorizeImageCommand', categorizeImageHandler);
+  // Register handler
+  console.log('Registering CategorizeImageCommand handler...');
+  commandBus.register('CategorizeImageCommand', categorizeImageHandler);
 
-export const categorizeImageWorker = new Worker(ImageCategorizationQueue.queueName,
+  return new Worker(
+    ImageCategorizationQueue.queueName,
     async (job: { data: Image }) => {
-        const image = job.data;
-        const command = new CategorizeImageCommand(image);
-        await commandBus.execute(command);
+      const image = job.data;
+      const command = new CategorizeImageCommand(image);
+      await commandBus.execute(command);
     },
     { connection: ImageCategorizationQueue.getConnection() }
-);
+  );
+}
 
-// Log worker status
-categorizeImageWorker.on('completed', (job) => {
+// Initialize and export the worker
+let categorizeImageWorker: Worker;
+
+initializeWorker().then(worker => {
+  categorizeImageWorker = worker;
+
+  // Log worker status
+  worker.on('completed', (job) => {
     console.log(`categorizationImageWorker Job ${job.id} completed successfully.`);
-});
+  });
 
-categorizeImageWorker.on('failed', (job, err) => {
+  worker.on('failed', (job, err) => {
     console.error(`categorizationImageWorker Job ${job.id} failed: ${err.message}`);
+  });
+
+  worker.on('error', (err) => {
+    console.error('categorizationImageWorker error:', err);
+  });
+
+  console.log('categorizationImageWorker is running...');
 });
 
-categorizeImageWorker.on('error', (err) => {
-  console.error('categorizationImageWorker error:', err);
-});
-
-console.log('categorizationImageWorker is running...');
+export { categorizeImageWorker };
