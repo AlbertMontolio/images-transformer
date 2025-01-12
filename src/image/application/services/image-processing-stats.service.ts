@@ -20,6 +20,10 @@ export class ImageProcessingStatsService {
       return acc;
     }, {});
 
+    // TODO: use map
+    // const hashMap = new Map(processNames.map((name, index) => [name, index]));
+
+
     for (const image of images) {
       for (const processName of processNames) {
         const duration = await this.getProcessingDuration(image.id, processName);

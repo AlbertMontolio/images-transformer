@@ -32,7 +32,7 @@ export class FilterSelectorService {
   }
 
   private blur(): FilterOption {
-    const value = this.randomFloat(0.4, 999);
+    const value = this.randomFloat(0.4, 9);
     return {
       name: 'blur',
       applyFilter: (img: Sharp) => img.blur(value),

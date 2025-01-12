@@ -4,9 +4,15 @@ import { Sharp } from "sharp";
 export class SaveImageInFolderService {
   constructor(private readonly outputImagesDir: string) {}
   
-  async execute(image: Sharp, name: string): Promise<void> {
-    const storeOutputFilePath = path.join(this.outputImagesDir, 'transformed_images', name);
+  async execute(image: Sharp, filename: string): Promise<void> {
+    await image.toFile(path.join(this.outputImagesDir, 'transformed_images', filename));
+  }
 
-    await image.withMetadata().toFile(storeOutputFilePath);
+  async executeMany(images: { image: Sharp; filename: string }[]): Promise<void> {
+    await Promise.all(
+      images.map(({ image, filename }) => 
+        this.execute(image, filename)
+      )
+    );
   }
 }

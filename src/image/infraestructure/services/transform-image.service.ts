@@ -41,7 +41,6 @@ export class TransformImageService {
         return;
       }
       const inputImagePath = path.join(inputImagesDir, name);
-      console.log('### tis inputImagePath', inputImagePath);
       const sharpImage = sharp(inputImagePath);
       const metadata = await sharpImage.metadata();
 

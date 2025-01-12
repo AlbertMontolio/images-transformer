@@ -29,8 +29,10 @@ export class DetectImageHandler {
       status: 'completed'
     });
 
+    // ### TODO: save in batch like in transform-image.handler.ts
     await this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions);
 
+    // ### TODO: save in batch
     for (const prediction of predictions) {
       const [x, y, width, height] = prediction.bbox;
       const detectedObject = {

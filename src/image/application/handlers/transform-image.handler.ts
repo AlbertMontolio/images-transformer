@@ -2,8 +2,12 @@ import { TransformImageCommand } from '../commands/transform-image.command';
 import { TransformImageService } from '../../infraestructure/services/transform-image.service';
 import { LogRepository } from '../../infraestructure/repositories/log.repository';
 import { SaveImageInFolderService } from 'src/image/infraestructure/services/save-image-in-folder.service';
+import { Sharp } from 'sharp';
 
 export class TransformImageHandler {
+  private static readonly BATCH_SIZE = 10;
+  private batch: { image: Sharp; filename: string }[] = [];
+
   constructor(
     private readonly transformImageService: TransformImageService,
     private readonly logRepository: LogRepository,
@@ -30,18 +34,35 @@ export class TransformImageHandler {
       status: 'completed'
     });
 
-    await this.logRepository.create({
-      imageId: image.id,
-      processName: 'transformation_storage',
-      status: 'started'
-    });
+    this.batch.push({ image: sharpImage, filename: image.name });
 
-    await this.saveImageInFolderService.execute(sharpImage, image.name);
+    console.log('### this.batch', this.batch);
 
-    await this.logRepository.create({
-      imageId: image.id,
-      processName: 'transformation_storage',
-      status: 'completed'
-    });
+
+    if (this.batch.length >= TransformImageHandler.BATCH_SIZE) {
+      await this.logRepository.create({
+        imageId: image.id,
+        processName: 'transformation_storage',
+        status: 'started'
+      });
+
+      await this.saveImageInFolderService.executeMany([...this.batch]);
+
+      await this.logRepository.create({
+        imageId: image.id,
+        processName: 'transformation_storage',
+        status: 'completed'
+      });
+
+      this.batch = []; // Clear the batch
+    }
+  }
+
+  // Method to flush remaining images
+  async flushBatch(): Promise<void> {
+    if (this.batch.length > 0) {
+      await this.saveImageInFolderService.executeMany([...this.batch]);
+      this.batch = [];
+    }
   }
 } 
