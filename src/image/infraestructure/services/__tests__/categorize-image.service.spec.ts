@@ -9,6 +9,16 @@ jest.mock('sharp');
 
 describe('CategorizeImageService', () => {
   let service: CategorizeImageService;
+  // TODO: use fixtures
+  const image = {
+    name: 'test.jpg',
+    id: 1,
+    createdAt: new Date(),
+    size: 100,
+    path: 'input/path',
+    width: 1000,
+    height: 400,
+  };
 
   beforeEach(() => {
     service = new CategorizeImageService();
@@ -38,8 +48,9 @@ describe('CategorizeImageService', () => {
     };
     (mobilenet.load as jest.Mock).mockResolvedValue(mockModel);
 
+
     // Act
-    const predictions = await service.execute('path/to/image.jpg');
+    const predictions = await service.execute(image);
 
     // Assert
     expect(predictions).toEqual(mockPredictions);
@@ -55,7 +66,7 @@ describe('CategorizeImageService', () => {
     }) as any);
 
     // Act & Assert
-    await expect(service.execute('path/to/image.jpg')).rejects.toThrow('Image classification failed');
+    await expect(service.execute(image)).rejects.toThrow('Image classification failed');
   });
 
   it('should dispose the tensor even if an error occurs', async () => {
@@ -70,7 +81,7 @@ describe('CategorizeImageService', () => {
     (mobilenet.load as jest.Mock).mockRejectedValue(new Error('Model load error'));
 
     // Act & Assert
-    await expect(service.execute('path/to/image.jpg')).rejects.toThrow('Image classification failed');
+    await expect(service.execute(image)).rejects.toThrow('Image classification failed');
     expect(mockTensor.dispose).toHaveBeenCalled();
   });
 });

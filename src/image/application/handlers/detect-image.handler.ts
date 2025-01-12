@@ -1,11 +1,15 @@
 import { DetectObjectsService } from 'src/image/infraestructure/services/detect-objects.service';
 import { LogRepository } from '../../infraestructure/repositories/log.repository';
 import { DetectImageCommand } from '../commands/detect-image.command';
+import { SaveObjectPredictionsIntoImageUseCase } from '../use-cases/save-object-predictions-into-image.use-case';
+import { DetectedObjectRepository } from 'src/image/infraestructure/repositories/detected-object.repository';
 
 export class DetectImageHandler {
   constructor(
     private readonly detectObjectsService: DetectObjectsService,
-    private readonly logRepository: LogRepository
+    private readonly logRepository: LogRepository,
+    private readonly saveObjectPredictionsIntoImageUseCase: SaveObjectPredictionsIntoImageUseCase,
+    private readonly detectedObjectRepository: DetectedObjectRepository
   ) {}
 
   async execute(command: DetectImageCommand): Promise<void> {
@@ -13,7 +17,21 @@ export class DetectImageHandler {
 
     await this.logRepository.create({ imageId: image.id, status: 'detection-started' });
 
-    await this.detectObjectsService.execute(image);
+    const predictions = await this.detectObjectsService.execute(image);
+    await this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions);
+
+    for (const prediction of predictions) {
+      const [x, y, width, height] = prediction.bbox;
+      const detectedObject = {
+        x,
+        y,
+        width,
+        height,
+        class: prediction.class,
+        score: prediction.score,
+      }
+      await this.detectedObjectRepository.create(detectedObject, image.id);
+    }
 
     await this.logRepository.create({ imageId: image.id, status: 'detection-finished' });
   }

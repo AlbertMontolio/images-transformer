@@ -1,12 +1,11 @@
-import { DetectedObject } from "@prisma/client";
+import { Image } from "@prisma/client";
 import sharp from 'sharp';
 import path from 'path';
 import { inputImagesDir, outputImagesDir } from "../../config";
-import { ImageWithRelations } from "src/image/domain/interfaces/image-with-relations";
 import { DetectedObjectPrediction } from "src/image/infraestructure/services/detect-objects.service";
 
 export class SaveObjectPredictionsIntoImageUseCase {
-  async execute(image: ImageWithRelations, predictions: DetectedObjectPrediction[]) {
+  async execute(image: Image, predictions: DetectedObjectPrediction[]) {
     console.log('### image', image)
     const imagePath = path.join(inputImagesDir, image.name);
 

@@ -4,9 +4,9 @@ import { LogRepository } from '../repositories/log.repository';
 import { CategorizationRepository } from '../repositories/categorization.repository';
 import { ImageCategorizationQueue } from '../queues/image-categorization.queue';
 import { Image } from '@prisma/client';
-import { CommandBus } from 'src/shared/command-bus/command-bus';
+import { CommandBus } from '../../../shared/command-bus/command-bus';
 import { CategorizeImageHandler } from '../../application/handlers/categorize-image.handler';
-import { CategorizeImageCommand } from 'src/image/application/commands/categorize-image.command';
+import { CategorizeImageCommand } from '../../application/commands/categorize-image.command';
 
 
 // Setup command bus

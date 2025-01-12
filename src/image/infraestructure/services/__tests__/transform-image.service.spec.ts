@@ -67,10 +67,16 @@ describe('TransformImageService', () => {
 
     // Act
     await service.execute({
-      imagePath: 'input/path',
-      imageName: 'test.jpg',
+      image: {
+        name: 'test.jpg',
+        id: 1,
+        createdAt: new Date(),
+        width: 1000,
+        height: 400,
+        size: 100,
+        path: 'input/path',
+      },
       watermarkText: 'Sample Watermark',
-      imageId: 1,
     });
 
     // Assert
@@ -92,10 +98,16 @@ describe('TransformImageService', () => {
     // Act & Assert
     await expect(
       service.execute({
-        imagePath: 'input/path',
-        imageName: 'test.jpg',
+        image: {
+          name: 'test.jpg',
+          id: 1,
+          createdAt: new Date(),
+          width: 1000,
+          height: 400,
+          size: 100,
+          path: 'input/path',
+        },
         watermarkText: 'Sample Watermark',
-        imageId: 1,
       }),
     ).resolves.toBeUndefined();
     expect(mockRepository.update).not.toHaveBeenCalled();
@@ -107,10 +119,16 @@ describe('TransformImageService', () => {
 
     // Act
     await service.execute({
-      imagePath: 'input/path',
-      imageName: 'test.jpg',
+      image: {
+        name: 'test.jpg',
+        id: 1,
+        createdAt: new Date(),
+        width: 1000,
+        height: 400,
+        size: 100,
+        path: 'input/path',
+      },
       watermarkText: 'Sample Watermark',
-      imageId: 1,
     });
 
     // Assert

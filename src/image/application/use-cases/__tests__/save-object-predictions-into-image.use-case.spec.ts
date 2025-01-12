@@ -1,6 +1,6 @@
 import sharp from 'sharp';
 import path from 'path';
-import { SaveObjectPredictionsIntoImageUseCase } from '../draw-objects-into-image.use-case';
+import { SaveObjectPredictionsIntoImageUseCase } from '../save-object-predictions-into-image.use-case';
 import { inputImagesDir, outputImagesDir } from '../../../config';
 import { createImage } from './__fixtures__/image.fixture';
 

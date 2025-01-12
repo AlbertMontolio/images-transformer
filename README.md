@@ -8,7 +8,7 @@ docker run --name redis -p 6379:6379 -d redis
 
 node dist/image/infraestructure/workers/transform-image.worker.js
 node dist/image/infraestructure/workers/categorize-image.worker.js
-
+node dist/image/infraestructure/workers/detect-image.worker.js
 # bullmq
 read please: https://docs.bullmq.io/guide/telemetry about bullmq
 

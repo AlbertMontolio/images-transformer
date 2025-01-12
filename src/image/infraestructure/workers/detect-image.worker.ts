@@ -1,17 +1,21 @@
 import { Worker } from 'bullmq';
+import { Image } from '@prisma/client';
 import { LogRepository } from '../repositories/log.repository';
 import { CommandBus } from '../../../shared/command-bus/command-bus';
-import { Image } from '@prisma/client';
-import { DetectImageHandler } from 'src/image/application/handlers/detect-image.handler';
+import { DetectImageHandler } from '../../application/handlers/detect-image.handler';
 import { DetectObjectsService } from '../services/detect-objects.service';
 import { ImageDetectionQueue } from '../queues/image-detection.queue';
-import { DetectImageCommand } from 'src/image/application/commands/detect-image.command';
+import { DetectImageCommand } from '../../application/commands/detect-image.command';
+import { SaveObjectPredictionsIntoImageUseCase } from '../../application/use-cases/save-object-predictions-into-image.use-case';
+import { DetectedObjectRepository } from '../repositories/detected-object.repository';
 
 // Setup command bus
 const commandBus = new CommandBus();
 const detectImageHandler = new DetectImageHandler(
   new DetectObjectsService(),
-  new LogRepository()
+  new LogRepository(),
+  new SaveObjectPredictionsIntoImageUseCase(),
+  new DetectedObjectRepository()
 );
 
 // Register handler
