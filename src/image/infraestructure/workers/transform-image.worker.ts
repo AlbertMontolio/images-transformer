@@ -6,6 +6,8 @@ import { LogRepository } from '../repositories/log.repository';
 import { ImageTransformationQueue } from '../queues/image-transformation.queue';
 import { CommandBus } from '../../../shared/command-bus/command-bus';
 import { Image } from '@prisma/client';
+import { SaveImageInFolderService } from '../services/save-image-in-folder.service';
+import { outputImagesDir } from '../../config';
 
 type Job = {
   data: Image;
@@ -15,7 +17,8 @@ type Job = {
 const commandBus = new CommandBus();
 const transformImageHandler = new TransformImageHandler(
   new TransformImageService(),
-  new LogRepository()
+  new LogRepository(),
+  new SaveImageInFolderService(outputImagesDir),
 );
 
 // Register handler

@@ -1,11 +1,13 @@
 import { TransformImageCommand } from '../commands/transform-image.command';
 import { TransformImageService } from '../../infraestructure/services/transform-image.service';
 import { LogRepository } from '../../infraestructure/repositories/log.repository';
+import { SaveImageInFolderService } from 'src/image/infraestructure/services/save-image-in-folder.service';
 
 export class TransformImageHandler {
   constructor(
     private readonly transformImageService: TransformImageService,
-    private readonly logRepository: LogRepository
+    private readonly logRepository: LogRepository,
+    private readonly saveImageInFolderService: SaveImageInFolderService
   ) {}
 
   async execute(command: TransformImageCommand): Promise<void> {
@@ -17,7 +19,7 @@ export class TransformImageHandler {
       status: 'started'
     });
 
-    await this.transformImageService.execute({
+    const sharpImage = await this.transformImageService.execute({
       image,
       watermarkText,
     });
@@ -27,5 +29,7 @@ export class TransformImageHandler {
       processName: 'transformation',
       status: 'completed'
     });
+
+    await this.saveImageInFolderService.execute(sharpImage, image.name);
   }
 } 

@@ -12,6 +12,8 @@ export interface DetectedObjectPrediction {
 }
 
 export class DetectObjectsService {
+  constructor(private readonly model: cocoSsd.ObjectDetection) {}
+
   async execute(image: Image): Promise<DetectedObjectPrediction[]> {
     const { name } = image;
     const inputImagePath = path.join(inputImagesDir, name);
@@ -37,11 +39,8 @@ export class DetectObjectsService {
       // Step 4: Convert Tensor to `int32`
       inputTensor = imageTensor.toInt();
 
-      // Load the Coco SSD model
-      const model = await cocoSsd.load();
-
       // Perform object detection
-      const predictions = await model.detect(inputTensor);
+      const predictions = await this.model.detect(inputTensor);
 
       return predictions.map((prediction) => ({
         class: prediction.class,

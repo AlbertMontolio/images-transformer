@@ -13,7 +13,10 @@ describe('DetectObjectsService', () => {
   let service: DetectObjectsService;
 
   beforeEach(() => {
-    service = new DetectObjectsService();
+    const mockModel = {
+      detect: jest.fn()
+    };
+    service = new DetectObjectsService(mockModel as unknown as cocoSsd.ObjectDetection);
   });
 
   afterEach(() => {
