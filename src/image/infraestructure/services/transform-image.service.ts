@@ -1,7 +1,7 @@
 import sharp, { Sharp } from 'sharp';
 import path from 'path';
 import { TransformedImageRepository } from '../repositories/transformed-image.repository';
-import { hostOutputImagesDir, outputImagesDir } from '../../config';
+import { hostOutputImagesDir, inputImagesDir, outputImagesDir } from '../../config';
 import { FilterSelectorService } from '../../domain/services/filter-selector.service';
 import { Image } from '@prisma/client';
 
@@ -40,8 +40,9 @@ export class TransformImageService {
         console.error('Failed to create transformed image record');
         return;
       }
-
-      const sharpImage = sharp(imagePath);
+      const inputImagePath = path.join(inputImagesDir, name);
+      console.log('### tis inputImagePath', inputImagePath);
+      const sharpImage = sharp(inputImagePath);
       const metadata = await sharpImage.metadata();
 
       if (!metadata.width || !metadata.height) {

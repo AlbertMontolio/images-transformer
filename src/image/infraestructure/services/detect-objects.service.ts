@@ -1,9 +1,9 @@
 import * as tf from '@tensorflow/tfjs-node';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import sharp from 'sharp';
-import { DetectedObject, Image } from '@prisma/client';
 import path from 'path';
 import { inputImagesDir } from '../../config';
+import { Image } from '@prisma/client';
 
 export interface DetectedObjectPrediction {
   class: string;
@@ -13,14 +13,15 @@ export interface DetectedObjectPrediction {
 
 export class DetectObjectsService {
   async execute(image: Image): Promise<DetectedObjectPrediction[]> {
-    const imagePath = path.join(inputImagesDir, image.name);
+    const { name } = image;
+    const inputImagePath = path.join(inputImagesDir, name);
 
     let imageTensor: tf.Tensor3D | undefined;
     let inputTensor: tf.Tensor3D | undefined;
 
     try {
       // Step 1: Load and Resize the Image
-      const resizedImageBuffer = await sharp(imagePath)
+      const resizedImageBuffer = await sharp(inputImagePath)
         .resize(640, 640) // Resize image to 640x640 (Coco SSD works with flexible sizes)
         .toFormat('jpeg')
         .toBuffer();

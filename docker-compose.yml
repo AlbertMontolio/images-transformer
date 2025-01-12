@@ -26,7 +26,7 @@ services:
     depends_on:
       - postgres
       - redis
-    command: node dist/run.js # The command to run your main app
+    command: node dist/main.js # The command to run your main app
 
   migrate:
     build:
@@ -95,6 +95,33 @@ services:
     container_name: transform_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/transform-image.worker.js"]
+    volumes:
+      - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
+      - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
+
+    environment:
+      CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
+      CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: albertmontolio
+      POSTGRES_PASSWORD: 123456
+      POSTGRES_DB: images-transformer-db
+      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+    depends_on:
+      - app
+      - redis
+      - postgres
+
+  detect_image_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: detect_image_worker
+    restart: always
+    command: ["node", "dist/image/infraestructure/workers/detect-image.worker.js"]
     volumes:
       - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
       - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images

@@ -3,15 +3,19 @@ import * as mobilenet from '@tensorflow-models/mobilenet'; // MobileNet for imag
 import sharp from 'sharp';
 import { Prediction } from '../types/prediction';
 import { Image } from '@prisma/client';
+import { inputImagesDir } from '../../config';
+import path from 'path';
 
 export class CategorizeImageService {
   async execute(image: Image): Promise<Prediction[]> {
-    const { path: imagePath } = image;
+    const { name } = image;
     let imageTensor3D: tf.Tensor3D | undefined;
 
     try {
       // Read and process the image using Sharp
-      const imageBuffer = await sharp(imagePath).toBuffer();
+      const inputImagePath = path.join(inputImagesDir, name);
+      console.log('### cis inputImagePath', inputImagePath);
+      const imageBuffer = await sharp(inputImagePath).toBuffer();
 
       // Decode image to a tensor
       const imageTensor = tf.node.decodeImage(imageBuffer, 3);
