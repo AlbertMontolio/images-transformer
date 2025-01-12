@@ -3,7 +3,8 @@ import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import sharp from 'sharp';
 import { DetectObjectsService } from '../detect-objects.service';
 import { createImage } from '../../../application/use-cases/__tests__/__fixtures__/image.fixture';
-// ### TODO: move fixtures to domain
+import path from 'path';
+import { inputImagesDir } from '../../../config';
 
 jest.mock('@tensorflow/tfjs-node');
 jest.mock('@tensorflow-models/coco-ssd');
@@ -11,12 +12,17 @@ jest.mock('sharp');
 
 describe('DetectObjectsService', () => {
   let service: DetectObjectsService;
-
+  let mockModel: jest.Mocked<cocoSsd.ObjectDetection>;
+  
   beforeEach(() => {
-    const mockModel = {
-      detect: jest.fn()
-    };
-    service = new DetectObjectsService(mockModel as unknown as cocoSsd.ObjectDetection);
+    mockModel = {
+      detect: jest.fn().mockResolvedValue([
+        { class: 'person', score: 0.95, bbox: [10, 20, 30, 40] },
+        { class: 'cat', score: 0.85, bbox: [50, 60, 70, 80] },
+      ])
+    } as unknown as jest.Mocked<cocoSsd.ObjectDetection>;
+    
+    service = new DetectObjectsService(mockModel);
   });
 
   afterEach(() => {
@@ -25,15 +31,25 @@ describe('DetectObjectsService', () => {
 
   it('should detect objects in an image', async () => {
     // Arrange
-    const mockImage = createImage({ id: 1, name: 'image.jpg', width: 640, height: 480, size: 12345 })
+    const mockImage = createImage({ 
+      id: 1, 
+      name: 'image.jpg', 
+      width: 640, 
+      height: 480, 
+      size: 12345 
+    });
+    
     const mockResizedImageBuffer = Buffer.from('mock-image-buffer');
-    const mockTensor = { shape: [640, 640, 3], toInt: jest.fn(), dispose: jest.fn() } as unknown as tf.Tensor3D;
-    const mockModel = {
-      detect: jest.fn().mockResolvedValue([
-        { class: 'person', score: 0.95, bbox: [10, 20, 30, 40] },
-        { class: 'cat', score: 0.85, bbox: [50, 60, 70, 80] },
-      ]),
-    };
+    const mockInputTensor = { 
+      dispose: jest.fn(),
+      toInt: jest.fn().mockReturnThis()
+    } as unknown as tf.Tensor3D;
+    
+    const mockImageTensor = { 
+      shape: [640, 640, 3],
+      dispose: jest.fn(),
+      toInt: jest.fn().mockReturnValue(mockInputTensor)
+    } as unknown as tf.Tensor3D;
 
     (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
       resize: jest.fn().mockReturnThis(),
@@ -41,8 +57,7 @@ describe('DetectObjectsService', () => {
       toBuffer: jest.fn().mockResolvedValue(mockResizedImageBuffer),
     }) as any);
 
-    (tf.node.decodeImage as jest.Mock).mockReturnValue(mockTensor);
-    (cocoSsd.load as jest.Mock).mockResolvedValue(mockModel);
+    (tf.node.decodeImage as jest.Mock).mockReturnValue(mockImageTensor);
 
     // Act
     const results = await service.execute(mockImage);
@@ -52,14 +67,53 @@ describe('DetectObjectsService', () => {
       { class: 'person', score: 0.95, bbox: [10, 20, 30, 40] },
       { class: 'cat', score: 0.85, bbox: [50, 60, 70, 80] },
     ]);
-    expect(sharp).toHaveBeenCalledWith(expect.stringContaining('image.jpg'));
-    expect(mockModel.detect).toHaveBeenCalledWith(mockTensor.toInt());
-    expect(mockTensor.dispose).toHaveBeenCalled();
+    
+    const expectedPath = path.join(inputImagesDir, mockImage.name);
+    expect(sharp).toHaveBeenCalledWith(expectedPath);
+    expect(mockModel.detect).toHaveBeenCalledWith(mockInputTensor);
+    expect(mockImageTensor.dispose).toHaveBeenCalled();
+    expect(mockInputTensor.dispose).toHaveBeenCalled();
   });
 
   it('should throw an error if object detection fails', async () => {
     // Arrange
-    const mockImage = createImage({ id: 1, name: 'image.jpg', width: 640, height: 480, size: 12345 });
+    const mockImage = createImage({ 
+      id: 1, 
+      name: 'image.jpg', 
+      width: 640, 
+      height: 480, 
+      size: 12345 
+    });
+    
+    const mockTensor = { 
+      dispose: jest.fn(),
+      toInt: jest.fn()
+    } as unknown as tf.Tensor3D;
+
+    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
+      resize: jest.fn().mockReturnThis(),
+      toFormat: jest.fn().mockReturnThis(),
+      toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-buffer')),
+    }) as any);
+
+    (tf.node.decodeImage as jest.Mock).mockReturnValue(mockTensor);
+    mockModel.detect.mockRejectedValue(new Error('Detection failed'));
+
+    // Act & Assert
+    await expect(service.execute(mockImage)).rejects.toThrow('Object detection failed');
+    expect(mockTensor.dispose).toHaveBeenCalled();
+  });
+
+  it('should dispose tensors even if an error occurs during sharp processing', async () => {
+    // Arrange
+    const mockImage = createImage({ 
+      id: 1, 
+      name: 'image.jpg', 
+      width: 640, 
+      height: 480, 
+      size: 12345 
+    });
+
     (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
       resize: jest.fn().mockReturnThis(),
       toFormat: jest.fn().mockReturnThis(),
@@ -68,24 +122,5 @@ describe('DetectObjectsService', () => {
 
     // Act & Assert
     await expect(service.execute(mockImage)).rejects.toThrow('Object detection failed');
-  });
-
-  it('should dispose tensors even if an error occurs', async () => {
-    // Arrange
-    const mockImage = createImage({ id: 1, name: 'image.jpg', width: 640, height: 480, size: 12345 });
-    const mockTensor = { dispose: jest.fn() } as unknown as tf.Tensor3D;
-
-    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
-      resize: jest.fn().mockReturnThis(),
-      toFormat: jest.fn().mockReturnThis(),
-      toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-image-buffer')),
-    }) as any);
-
-    (tf.node.decodeImage as jest.Mock).mockReturnValue(mockTensor);
-    (cocoSsd.load as jest.Mock).mockRejectedValue(new Error('Model load error'));
-
-    // Act & Assert
-    await expect(service.execute(mockImage)).rejects.toThrow('Object detection failed');
-    expect(mockTensor.dispose).toHaveBeenCalled();
   });
 });
