@@ -61,6 +61,11 @@ export class ImageRepository {
     return images;
   }
 
+  async getStats() {
+    const images = await this.findAll();
+    return images.length;
+  }
+
   async deleteAllImagesAndRelations() {
     // only for prototyping
     try {

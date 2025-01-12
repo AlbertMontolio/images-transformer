@@ -79,3 +79,5 @@ const asyncHandler = (fn) => (req, res, next) => {
 # TODO: add enums to filtertype and other places
 # TODO: detec-objectsuse case, you save detected objects in db, and, you save image in detected folder
 pretty sure you can do batches and transactions
+
+# store filter as json in db

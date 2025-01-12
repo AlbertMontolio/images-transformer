@@ -2,11 +2,13 @@ import fs from 'fs-extra';
 import path from 'path';
 import { inputImagesDir } from '../../config';
 import dotenv from 'dotenv';
+import { injectable } from 'tsyringe';
 
 dotenv.config();
 
 const IMAGE_EXTENSIONS: string[] = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.heic', '.webp'];
 
+@injectable()
 export class ReadImagesNamesUseCase {
   async execute() {
     const inputPath = inputImagesDir

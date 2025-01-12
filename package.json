@@ -11,6 +11,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
+    "test:clear": "jest --clearCache",
     "postinstall": "npm rebuild @tensorflow/tfjs-node --build-from-source",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"

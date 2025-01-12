@@ -2,16 +2,15 @@ import express from 'express';
 import cors from 'cors'
 import dotenv from 'dotenv';
 import 'reflect-metadata';
-
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 import { createBullBoard } from '@bull-board/api'
-
 import { ImageCategorizationQueue } from './image/infraestructure/queues/image-categorization.queue';
 import { ImageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
-import { dependencies } from './image/utils/dependencies';
-import imagesRoutes from './image/infraestructure/routes/image.routes';
 import { ImageDetectionQueue } from './image/infraestructure/queues/image-detection.queue';
+import imagesRoutes from './image/infraestructure/routes/image.routes';
+import { container } from './shared/container';
+import { ImageRepository } from './image/infraestructure/repositories/image.repository';
 
 dotenv.config();
 
@@ -36,19 +35,18 @@ createBullBoard({
 const app = express();
 app.use(express.json());
 
-
-// setup endpoint for bull-dashboard
 app.use('/admin/queues', serverAdapter.getRouter());
-
 app.use('/images', imagesRoutes);
 
 app.get('/stats', async (_req, res) => {
-    const stats = dependencies.getStatsUseCase.execute()
+    const imageRepository = container.resolve(ImageRepository);
+    const stats = await imageRepository.getStats();
     res.send(stats);
 });
 
 app.get('/remove', async (_req, res) => {
-    await dependencies.imageRepository.deleteAllImagesAndRelations()
+    const imageRepository = container.resolve(ImageRepository);
+    await imageRepository.deleteAllImagesAndRelations();
     res.send();
 });
 
@@ -57,7 +55,6 @@ export const getCorsOrigin = (): string => process.env.CORS_ORIGIN || '*';
 export const startServer = () => {
     const PORT = process.env.PORT || 3000;
     const CORS_ORIGIN = getCorsOrigin();
-    // allow requests from nextjs app in development
     app.use(cors({
         origin: CORS_ORIGIN,
     }));
@@ -88,7 +85,7 @@ export const shutdown = async () => {
 
     } catch (error) {
         console.error('Error during shutdown:', error);
-        process.exit(1); // Exit with an error code
+        process.exit(1);
     }
 };
 

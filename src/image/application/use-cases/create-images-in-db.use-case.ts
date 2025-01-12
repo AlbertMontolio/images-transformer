@@ -1,6 +1,8 @@
 import { Image } from "@prisma/client";
 import { ImageRepository } from "../../infraestructure/repositories/image.repository"
+import { injectable } from 'tsyringe';
 
+@injectable()
 export class CreateImagesInDbUseCase {
   imageRepository: ImageRepository;
 

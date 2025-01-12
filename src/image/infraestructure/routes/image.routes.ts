@@ -1,11 +1,14 @@
 import express from 'express';
-import { dependencies } from '../../utils/dependencies';
+import { container } from '../../../shared/container';
+import { ProcessImagesUseCase } from '../../application/use-cases/process-images.use-case';
+import { ImageRepository } from '../repositories/image.repository';
 
-export const router = express.Router();
+const router = express.Router();
 
 router.get('/', async (_req, res) => {
   try {
-    const images = await dependencies.imageRepository.findAll();
+    const imageRepository = container.resolve(ImageRepository);
+    const images = await imageRepository.findAll();
     res.send(images);
   } catch (error) {
     res.status(500).send({ error: 'Failed to fetch images' });
@@ -13,7 +16,7 @@ router.get('/', async (_req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  const idParam = req.params.id; // Use req.params.id
+  const idParam = req.params.id;
   const imageId = parseInt(idParam, 10);
 
   if (isNaN(imageId)) {
@@ -22,7 +25,8 @@ router.get('/:id', async (req, res) => {
   }
 
   try {
-    const image = await dependencies.imageRepository.findOne(imageId);
+    const imageRepository = container.resolve(ImageRepository);
+    const image = await imageRepository.findOne(imageId);
     if (!image) {
       res.status(404).send({ error: 'Image not found' });
       return;
@@ -34,8 +38,8 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/process', async (_req, res) => {
-  await dependencies.processImagesUseCase.execute();
-
+  const processImagesUseCase = container.resolve(ProcessImagesUseCase);
+  await processImagesUseCase.execute();
   res.status(200).send();
 });
 

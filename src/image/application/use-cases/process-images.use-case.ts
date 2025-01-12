@@ -1,26 +1,29 @@
-import { CreateImagesInDbUseCase } from "./create-images-in-db.use-case";
+import { injectable, inject } from 'tsyringe';
 import { ReadImagesNamesUseCase } from "./read-images-names.use-case";
-import { SaveObjectPredictionsIntoImageUseCase } from "./save-object-predictions-into-image.use-case";
+import { CreateImagesInDbUseCase } from "./create-images-in-db.use-case";
 import { ImageCategorizationQueue } from "../../infraestructure/queues/image-categorization.queue";
 import { ImageTransformationQueue } from "../../infraestructure/queues/image-transformation.queue";
 import { ImageDetectionQueue } from "../../infraestructure/queues/image-detection.queue";
+import { INJECTION_TOKENS } from '../../../shared/injection-tokens';
 
+@injectable()
 export class ProcessImagesUseCase {
-  readImagesNamesUseCase: ReadImagesNamesUseCase;
-  createImagesInDbUseCase: CreateImagesInDbUseCase;
-  saveObjectPredictionsIntoImageUseCase: SaveObjectPredictionsIntoImageUseCase;
-  private readonly imageCategorizationQueue: ImageCategorizationQueue;
-  private readonly imageTransformationQueue: ImageTransformationQueue;
-  private readonly imageDetectionQueue: ImageDetectionQueue;
-
-  constructor() {
-    this.readImagesNamesUseCase = new ReadImagesNamesUseCase();
-    this.createImagesInDbUseCase = new CreateImagesInDbUseCase()
-
-    this.imageCategorizationQueue = ImageCategorizationQueue.getInstance()
-    this.imageTransformationQueue = ImageTransformationQueue.getInstance()
-    this.imageDetectionQueue = ImageDetectionQueue.getInstance()
-  }
+  constructor(
+    @inject(ReadImagesNamesUseCase) 
+    private readonly readImagesNamesUseCase: ReadImagesNamesUseCase,
+    
+    @inject(CreateImagesInDbUseCase)
+    private readonly createImagesInDbUseCase: CreateImagesInDbUseCase,
+    
+    @inject(INJECTION_TOKENS.IMAGE_CATEGORIZATION_QUEUE)
+    private readonly imageCategorizationQueue: ImageCategorizationQueue,
+    
+    @inject(INJECTION_TOKENS.IMAGE_TRANSFORMATION_QUEUE)
+    private readonly imageTransformationQueue: ImageTransformationQueue,
+    
+    @inject(INJECTION_TOKENS.IMAGE_DETECTION_QUEUE)
+    private readonly imageDetectionQueue: ImageDetectionQueue
+  ) {}
 
   async execute() {
     const imagesFilesNames = await this.readImagesNamesUseCase.execute()

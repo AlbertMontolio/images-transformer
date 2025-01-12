@@ -14,9 +14,6 @@ export class ImageDetectionQueue extends Queue<Image> {
     });
   }
 
-  /**
-   * Get the singleton instance of the queue
-   */
   public static getInstance(options?: QueueOptions): ImageDetectionQueue {
     if (!this.instance) {
       this.instance = new ImageDetectionQueue(options);
@@ -24,9 +21,6 @@ export class ImageDetectionQueue extends Queue<Image> {
     return this.instance;
   }
 
-  /**
-   * Expose the Redis connection
-   */
   public static getConnection() {
     return redisConnection;
   }
