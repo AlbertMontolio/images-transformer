@@ -1,83 +1,80 @@
-# about images sharp readstreams
-https://obviy.us/blog/sharp-heic-on-aws-lambda/
+# Image Processing Service
 
-mobilenet, image recognisition
+A Node.js/Express microservice that processes images using machine learning for categorization and object detection, with queue-based processing for scalability.
 
-# start queues and worker
-docker run --name redis -p 6379:6379 -d redis
+## Table of Contents
+- [Technical Overview](#technical-overview)
+- [Architecture](#architecture)
+- [Core Features](#core-features)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Development](#development)
+- [Performance & Scalability](#performance--scalability)
+- [Security](#security)
 
-node dist/image/infraestructure/workers/transform-image.worker.js
-node dist/image/infraestructure/workers/categorize-image.worker.js
-node dist/image/infraestructure/workers/detect-image.worker.js
-# bullmq
-read please: https://docs.bullmq.io/guide/telemetry about bullmq
+## Technical Overview
 
-# postgresql
-run on warp
-psql postgres # it connects to postgres db.
-you could do psql -D but you need name of db
+### Tech Stack
+- **Runtime**: Node.js v22.12.0
+- **Framework**: Express.js
+- **Database**: PostgreSQL with Prisma ORM
+- **Queue System**: BullMQ with Redis
+- **ML Models**: TensorFlow.js (MobileNet, COCO-SSD)
+- **Image Processing**: Sharp
+- **Containerization**: Docker & Docker Compose
+- **Testing**: Jest with Istanbul for coverage
+- **Dependency Injection**: TSyringe
+- **Type Safety**: TypeScript
 
-postgres=# \du
-                                      List of roles
-   Role name    |                         Attributes                         | Member of 
-----------------+------------------------------------------------------------+-----------
- albertmontolio | Superuser, Create role, Create DB, Replication, Bypass RLS | {}
+## Architecture
 
+### Clean Architecture Implementation
+The project follows Clean Architecture principles with clear separation of concerns:
 
- sql -h localhost -U your_db_user -d your_db_name
+1. **Domain Layer**
+   - Contains business logic and domain entities
+   - Technology-agnostic
+   - No dependencies on external frameworks
 
-# apply migration in prisma
-npx prisma migrate dev --name image-optionals
-it creates file and fires it in db
+2. **Application Layer**
+   - Use cases implementation
+   - Orchestrates domain objects
+   - Contains application-specific business rules
 
-npx prisma migrate reset
-npx prisma generate
+3. **Infrastructure Layer**
+   - External interfaces (REST API, queues)
+   - Database implementations
+   - Framework-specific code
+   - Third-party services integration
 
-node v working
-v22.12.0
+### Queue-Based Processing
+- **BullMQ Workers**: Distributed processing of image operations
+- **Queue Types**:
+  - Image Categorization Queue
+  - Image Transformation Queue
+  - Object Detection Queue
+- **Redis Backend**: Reliable message broker for queue management
 
-docker-compose down --volumes
-docker system prune -af
-rm -rf node_modules package-lock.json dist
+## Core Features
 
-docker-compose build --no-cache
-docker-compose up -d
+### Image Processing
+- Image format conversion (JPEG, PNG, WebP)
+- Resizing and optimization
+- Metadata extraction
+- Error handling and validation
 
-docker execute -it node_app batch
+### Machine Learning Capabilities
+- **Image Categorization**: MobileNet model for image classification
+- **Object Detection**: COCO-SSD model for identifying objects
+- **Batch Processing**: Efficient handling of multiple images
 
-scale!!!
+### Monitoring & Administration
+- Bull Dashboard for queue monitoring
+- Performance metrics collection
+- Job status tracking
+- Error logging and reporting
 
-# todo: dockerfile improvements, do not copy . .
-it requires to remove node_modules and dist
-
-663020a5ccd3
-
-docker exec -it images-transformer-app bash
-
-'IMG_5302 4.jpeg'       'IMG_5306 4.jpeg'       'IMG_5311 4.HEIC.jpeg'  'IMG_5316 4.HEIC.jpeg'  'IMG_5320 4.HEIC.jpeg'   heics
-'IMG_5303 4.jpeg'       'IMG_5307 4.HEIC.jpeg'  'IMG_5312 4.HEIC.jpeg'  'IMG_5317 4.HEIC.jpeg'  'IMG_5321 4.HEIC.jpeg'   jpegs
-'IMG_5304 4.HEIC.jpeg'  'IMG_5308 4.HEIC.jpeg'  'IMG_5313 4.HEIC.jpeg'  'IMG_5317 4.jpeg'       'IMG_5322 4.HEIC.jpeg'   others
-'IMG_5305 4.HEIC.jpeg'  'IMG_5309 4.HEIC.jpeg'  'IMG_5314 4.HEIC.jpeg'  'IMG_5318 4.HEIC.jpeg'   flower.jpg
-'IMG_5306 4.HEIC.jpeg'  'IMG_5310 4.HEIC.jpeg'  'IMG_5315 4.HEIC.jpeg'  'IMG_5319 4.HEIC.jpeg'   flower_photos
-
-/usr/src/app/input_images/IMG_5322 4.HEIC.jpeg
-
-
-todo 
-Add a request logger to monitor incoming requests. Use a library like morgan:
-
-Uncaught promise rejections in your route handlers (e.g., if findOne or deleteAllImagesAndRelations fails) could crash the app. Use an error-handling middleware or a wrapper for async routes.
-
-Refactor Example: Create an asyncHandler utility:
-
-javascript
-Copiar código
-const asyncHandler = (fn) => (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-};
-
-# TODO: add enums to filtertype and other places
-# TODO: detec-objectsuse case, you save detected objects in db, and, you save image in detected folder
-pretty sure you can do batches and transactions
-
-# store filter as json in db
+## Project Structure
