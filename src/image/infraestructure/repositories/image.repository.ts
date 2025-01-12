@@ -74,4 +74,14 @@ export class ImageRepository {
       console.error('Error deleting rows:', error);
     }
   }
+
+  async createMany(fileNames: string[]): Promise<void> {
+    await prisma.image.createMany({
+      data: fileNames.map(name => ({
+        name,
+        path: path.join(inputImagesDir, name)
+      })),
+      skipDuplicates: true
+    });
+  }
 }

@@ -1,6 +1,7 @@
 import { prisma } from "../prisma/prisma-client";
 
-type ProcessName = 'object_detection' | 'transformation' | 'categorization';
+// ### TODO: add enums from Prisma
+export type ProcessName = 'object_detection' | 'transformation' | 'categorization' | 'transformation_storage';
 
 export class LogRepository {
   async create({

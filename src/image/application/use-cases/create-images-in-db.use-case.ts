@@ -18,4 +18,8 @@ export class CreateImagesInDbUseCase {
 
     return images;
   }
+
+  async executeMany(fileNames: string[]): Promise<void> {
+    await this.imageRepository.createMany(fileNames);
+  }
 }

@@ -1,8 +1,7 @@
-import { LogRepository } from '../../infraestructure/repositories/log.repository';
+import { LogRepository, ProcessName } from '../../infraestructure/repositories/log.repository';
 import { ImageRepository } from '../../infraestructure/repositories/image.repository';
 import { injectable } from 'tsyringe';
 
-type ProcessName = 'object_detection' | 'transformation' | 'categorization';
 
 @injectable()
 export class ImageProcessingStatsService {
@@ -12,30 +11,23 @@ export class ImageProcessingStatsService {
   ) {}
 
   async getImagesProcessingTimes() {
+    // ### TODO: get from prisma enums
+    const processNames: ProcessName[] = ['transformation', 'categorization', 'object_detection', 'transformation_storage'];
     const images = await this.imageRepository.findAll();
-    const imageTransformationDurations = [];
-    const imageCategorizationDurations = [];
-    const imageObjectDetectionDurations = [];
+
+    const processNamesMap = processNames.reduce((acc, name, index) => {
+      acc[name] = 0;
+      return acc;
+    }, {});
 
     for (const image of images) {
-      const imageTransformationDuration = await this.getProcessingDuration(image.id, 'transformation');
-      const imageCategorizationDuration = await this.getProcessingDuration(image.id, 'categorization');
-      const imageObjectDetectionDuration = await this.getProcessingDuration(image.id, 'object_detection');
-
-      imageTransformationDurations.push(imageTransformationDuration);
-      imageCategorizationDurations.push(imageCategorizationDuration);
-      imageObjectDetectionDurations.push(imageObjectDetectionDuration);
+      for (const processName of processNames) {
+        const duration = await this.getProcessingDuration(image.id, processName);
+        processNamesMap[processName] += duration;
+      }
     }
 
-    const imagesTransformationsTotal = imageTransformationDurations.reduce((acc, curr) => acc + curr, 0);
-    const imagesCategorizationsTotal = imageCategorizationDurations.reduce((acc, curr) => acc + curr, 0);
-    const imagesObjectDetectionsTotal = imageObjectDetectionDurations.reduce((acc, curr) => acc + curr, 0);
-
-    return {
-      imagesTransformationsTotal,
-      imagesCategorizationsTotal,
-      imagesObjectDetectionsTotal,
-    };
+    return processNamesMap;
   }
 
   private async getProcessingDuration(imageId: number, processName: ProcessName): Promise<number | null> {

@@ -6,13 +6,19 @@ import { ImageTransformationQueue } from "../../infraestructure/queues/image-tra
 import { ImageDetectionQueue } from "../../infraestructure/queues/image-detection.queue";
 import { INJECTION_TOKENS } from '../../../shared/injection-tokens';
 import { inputImagesDir } from '../../config';
+import { ImageRepository } from '../../infraestructure/repositories/image.repository';
 
 @injectable()
 export class ProcessImagesUseCase {
+  private readonly BATCH_SIZE = 5; // Adjust based on your needs
+  
   constructor(
     @inject(ReadImagesNamesUseCase) 
     private readonly readImagesNamesUseCase: ReadImagesNamesUseCase,
     
+    @inject(ImageRepository)
+    private readonly imageRepository: ImageRepository,
+
     @inject(CreateImagesInDbUseCase)
     private readonly createImagesInDbUseCase: CreateImagesInDbUseCase,
     
@@ -26,6 +32,14 @@ export class ProcessImagesUseCase {
     private readonly imageDetectionQueue: ImageDetectionQueue
   ) {}
 
+  private createBatches<T>(items: T[], batchSize: number): T[][] {
+    const batches: T[][] = [];
+    for (let i = 0; i < items.length; i += batchSize) {
+      batches.push(items.slice(i, i + batchSize));
+    }
+    return batches;
+  }
+
   async execute() {
     const inputPath = inputImagesDir
     const imagesFilesNames = await this.readImagesNamesUseCase.execute(inputPath)
@@ -34,12 +48,32 @@ export class ProcessImagesUseCase {
       return
     }
 
-    const images = await this.createImagesInDbUseCase.execute(imagesFilesNames)
+    const fileNameBatches = this.createBatches(imagesFilesNames, this.BATCH_SIZE);
 
-    for (const image of images) {
-      await this.imageTransformationQueue.add('transform-image', image);
-      await this.imageCategorizationQueue.add('categorize-image', image);
-      await this.imageDetectionQueue.add('detect-objects', image);
+    for (const fileNameBatch of fileNameBatches) {
+      await this.createImagesInDbUseCase.executeMany(fileNameBatch);
+      const images = await this.imageRepository.findAll();
+      
+      await Promise.all([
+        this.imageCategorizationQueue.addBulk(
+          images.map(image => ({
+            name: 'categorize-image',
+            data: image
+          }))
+        ),
+        this.imageTransformationQueue.addBulk(
+          images.map(image => ({
+            name: 'transform-image',
+            data: image
+          }))
+        ),
+        this.imageDetectionQueue.addBulk(
+          images.map(image => ({
+            name: 'detect-objects',
+            data: image
+          }))
+        )
+      ]);
     }
   }
 }

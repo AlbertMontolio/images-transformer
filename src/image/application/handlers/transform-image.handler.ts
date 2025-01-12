@@ -30,6 +30,18 @@ export class TransformImageHandler {
       status: 'completed'
     });
 
+    await this.logRepository.create({
+      imageId: image.id,
+      processName: 'transformation_storage',
+      status: 'started'
+    });
+
     await this.saveImageInFolderService.execute(sharpImage, image.name);
+
+    await this.logRepository.create({
+      imageId: image.id,
+      processName: 'transformation_storage',
+      status: 'completed'
+    });
   }
 } 
