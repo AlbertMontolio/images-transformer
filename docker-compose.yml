@@ -1,32 +1,41 @@
 version: '3.8'
+
+# Combined environment configuration
+x-common-env: &common-env
+  # Postgres configuration
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: albertmontolio
+  POSTGRES_PASSWORD: 123456
+  POSTGRES_DB: images-transformer-db
+  DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+  # Container folders
+  CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
+  CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
+  # Redis configuration
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+
+x-common-volumes: &common-volumes
+  - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
+  - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
+
 services:
-  # Node.js App
   app:
     build:
       context: .
-      dockerfile: Dockerfile # Add this Dockerfile to build the Node.js app
+      dockerfile: Dockerfile
     container_name: node_app
     restart: always
     ports:
-      - "3000:3000" # Change this to your app's port
+      - "3000:3000"
     environment:
-      CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
-      CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: albertmontolio
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: images-transformer-db
-      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    volumes:
-      - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
-      - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
+      <<: *common-env
+    volumes: *common-volumes
     depends_on:
       - postgres
       - redis
-    command: node dist/main.js # The command to run your main app
+    command: node dist/main.js
 
   migrate:
     build:
@@ -53,7 +62,6 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
 
-  # Redis for Queues
   redis:
     image: redis:7
     container_name: redis_queue
@@ -68,21 +76,9 @@ services:
     container_name: categorize_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/categorize-image.worker.js"]
-    volumes:
-      - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
-      - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
-
+    volumes: *common-volumes
     environment:
-      CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
-      CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: albertmontolio
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: images-transformer-db
-      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+      <<: *common-env
     depends_on:
       - app
       - redis
@@ -95,21 +91,9 @@ services:
     container_name: transform_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/transform-image.worker.js"]
-    volumes:
-      - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
-      - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
-
+    volumes: *common-volumes
     environment:
-      CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
-      CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: albertmontolio
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: images-transformer-db
-      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+      <<: *common-env
     depends_on:
       - app
       - redis
@@ -122,21 +106,9 @@ services:
     container_name: detect_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/detect-image.worker.js"]
-    volumes:
-      - ${HOST_INPUT_FOLDER}:/usr/src/app/input_images
-      - ${HOST_OUTPUT_FOLDER}:/usr/src/app/output_images
-
+    volumes: *common-volumes
     environment:
-      CONTAINER_INPUT_FOLDER: /usr/src/app/input_images
-      CONTAINER_OUTPUT_FOLDER: /usr/src/app/output_images
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: albertmontolio
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: images-transformer-db
-      DATABASE_URL: "postgresql://albertmontolio:123456@postgres:5432/images-transformer-db"
+      <<: *common-env
     depends_on:
       - app
       - redis

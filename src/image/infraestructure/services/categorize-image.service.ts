@@ -22,6 +22,7 @@ export class CategorizeImageService {
       imageTensor3D = imageTensor as tf.Tensor3D;
 
       // Load the MobileNet model
+      // TODO: do not load it by every image iteration...
       const model = await mobilenet.load();
 
       // Perform classification
