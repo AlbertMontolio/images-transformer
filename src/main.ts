@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors'
 import dotenv from 'dotenv';
+import 'reflect-metadata';
 
 import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
