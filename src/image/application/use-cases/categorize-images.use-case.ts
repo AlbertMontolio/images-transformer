@@ -4,7 +4,7 @@ import { CatejorizationJobData } from '../../infraestructure/types/categorizatio
 import path from 'path';
 import { inputImagesDir } from '../../config';
 import { CategorizeImagesUseCaseError } from '../../domain/errors/categorize-images.use-case.error';
-import { ImageCategorizationQueue } from 'src/image/infraestructure/queues/image-categorization.queue';
+import { ImageCategorizationQueue } from '../../infraestructure/queues/image-categorization.queue';
 
 export class CategorizeImagesUseCase {
   logRepository: LogRepository;

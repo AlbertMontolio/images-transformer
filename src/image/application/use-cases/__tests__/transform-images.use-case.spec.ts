@@ -3,7 +3,7 @@ import path from "path";
 
 import { TransformImagesUseCase } from "../transform-images.use-case";
 import { createImage } from "./__fixtures__/image.fixture";
-import { imageTransformationQueue } from "../../../infraestructure/queues/image-transformation-old.queue";
+import { ImageTransformationQueue } from "../../../infraestructure/queues/image-transformation.queue";
 import { inputImagesDir } from "../../../config";
 
 jest.mock('../../../infraestructure/queues/image-transformation.queue', () => ({
@@ -14,10 +14,12 @@ jest.mock('../../../infraestructure/queues/image-transformation.queue', () => ({
 
 describe('TransformImagesUseCase', () => {
   let transformImagesUseCase: TransformImagesUseCase;
+  let imageTransformationQueue: ImageTransformationQueue;
 
   beforeEach(() => {
     transformImagesUseCase = new TransformImagesUseCase();
     jest.clearAllMocks();
+    imageTransformationQueue = ImageTransformationQueue.getInstance();
   });
 
   it('should add transformation jobs for each image to the queue', async () => {

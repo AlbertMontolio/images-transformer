@@ -58,6 +58,7 @@ export class TransformImageService {
       sharpImage.resize(targetWidth);
 
       const filter = this.filterSelectorService.getRandomFilter();
+      console.log('### filter', filter);
       filter.applyFilter(sharpImage);
 
       await this.transformedImageRepository.update({

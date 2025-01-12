@@ -31,7 +31,7 @@ export class FilterSelectorService {
   }
 
   private blur(): FilterOption {
-    const value = Math.random() * 5;
+    const value = this.randomFloat(0.4, 999);
     return {
       name: 'blur',
       applyFilter: (img: Sharp) => img.blur(value),
@@ -40,7 +40,7 @@ export class FilterSelectorService {
   }
 
   private sharpen(): FilterOption {
-    const value = { sigma: Math.random() * (1000 - 0.3) + 0.3 }; // Ensures sigma is between 0.3 and 1000
+    const value = { sigma: this.randomFloat(1, 9) };
 
     return {
       name: 'sharpen',
@@ -64,5 +64,9 @@ export class FilterSelectorService {
 
   private randomInt(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  private randomFloat(min: number, max: number): number {
+    return Math.random() * (max - min) + min;
   }
 }

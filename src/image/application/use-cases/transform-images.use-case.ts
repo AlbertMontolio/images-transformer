@@ -1,7 +1,7 @@
 import { Image } from "@prisma/client";
 import path from 'path';
 import { inputImagesDir } from "../../config";
-import { ImageTransformationJobData, ImageTransformationQueue } from "src/image/infraestructure/queues/image-transformation.queue";
+import { ImageTransformationJobData, ImageTransformationQueue } from "../../infraestructure/queues/image-transformation.queue";
 
 export class TransformImagesUseCase {
   imageTransformationQueue: ImageTransformationQueue;
