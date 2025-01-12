@@ -1,5 +1,6 @@
 import { Queue, QueueOptions } from 'bullmq';
 import { redisConnection } from './redis-connection';
+import { Image } from '@prisma/client';
 
 export type ImageTransformationJobData = {
   imagePath: string; // ### TODO: remove
@@ -8,7 +9,7 @@ export type ImageTransformationJobData = {
   imageId: number;
 };
 
-export class ImageTransformationQueue extends Queue<ImageTransformationJobData> {
+export class ImageTransformationQueue extends Queue<Image> {
   public static readonly queueName = 'image-transformation-queue';
 
   private static instance: ImageTransformationQueue | null = null;

@@ -3,10 +3,10 @@ import { CategorizeImagesUseCase } from "./categorize-images.use-case";
 import { TransformImagesUseCase } from "./transform-images.use-case";
 import { DetectObjectsUseCase } from "./detect-objects.use-case";
 import { ReadImagesNamesUseCase } from "./read-images-names.use-case";
-import dotenv from 'dotenv';
 import { SaveObjectPredictionsIntoImageUseCase } from "./draw-objects-into-image.use-case";
-
-dotenv.config();
+import { ImageCategorizationQueue } from "src/image/infraestructure/queues/image-categorization.queue";
+import { ImageTransformationQueue } from "src/image/infraestructure/queues/image-transformation.queue";
+import { ImageDetectionQueue } from "src/image/infraestructure/queues/image-detection.queue";
 
 export class ProcessImagesUseCase {
   readImagesNamesUseCase: ReadImagesNamesUseCase;
@@ -15,6 +15,9 @@ export class ProcessImagesUseCase {
   transformImagesUseCase: TransformImagesUseCase;
   detectObjectsUseCase: DetectObjectsUseCase;
   saveObjectPredictionsIntoImageUseCase: SaveObjectPredictionsIntoImageUseCase;
+  private readonly imageCategorizationQueue: ImageCategorizationQueue;
+  private readonly imageTransformationQueue: ImageTransformationQueue;
+  private readonly imageDetectionQueue: ImageDetectionQueue;
 
   constructor() {
     this.readImagesNamesUseCase = new ReadImagesNamesUseCase();
@@ -22,6 +25,10 @@ export class ProcessImagesUseCase {
     this.createImagesInDbUseCase = new CreateImagesInDbUseCase()
     this.transformImagesUseCase = new TransformImagesUseCase()
     this.detectObjectsUseCase = new DetectObjectsUseCase()
+
+    this.imageCategorizationQueue = ImageCategorizationQueue.getInstance()
+    this.imageTransformationQueue = ImageTransformationQueue.getInstance()
+    this.imageDetectionQueue = ImageDetectionQueue.getInstance()
   }
 
   async execute() {
@@ -33,13 +40,10 @@ export class ProcessImagesUseCase {
 
     const images = await this.createImagesInDbUseCase.execute(imagesFilesNames)
 
-    // ### TODO: do only one loop?
-    this.categorizeImagesUseCase.execute(images)
-    this.transformImagesUseCase.execute({
-      images,
-      watermarkText: 'Albert Montolio'
-    })
-
-    this.detectObjectsUseCase.execute(images);
+    for (const image of images) {
+      await this.imageTransformationQueue.add('transform-image', image);
+      await this.imageCategorizationQueue.add('categorize-image', image);
+      await this.imageDetectionQueue.add('detect-objects', image);
+    }
   }
 }

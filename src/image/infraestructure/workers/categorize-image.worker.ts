@@ -1,38 +1,32 @@
 import { Worker } from 'bullmq';
 import { CategorizeImageService } from '../services/categorize-image.service';
 import { LogRepository } from '../repositories/log.repository';
-import { CategorizationRepository, CreateCategorizationProp } from '../repositories/categorization.repository';
-import { ImageCategorizationJobData, ImageCategorizationQueue } from '../queues/image-categorization.queue';
+import { CategorizationRepository } from '../repositories/categorization.repository';
+import { ImageCategorizationQueue } from '../queues/image-categorization.queue';
+import { Image } from '@prisma/client';
+import { CommandBus } from 'src/shared/command-bus/command-bus';
+import { CategorizeImageHandler } from '../../application/handlers/categorize-image.handler';
+import { CategorizeImageCommand } from 'src/image/application/commands/categorize-image.command';
 
-const categorizeImageService = new CategorizeImageService()
-const logRepository = new LogRepository()
-const categorizationRepository = new CategorizationRepository()
+
+// Setup command bus
+const commandBus = new CommandBus();
+const categorizeImageHandler = new CategorizeImageHandler(
+  new CategorizeImageService(),
+  new LogRepository(),
+  new CategorizationRepository()
+);
+
+// Register handler
+console.log('Registering CategorizeImageCommand handler...');
+// TODO: use symbol instead of string
+commandBus.register('CategorizeImageCommand', categorizeImageHandler);
 
 export const categorizeImageWorker = new Worker(ImageCategorizationQueue.queueName,
-    async (job: { data: ImageCategorizationJobData }) => {
-        const { imagePath, imageId } = job.data;
-        console.log({ imagePath, imageId })
-
-        logRepository.create({
-            imageId,
-            status: 'categorization-started',
-        })
-        const predictions = await categorizeImageService.execute(imagePath)
-        logRepository.create({
-            imageId,
-            status: 'categorization-finished',
-        })
-
-        const inputs: CreateCategorizationProp[] = predictions.map((prediction) => {
-            return {
-                label: prediction.className,
-                score: prediction.probability,
-            }
-        })
-        categorizationRepository.createMany({
-            inputs,
-            imageId,
-        })
+    async (job: { data: Image }) => {
+        const image = job.data;
+        const command = new CategorizeImageCommand(image);
+        await commandBus.execute(command);
     },
     { connection: ImageCategorizationQueue.getConnection() }
 );

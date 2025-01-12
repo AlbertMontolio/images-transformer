@@ -1,13 +1,9 @@
 import { Queue, QueueOptions } from 'bullmq';
 import { redisConnection } from './redis-connection';
-
-export type ImageCategorizationJobData = {
-  imagePath: string;
-  imageId: number;
-};
+import { Image } from '@prisma/client';
 
 // ### TODO: refactor in a base queue
-export class ImageCategorizationQueue extends Queue<ImageCategorizationJobData> {
+export class ImageCategorizationQueue extends Queue<Image> {
   public static readonly queueName = 'image-categorization-queue';
 
   private static instance: ImageCategorizationQueue | null = null;

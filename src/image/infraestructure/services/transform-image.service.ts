@@ -3,6 +3,7 @@ import path from 'path';
 import { TransformedImageRepository } from '../repositories/transformed-image.repository';
 import { hostOutputImagesDir, outputImagesDir } from '../../config';
 import { FilterSelectorService } from '../../domain/services/filter-selector.service';
+import { Image } from '@prisma/client';
 
 type FilterOption = {
   name: string;
@@ -20,22 +21,19 @@ export class TransformImageService {
   }
 
   async execute({
-    imagePath,
-    imageName,
+    image,
     watermarkText,
-    imageId,
   }: {
-    imagePath: string;
-    imageName: string;
+    image: Image;
     watermarkText: string;
-    imageId: number;
   }): Promise<void> {
-    const repositoryOutputFilePath = path.join(hostOutputImagesDir, 'transformed_images', imageName);
+    const { id, name, path: imagePath } = image;
+    const repositoryOutputFilePath = path.join(hostOutputImagesDir, 'transformed_images', name);
 
     try {
       const transformedImage = await this.transformedImageRepository.create({
         path: repositoryOutputFilePath,
-        imageId,
+        imageId: id,
       });
 
       if (!transformedImage) {
@@ -85,7 +83,7 @@ export class TransformImageService {
         transformedId: transformedImage.id,
       });
 
-      const storeOutputFilePath = path.join(outputImagesDir, 'transformed_images', imageName);
+      const storeOutputFilePath = path.join(outputImagesDir, 'transformed_images', name);
 
       await sharpImage.withMetadata().toFile(storeOutputFilePath);
     } catch (err) {

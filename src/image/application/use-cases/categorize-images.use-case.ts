@@ -15,13 +15,11 @@ export class CategorizeImagesUseCase {
     this.imageCategorizationQueue = ImageCategorizationQueue.getInstance()
   }
 
-  async execute(images: Image[]) {
-    for (const image of images) {
-      const imageId = image.id
-      const imageName = image.name
-      const imagePath = path.join(inputImagesDir, imageName);
-      await this.categorizeImage({ imagePath, imageId })
-    }
+  async execute(image: Image) {
+    const imageId = image.id
+    const imageName = image.name
+    const imagePath = path.join(inputImagesDir, imageName);
+    await this.categorizeImage({ imagePath, imageId })
   }
 
   private async categorizeImage({

@@ -3,11 +3,12 @@ import { TransformImageCommand } from '../../application/commands/transform-imag
 import { TransformImageHandler } from '../../application/handlers/transform-image.handler';
 import { TransformImageService } from '../services/transform-image.service';
 import { LogRepository } from '../repositories/log.repository';
-import { ImageTransformationJobData, ImageTransformationQueue } from '../queues/image-transformation.queue';
+import { ImageTransformationQueue } from '../queues/image-transformation.queue';
 import { CommandBus } from '../../../shared/command-bus/command-bus';
+import { Image } from '@prisma/client';
 
 type Job = {
-  data: ImageTransformationJobData;
+  data: Image;
 }
 
 // Setup command bus
@@ -25,13 +26,12 @@ commandBus.register('TransformImageCommand', transformImageHandler);
 const transformImageWorker = new Worker(
   ImageTransformationQueue.queueName,
   async (job: Job) => {
-    const { imagePath, watermarkText, imageId, imageName } = job.data;
+    const image = job.data;
 
+    // TODO: user input in endpoint
     const command = new TransformImageCommand(
-      imagePath,
-      imageName,
-      watermarkText,
-      imageId
+      image,
+      'Albert Montolio watermark',
     );
 
     await commandBus.execute(command);

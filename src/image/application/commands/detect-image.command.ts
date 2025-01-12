@@ -1,8 +1,7 @@
 import { Image } from '@prisma/client';
 
-export class TransformImageCommand {
+export class DetectImageCommand {
   constructor(
     public readonly image: Image,
-    public readonly watermarkText: string
   ) {}
 } 

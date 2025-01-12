@@ -1,3 +1,4 @@
+import { Image } from "@prisma/client";
 import { ImageRepository } from "../../infraestructure/repositories/image.repository"
 
 export class CreateImagesInDbUseCase {
@@ -6,8 +7,8 @@ export class CreateImagesInDbUseCase {
   constructor() {
     this.imageRepository = new ImageRepository()
   }
-  async execute(imageNames: string[]) {
-    const images = []; 
+  async execute(imageNames: string[]): Promise<Image[]> {
+    const images: Image[] = []; 
     for (const imageName of imageNames) {
       const image = await this.imageRepository.create(imageName)
       images.push(image)
