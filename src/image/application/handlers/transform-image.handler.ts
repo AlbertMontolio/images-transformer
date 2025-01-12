@@ -11,13 +11,21 @@ export class TransformImageHandler {
   async execute(command: TransformImageCommand): Promise<void> {
     const { image, watermarkText } = command;
 
-    await this.logRepository.create({ imageId: image.id, status: 'transformation-started' });
+    await this.logRepository.create({
+      imageId: image.id,
+      processName: 'transformation',
+      status: 'started'
+    });
 
     await this.transformImageService.execute({
       image,
       watermarkText,
     });
 
-    await this.logRepository.create({ imageId: image.id, status: 'transformation-finished' });
+    await this.logRepository.create({
+      imageId: image.id,
+      processName: 'transformation',
+      status: 'completed'
+    });
   }
 } 

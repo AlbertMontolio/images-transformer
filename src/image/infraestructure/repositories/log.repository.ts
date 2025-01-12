@@ -1,39 +1,28 @@
 import { prisma } from "../prisma/prisma-client";
 
+type ProcessName = 'object_detection' | 'transformation' | 'categorization';
+
 export class LogRepository {
   async create({
     imageId,
+    processName,
     status,
   }: {
     imageId: number;
-    status: string;
+    processName: ProcessName;
+    status: 'started' | 'completed' | 'error';
   }) {
     try {
-      await prisma.log.create({
+      return await prisma.log.create({
         data: {
           imageId,
+          processName,
           status,
         }
-      })
+      });
     } catch (err) {
-      console.log('### err:', err)
+      console.error('Error creating log:', err);
+      throw err;
     }
-  }
-
-  async findLogByImageIdAndStatus({
-    imageId,
-    status,
-  }: {
-    imageId: number;
-    status?: string;
-  }) {
-    const log = await prisma.log.findFirst({
-      where: {
-        imageId,
-        status,
-      }
-    })
-
-    return log;
   }
 }

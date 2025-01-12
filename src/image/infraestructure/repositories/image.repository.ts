@@ -22,15 +22,6 @@ export class ImageRepository {
         size: stats.size,
         width: metadata.width,
         height: metadata.height,
-        logs: {
-          create: {
-            status: 'created',
-          },
-        },
-      },
-      include: {
-        logs: true,
-        categorizations: true,
       },
     });
 

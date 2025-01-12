@@ -13,9 +13,19 @@ export class CategorizeImageHandler {
   async execute(command: CategorizeImageCommand): Promise<void> {
     const { image } = command;
 
-    await this.logRepository.create({ imageId: image.id, status: 'categorization-started' });
+    await this.logRepository.create({
+      imageId: image.id,
+      processName: 'categorization',
+      status: 'started'
+    });
 
     const predictions = await this.categorizeImageService.execute(image);
+
+    await this.logRepository.create({
+      imageId: image.id,
+      processName: 'categorization',
+      status: 'completed'
+    });
 
     const inputs: CreateCategorizationProp[] = predictions.map((prediction) => {
       return {
@@ -28,6 +38,5 @@ export class CategorizeImageHandler {
       imageId: image.id,
     })
 
-    await this.logRepository.create({ imageId: image.id, status: 'categorization-finished' });
   }
 } 

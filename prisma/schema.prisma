@@ -30,12 +30,19 @@ model Image {
 }
 
 model Log {
-  id         Int        @id @default(autoincrement()) // Primary key
-  createdAt  DateTime   @default(now()) // Log creation timestamp
-  status     String     // Status of the log (e.g., 'pending', 'completed', 'failed')
+  id                Int      @id @default(autoincrement())
+  
+  status            String   // 'started', 'completed', 'error'
+  processName       String   // 'object_detection', 'transformation', 'categorization'
 
-  imageId    Int        // Foreign key to the Image model
-  image      Image      @relation(fields: [imageId], references: [id]) // A log belongs to an image
+  createdAt         DateTime @default(now())
+  
+  imageId           Int
+  image             Image    @relation(fields: [imageId], references: [id])
+
+  @@index([imageId])
+  @@index([status])
+  @@index([processName])
 }
 
 model Categorization {

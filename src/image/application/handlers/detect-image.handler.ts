@@ -15,9 +15,20 @@ export class DetectImageHandler {
   async execute(command: DetectImageCommand): Promise<void> {
     const { image } = command;
 
-    await this.logRepository.create({ imageId: image.id, status: 'detection-started' });
+    await this.logRepository.create({
+      imageId: image.id,
+      processName: 'object_detection',
+      status: 'started'
+    });
 
     const predictions = await this.detectObjectsService.execute(image);
+
+    await this.logRepository.create({
+      imageId: image.id,
+      processName: 'object_detection',
+      status: 'completed'
+    });
+
     await this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions);
 
     for (const prediction of predictions) {
@@ -32,7 +43,5 @@ export class DetectImageHandler {
       }
       await this.detectedObjectRepository.create(detectedObject, image.id);
     }
-
-    await this.logRepository.create({ imageId: image.id, status: 'detection-finished' });
   }
 } 
