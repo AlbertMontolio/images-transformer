@@ -1,3 +1,7 @@
 node_modules/
 .env
 dist/
+coverage/
+coverage-final.json
+.nyc_output/
+notes.js
