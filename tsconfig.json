@@ -24,7 +24,11 @@
     "sourceMap": true,
     "strictBindCallApply": false,
     "strictNullChecks": false,
-    "target": "es2017"
+    "target": "es2017",
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ]
   },
   "ts-node": {
     "require": [

@@ -16,7 +16,18 @@ router.get('/', async (_req, res) => {
   }
 });
 
-
+/**
+ * @swagger
+ * /images/process:
+ *   post:
+ *     summary: Process images in the input directory
+ *     description: Processes all images in the input directory for categorization, transformation, and object detection
+ *     responses:
+ *       200:
+ *         description: Images processed successfully
+ *       500:
+ *         description: Server error during processing
+ */
 router.post('/process', async (_req, res) => {
   const processImagesUseCase = container.resolve(ProcessImagesUseCase);
   await processImagesUseCase.execute();
@@ -24,6 +35,29 @@ router.post('/process', async (_req, res) => {
   res.status(200).send();
 });
 
+/**
+ * @swagger
+ * /images/stats:
+ *   get:
+ *     summary: Get image processing statistics
+ *     description: Retrieves statistics about processed images including filters used and transformations
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalImages:
+ *                   type: number
+ *                 filterStats:
+ *                   type: object
+ *                 averageProcessingTime:
+ *                   type: number
+ *       500:
+ *         description: Server error while retrieving stats
+ */
 router.get('/stats', async (_req, res) => {
   const getStatsUseCase = container.resolve(GetStatsUseCase);
   const stats = await getStatsUseCase.execute();

@@ -44,6 +44,8 @@
     "redis": "^4.7.0",
     "reflect-metadata": "^0.2.2",
     "sharp": "^0.33.5",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "ts-node": "^10.9.2",
     "tsyringe": "^4.8.0",
     "typeorm": "^0.3.20",

@@ -11,6 +11,8 @@ import { ImageDetectionQueue } from './image/infraestructure/queues/image-detect
 import imagesRoutes from './image/infraestructure/routes/image.routes';
 import { container } from './shared/container';
 import { ImageRepository } from './image/infraestructure/repositories/image.repository';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './shared/swagger/swagger.config';
 
 dotenv.config();
 
@@ -37,6 +39,7 @@ app.use(express.json());
 
 app.use('/admin/queues', serverAdapter.getRouter());
 app.use('/images', imagesRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 app.get('/remove', async (_req, res) => {
     const imageRepository = container.resolve(ImageRepository);
