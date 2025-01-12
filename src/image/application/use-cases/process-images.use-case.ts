@@ -5,6 +5,7 @@ import { ImageCategorizationQueue } from "../../infraestructure/queues/image-cat
 import { ImageTransformationQueue } from "../../infraestructure/queues/image-transformation.queue";
 import { ImageDetectionQueue } from "../../infraestructure/queues/image-detection.queue";
 import { INJECTION_TOKENS } from '../../../shared/injection-tokens';
+import { inputImagesDir } from '../../config';
 
 @injectable()
 export class ProcessImagesUseCase {
@@ -26,7 +27,8 @@ export class ProcessImagesUseCase {
   ) {}
 
   async execute() {
-    const imagesFilesNames = await this.readImagesNamesUseCase.execute()
+    const inputPath = inputImagesDir
+    const imagesFilesNames = await this.readImagesNamesUseCase.execute(inputPath)
 
     if (!imagesFilesNames) {
       return

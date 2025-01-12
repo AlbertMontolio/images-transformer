@@ -23,6 +23,7 @@ export class FilterSelectorService {
     return this.filters[randomIndex]();
   }
 
+  // ### TODO: use enum
   private greyScale(): FilterOption {
     return {
       name: 'greyscale',

@@ -16,7 +16,7 @@ describe('ReadImagesNamesUseCase', () => {
       (fs.pathExists as jest.Mock).mockResolvedValueOnce(false);
 
       // Act
-      const result = await readImagesNamesUseCase.execute();
+      const result = await readImagesNamesUseCase.execute('foo-path');
 
       // Assert
       expect(fs.pathExists).toHaveBeenCalledWith(expect.any(String));
@@ -32,7 +32,7 @@ describe('ReadImagesNamesUseCase', () => {
       (fs.readdir as unknown as jest.Mock).mockResolvedValueOnce(mockFiles);
 
       // Act
-      const result = await readImagesNamesUseCase.execute();
+      const result = await readImagesNamesUseCase.execute('foo-path');
 
       // Assert
       expect(fs.pathExists).toHaveBeenCalledWith(expect.any(String));
@@ -47,7 +47,7 @@ describe('ReadImagesNamesUseCase', () => {
       (fs.readdir as unknown as jest.Mock).mockResolvedValueOnce(mockFiles);
 
       // Act
-      const result = await readImagesNamesUseCase.execute();
+      const result = await readImagesNamesUseCase.execute('foo-path');
 
       // Assert
       expect(fs.pathExists).toHaveBeenCalledWith(expect.any(String));

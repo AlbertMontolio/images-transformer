@@ -10,7 +10,7 @@ export class SaveObjectPredictionsIntoImageUseCase {
     const imagePath = path.join(inputImagesDir, image.name);
 
     console.log('### predictions', predictions)
-    if (!predictions) {
+    if (!predictions || predictions.length === 0) {
       return;
     }
 

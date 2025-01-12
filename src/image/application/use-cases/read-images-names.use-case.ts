@@ -1,6 +1,5 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { inputImagesDir } from '../../config';
 import dotenv from 'dotenv';
 import { injectable } from 'tsyringe';
 
@@ -10,8 +9,7 @@ const IMAGE_EXTENSIONS: string[] = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.h
 
 @injectable()
 export class ReadImagesNamesUseCase {
-  async execute() {
-    const inputPath = inputImagesDir
+  async execute(inputPath: string) {
     const exists: boolean = await this.folderExists(inputPath);
 
     if (!exists) {

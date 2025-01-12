@@ -12,6 +12,8 @@ import { ImageDetectionQueue } from '../image/infraestructure/queues/image-detec
 import { INJECTION_TOKENS } from './injection-tokens';
 import { ImageRepository } from '../image/infraestructure/repositories/image.repository';
 import { GetStatsUseCase } from '../image/application/use-cases/get-stats.use-case';
+import { FilterStatsService } from '../image/application/services/filter-stats.service';
+import { TotalNumberImagesPerPathService } from '../image/application/services/total-number-images-per-path.service';
 
 // Register services
 container.registerSingleton(TransformImageService);
@@ -37,5 +39,11 @@ container.register(INJECTION_TOKENS.IMAGE_DETECTION_QUEUE, {
 
 // Register repositories
 container.registerSingleton(ImageRepository);
+
+container.registerSingleton(
+  'FilterStatsService',
+  FilterStatsService
+);
+container.registerSingleton('TotalNumberImagesPerPathService', TotalNumberImagesPerPathService);
 
 export { container }; 
