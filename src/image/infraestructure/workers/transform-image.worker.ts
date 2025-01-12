@@ -1,34 +1,43 @@
 import { Worker } from 'bullmq';
+import { TransformImageCommand } from '../../application/commands/transform-image.command';
+import { TransformImageHandler } from '../../application/handlers/transform-image.handler';
 import { TransformImageService } from '../services/transform-image.service';
 import { LogRepository } from '../repositories/log.repository';
 import { ImageTransformationJobData, ImageTransformationQueue } from '../queues/image-transformation.queue';
+import { CommandBus } from '../../../shared/command-bus/command-bus';
 
 type Job = {
   data: ImageTransformationJobData;
 }
 
-const transformImageService = new TransformImageService()
-const logRepository = new LogRepository()
+// Setup command bus
+const commandBus = new CommandBus();
+const transformImageHandler = new TransformImageHandler(
+  new TransformImageService(),
+  new LogRepository()
+);
+
+// Register handler
+console.log('Registering TransformImageCommand handler...');
+// TODO: use symbol instead of string
+commandBus.register('TransformImageCommand', transformImageHandler);
 
 const transformImageWorker = new Worker(
   ImageTransformationQueue.queueName,
   async (job: Job) => {
-    // ### TODO: remove name?
-    const { imagePath, watermarkText, imageId, imageName } = job.data
+    const { imagePath, watermarkText, imageId, imageName } = job.data;
 
-    await logRepository.create({ imageId, status: 'transformation-started' })
-
-    await transformImageService.execute({
+    const command = new TransformImageCommand(
       imagePath,
       imageName,
       watermarkText,
-      imageId,
-    })
+      imageId
+    );
 
-    logRepository.create({ imageId, status: 'transformation-finished' })
+    await commandBus.execute(command);
   },
   { connection: ImageTransformationQueue.getConnection() }
-)
+);
 
 // Log worker status
 transformImageWorker.on('completed', (job) => {
