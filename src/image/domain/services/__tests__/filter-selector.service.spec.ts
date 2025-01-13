@@ -1,7 +1,19 @@
-import { FilterSelectorService, FilterOption } from '../filter-selector.service';
+import { FilterSelectorService } from '../filter-selector.service';
 import { Sharp } from 'sharp';
 
 jest.mock('sharp');
+
+type PrivateFilterSelectorService = {
+  greyScale(): { name: string; applyFilter: (sharp: Sharp) => void };
+  blur(): { name: string; applyFilter: (sharp: Sharp) => void; value: number };
+  sharpen(): { name: string; applyFilter: (sharp: Sharp) => void; value: number };
+  tint(): { 
+    name: string; 
+    applyFilter: (sharp: Sharp) => void; 
+    value: { r: number; g: number; b: number } 
+  };
+  randomInt(min: number, max: number): number;
+}
 
 describe('FilterSelectorService', () => {
   let service: FilterSelectorService;
@@ -25,7 +37,7 @@ describe('FilterSelectorService', () => {
     const mockSharpInstance = { greyscale: jest.fn().mockReturnThis() } as unknown as Sharp;
 
     // Act
-    const filter = (service as any).greyScale();
+    const filter = (service as unknown as PrivateFilterSelectorService).greyScale();
     filter.applyFilter(mockSharpInstance);
 
     // Assert
@@ -38,7 +50,7 @@ describe('FilterSelectorService', () => {
     const mockSharpInstance = { blur: jest.fn().mockReturnThis() } as unknown as Sharp;
 
     // Act
-    const filter = (service as any).blur();
+    const filter = (service as unknown as PrivateFilterSelectorService).blur();
     filter.applyFilter(mockSharpInstance);
 
     // Assert
@@ -52,7 +64,7 @@ describe('FilterSelectorService', () => {
     const mockSharpInstance = { sharpen: jest.fn().mockReturnThis() } as unknown as Sharp;
 
     // Act
-    const filter = (service as any).sharpen();
+    const filter = (service as unknown as PrivateFilterSelectorService).sharpen();
     filter.applyFilter(mockSharpInstance);
 
     // Assert
@@ -66,7 +78,7 @@ describe('FilterSelectorService', () => {
     const mockSharpInstance = { tint: jest.fn().mockReturnThis() } as unknown as Sharp;
 
     // Act
-    const filter = (service as any).tint();
+    const filter = (service as unknown as PrivateFilterSelectorService).tint();
     filter.applyFilter(mockSharpInstance);
 
     // Assert
@@ -79,7 +91,7 @@ describe('FilterSelectorService', () => {
 
   it('should generate random integers within the range', () => {
     // Act
-    const randomValue = (service as any).randomInt(0, 10);
+    const randomValue = (service as unknown as PrivateFilterSelectorService).randomInt(0, 10);
 
     // Assert
     expect(randomValue).toBeGreaterThanOrEqual(0);

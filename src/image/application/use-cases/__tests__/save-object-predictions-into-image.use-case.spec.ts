@@ -83,7 +83,7 @@ describe('SaveObjectPredictionsIntoImageUseCase', () => {
       });
 
       // Act
-      await saveObjectPredictionsIntoImageUseCase.execute(image, undefined as any);
+      await saveObjectPredictionsIntoImageUseCase.execute(image, undefined as DetectedObjectPrediction[] | undefined);
 
       // Assert
       expect(sharp).not.toHaveBeenCalled();
