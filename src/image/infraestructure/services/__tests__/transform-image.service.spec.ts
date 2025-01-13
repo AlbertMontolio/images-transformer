@@ -2,8 +2,7 @@ import sharp from 'sharp';
 import { TransformImageService } from '../transform-image.service';
 import { TransformedImageRepository } from '../../repositories/transformed-image.repository';
 import { FilterSelectorService } from '../../../domain/services/filter-selector.service';
-import path from 'path';
-import { outputImagesDir } from '../../../config';
+import { Sharp } from 'sharp';
 
 type FilterOption = {
   name: string;
@@ -65,7 +64,7 @@ describe('TransformImageService', () => {
 
   it('should apply transformations and return the sharp instance', async () => {
     // Arrange
-    const mockSharpInstance = {
+    const mockSharpInstance: Partial<Sharp> = {
       resize: jest.fn().mockReturnThis(),
       metadata: jest.fn().mockResolvedValue({ width: 2000, height: 1000 }),
       composite: jest.fn().mockReturnThis(),
@@ -78,7 +77,9 @@ describe('TransformImageService', () => {
       value: 2,
     };
 
-    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => mockSharpInstance as any);
+    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
+      () => mockSharpInstance as Sharp
+    );
     mockRepository.create.mockResolvedValueOnce(transformedImage);
     mockRepository.update.mockResolvedValueOnce(undefined);
     mockFilterSelector.getRandomFilter.mockReturnValueOnce(mockFilter);

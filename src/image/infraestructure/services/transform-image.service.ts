@@ -5,12 +5,6 @@ import { hostOutputImagesDir, inputImagesDir } from '../../config';
 import { FilterSelectorService } from '../../domain/services/filter-selector.service';
 import { Image } from '@prisma/client';
 
-type FilterOption = {
-  name: string;
-  applyFilter: (sharp: Sharp) => void;
-  value?: unknown;
-};
-
 export class TransformImageService {
   transformedImageRepository: TransformedImageRepository;
   filterSelectorService: FilterSelectorService;

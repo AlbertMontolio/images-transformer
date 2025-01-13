@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 import * as mobilenet from '@tensorflow-models/mobilenet';
-import sharp from 'sharp';
+import sharp, { Sharp } from 'sharp';
 import { CategorizeImageService } from '../categorize-image.service';
 
 jest.mock('@tensorflow/tfjs-node');
@@ -45,9 +45,13 @@ describe('CategorizeImageService', () => {
       { className: 'dog', probability: 0.8 },
     ];
 
-    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
+    const mockSharpInstance: Partial<Sharp> = {
       toBuffer: jest.fn().mockResolvedValue(mockImageBuffer),
-    }) as any);
+    };
+
+    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
+      () => mockSharpInstance as Sharp
+    );
 
     const mockTensor = { dispose: jest.fn() } as unknown as tf.Tensor3D;
     (tf.node.decodeImage as jest.Mock).mockReturnValue(mockTensor);
@@ -67,12 +71,15 @@ describe('CategorizeImageService', () => {
   it('should throw an error if classification fails', async () => {
     // Arrange
     const mockImageBuffer = Buffer.from('mock-image');
-    const mockTensor = { dispose: jest.fn() } as unknown as tf.Tensor3D;
-    
-    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
+    const mockSharpInstance: Partial<Sharp> = {
       toBuffer: jest.fn().mockResolvedValue(mockImageBuffer),
-    }) as any);
+    };
     
+    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
+      () => mockSharpInstance as Sharp
+    );
+    
+    const mockTensor = { dispose: jest.fn() } as unknown as tf.Tensor3D;
     (tf.node.decodeImage as jest.Mock).mockReturnValue(mockTensor);
     mockModel.classify.mockRejectedValue(new Error('Classification failed'));
 
@@ -84,12 +91,15 @@ describe('CategorizeImageService', () => {
   it('should dispose the tensor even if an error occurs', async () => {
     // Arrange
     const mockImageBuffer = Buffer.from('mock-image');
-    const mockTensor = { dispose: jest.fn() } as unknown as tf.Tensor3D;
-    
-    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
+    const mockSharpInstance: Partial<Sharp> = {
       toBuffer: jest.fn().mockResolvedValue(mockImageBuffer),
-    }) as any);
+    };
     
+    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
+      () => mockSharpInstance as Sharp
+    );
+    
+    const mockTensor = { dispose: jest.fn() } as unknown as tf.Tensor3D;
     (tf.node.decodeImage as jest.Mock).mockReturnValue(mockTensor);
     mockModel.classify.mockRejectedValue(new Error('Classification failed'));
 

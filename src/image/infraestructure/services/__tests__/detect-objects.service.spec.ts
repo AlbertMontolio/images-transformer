@@ -1,6 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import sharp from 'sharp';
+import sharp, { Sharp } from 'sharp';
 import { DetectObjectsService } from '../detect-objects.service';
 import { createImage } from '../../../application/use-cases/__tests__/__fixtures__/image.fixture';
 import path from 'path';
@@ -40,6 +40,16 @@ describe('DetectObjectsService', () => {
     });
     
     const mockResizedImageBuffer = Buffer.from('mock-image-buffer');
+    const mockSharpInstance: Partial<Sharp> = {
+      resize: jest.fn().mockReturnThis(),
+      toFormat: jest.fn().mockReturnThis(),
+      toBuffer: jest.fn().mockResolvedValue(mockResizedImageBuffer),
+    };
+
+    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
+      () => mockSharpInstance as Sharp
+    );
+
     const mockInputTensor = { 
       dispose: jest.fn(),
       toInt: jest.fn().mockReturnThis()
@@ -50,12 +60,6 @@ describe('DetectObjectsService', () => {
       dispose: jest.fn(),
       toInt: jest.fn().mockReturnValue(mockInputTensor)
     } as unknown as tf.Tensor3D;
-
-    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
-      resize: jest.fn().mockReturnThis(),
-      toFormat: jest.fn().mockReturnThis(),
-      toBuffer: jest.fn().mockResolvedValue(mockResizedImageBuffer),
-    }) as any);
 
     (tf.node.decodeImage as jest.Mock).mockReturnValue(mockImageTensor);
 
@@ -85,16 +89,20 @@ describe('DetectObjectsService', () => {
       size: 12345 
     });
     
+    const mockSharpInstance: Partial<Sharp> = {
+      resize: jest.fn().mockReturnThis(),
+      toFormat: jest.fn().mockReturnThis(),
+      toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-buffer')),
+    };
+
+    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
+      () => mockSharpInstance as Sharp
+    );
+
     const mockTensor = { 
       dispose: jest.fn(),
       toInt: jest.fn()
     } as unknown as tf.Tensor3D;
-
-    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
-      resize: jest.fn().mockReturnThis(),
-      toFormat: jest.fn().mockReturnThis(),
-      toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-buffer')),
-    }) as any);
 
     (tf.node.decodeImage as jest.Mock).mockReturnValue(mockTensor);
     mockModel.detect.mockRejectedValue(new Error('Detection failed'));
@@ -114,11 +122,15 @@ describe('DetectObjectsService', () => {
       size: 12345 
     });
 
-    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(() => ({
+    const mockSharpInstance: Partial<Sharp> = {
       resize: jest.fn().mockReturnThis(),
       toFormat: jest.fn().mockReturnThis(),
       toBuffer: jest.fn().mockRejectedValue(new Error('Sharp error')),
-    }) as any);
+    };
+
+    (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
+      () => mockSharpInstance as Sharp
+    );
 
     // Act & Assert
     await expect(service.execute(mockImage)).rejects.toThrow('Object detection failed');
