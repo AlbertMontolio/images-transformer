@@ -121,3 +121,9 @@ swagger documentation could be extended
 
 ### Webhook
 webhook could be added to notify the client when the image is processed.
+
+### Docker
+docker-compose could be optimized: trying to find an image small enough but that supports tensorflow.js. More replicas could be added to improve performance.
+
+### Retry policies
+retry policies could be added to the queues to improve the robustness of the system and when error in saving happens
