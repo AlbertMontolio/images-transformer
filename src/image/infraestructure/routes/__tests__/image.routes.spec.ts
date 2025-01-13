@@ -28,7 +28,6 @@ describe('Image Routes', () => {
         create: jest.fn(),
         findOne: jest.fn(),
         getStats: jest.fn(),
-        deleteAllImagesAndRelations: jest.fn()
       } as unknown as ImageRepository;
       
       container.registerInstance(ImageRepository, mockImageRepository);

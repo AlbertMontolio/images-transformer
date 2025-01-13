@@ -9,8 +9,6 @@ import { ImageCategorizationQueue } from './image/infraestructure/queues/image-c
 import { ImageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
 import { ImageDetectionQueue } from './image/infraestructure/queues/image-detection.queue';
 import imagesRoutes from './image/infraestructure/routes/image.routes';
-import { container } from './shared/container';
-import { ImageRepository } from './image/infraestructure/repositories/image.repository';
 import swaggerUi from 'swagger-ui-express';
 import { specs } from './shared/swagger/swagger.config';
 
@@ -40,12 +38,6 @@ app.use(express.json());
 app.use('/admin/queues', serverAdapter.getRouter());
 app.use('/images', imagesRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-
-app.get('/remove', async (_req, res) => {
-    const imageRepository = container.resolve(ImageRepository);
-    await imageRepository.deleteAllImagesAndRelations();
-    res.send();
-});
 
 export const getCorsOrigin = (): string => process.env.CORS_ORIGIN || '*';
 
