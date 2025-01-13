@@ -11,8 +11,9 @@ router.get('/', async (_req, res) => {
     const imageRepository = container.resolve(ImageRepository);
     const images = await imageRepository.findAll();
     res.send(images);
-  } catch (error) {
-    res.status(500).send({ error: 'Failed to fetch images' });
+  } catch (err) {
+    console.error('Error fetching images:', err);
+    res.status(500).json({ error: 'Failed to fetch images' });
   }
 });
 
@@ -70,7 +71,7 @@ router.get('/:id', async (req, res) => {
   const imageId = parseInt(idParam, 10);
 
   if (isNaN(imageId)) {
-    res.status(400).send({ error: 'ID must be a valid number' });
+    res.status(400).json({ error: 'ID must be a valid number' });
     return;
   }
 
@@ -78,12 +79,13 @@ router.get('/:id', async (req, res) => {
     const imageRepository = container.resolve(ImageRepository);
     const image = await imageRepository.findOne(imageId);
     if (!image) {
-      res.status(404).send({ error: 'Image not found' });
+      res.status(404).json({ error: 'Image not found' });
       return;
     }
     res.send(image);
-  } catch (_error) {
-    res.status(500).json({ message: 'Error processing image' });
+  } catch (err) {
+    console.error('Error fetching image:', err);
+    res.status(500).json({ error: 'Error processing image' });
   }
 });
 
