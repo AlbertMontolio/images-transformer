@@ -32,6 +32,8 @@ A Node.js/Express API that processes images stored in an input path and outputs 
 - **Dependency Injection**: TSyringe
 - **Type Safety**: TypeScript
 
+> Note: As framework, Express was chosen over Nestjs, since it was a task and not a real project, without authentication, authorization, deployment, real monitoring etc. If project would grow, Nestjs would be an option in order to leverage the benefits of the framework like dependency injection, better error handling, better monitoring, better testing etc.
+
 ## Architecture
 
 ### Clean Architecture Implementation
