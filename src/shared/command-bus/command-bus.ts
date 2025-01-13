@@ -1,9 +1,9 @@
-export interface ICommandHandler<T> {
-  execute(command: T): Promise<any>;
+export interface ICommandHandler<TCommand> {
+  execute(command: TCommand): Promise<unknown>;
 }
 
 export class CommandBus {
-  private handlers = new Map<string, ICommandHandler<any>>();
+  private handlers: Map<string, ICommandHandler<unknown>> = new Map();
 
   register<T>(commandName: string, handler: ICommandHandler<T>) {
     this.handlers.set(commandName, handler);

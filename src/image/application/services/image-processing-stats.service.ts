@@ -15,7 +15,7 @@ export class ImageProcessingStatsService {
     const processNames: ProcessName[] = ['transformation', 'categorization', 'object_detection', 'transformation_storage'];
     const images = await this.imageRepository.findAll();
 
-    const processNamesMap = processNames.reduce((acc, name, index) => {
+    const processNamesMap = processNames.reduce((acc, name) => {
       acc[name] = 0;
       return acc;
     }, {});

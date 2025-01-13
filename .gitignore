@@ -5,3 +5,5 @@ coverage/
 coverage-final.json
 .nyc_output/
 notes.js
+# ESLint
+.eslintcache

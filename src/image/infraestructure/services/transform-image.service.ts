@@ -1,7 +1,7 @@
 import sharp, { Sharp } from 'sharp';
 import path from 'path';
 import { TransformedImageRepository } from '../repositories/transformed-image.repository';
-import { hostOutputImagesDir, inputImagesDir, outputImagesDir } from '../../config';
+import { hostOutputImagesDir, inputImagesDir } from '../../config';
 import { FilterSelectorService } from '../../domain/services/filter-selector.service';
 import { Image } from '@prisma/client';
 

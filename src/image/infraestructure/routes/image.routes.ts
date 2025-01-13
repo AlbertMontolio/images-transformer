@@ -82,8 +82,8 @@ router.get('/:id', async (req, res) => {
       return;
     }
     res.send(image);
-  } catch (error) {
-    res.status(500).send({ error: 'Failed to fetch image' });
+  } catch (_error) {
+    res.status(500).json({ message: 'Error processing image' });
   }
 });
 

@@ -13,8 +13,9 @@
     "test:cov": "jest --coverage",
     "test:clear": "jest --clearCache",
     "postinstall": "npm rebuild @tensorflow/tfjs-node --build-from-source",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "eslint \"src/**/*.ts\"",
+    "lint:fix": "eslint \"src/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "keywords": [],
   "author": "",
