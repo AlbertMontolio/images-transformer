@@ -112,3 +112,12 @@ better stats can be achieved, after understanding what business needs etc.
 
 ### Performance
 better performance can be achieved, after expierincing with big amounts of images and finding bottlenecks.
+
+### TODOs
+the todos that are marked within the codebase could be added into jira tickets.
+
+### Swagger
+swagger documentation could be extended
+
+### Webhook
+webhook could be added to notify the client when the image is processed.
