@@ -18,6 +18,7 @@ describe('TransformImageService', () => {
   let service: TransformImageService;
   let mockRepository: jest.Mocked<TransformedImageRepository>;
   let mockFilterSelector: jest.Mocked<FilterSelectorService>;
+  const projectId = 1;
 
   const transformedImage = {
     id: 1,
@@ -34,6 +35,7 @@ describe('TransformImageService', () => {
   };
 
   const mockImage = {
+    projectId: 1,
     name: 'test.jpg',
     id: 1,
     createdAt: new Date(),

@@ -3,7 +3,7 @@ import { LogRepository } from '../../infraestructure/repositories/log.repository
 import { DetectImageCommand } from '../commands/detect-image.command';
 import { SaveObjectPredictionsIntoImageUseCase } from '../use-cases/save-object-predictions-into-image.use-case';
 import { DetectedObjectRepository } from 'src/image/infraestructure/repositories/detected-object.repository';
-import { ProcessStatus } from '@prisma/client';
+import { Status } from '@prisma/client';
 
 export class DetectImageHandler {
   constructor(
@@ -19,7 +19,7 @@ export class DetectImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'object_detection',
-      status: ProcessStatus.STARTED
+      status: Status.STARTED
     });
 
     const predictions = await this.detectObjectsService.execute(image);
@@ -27,7 +27,7 @@ export class DetectImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'object_detection',
-      status: ProcessStatus.COMPLETED
+      status: Status.COMPLETED
     });
 
     await this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions);

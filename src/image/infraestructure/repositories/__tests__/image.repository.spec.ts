@@ -28,7 +28,7 @@ describe('ImageRepository', () => {
   const imageName = 'test-image.jpg';
   const hostImagePath = path.join(hostInputImagesDir, imageName);
   const imagePath = path.join(inputImagesDir, imageName);
-
+  const projectId = 1;
   beforeEach(() => {
     repository = new ImageRepository();
     jest.clearAllMocks();
@@ -57,7 +57,7 @@ describe('ImageRepository', () => {
       (prisma.image.upsert as jest.Mock).mockResolvedValue(mockImageWithLogs);
 
       // Act
-      const result = await repository.create(imageName);
+      const result = await repository.create(imageName, projectId);
 
       // Assert
       expect(fs.stat).toHaveBeenCalledWith(imagePath);

@@ -1,5 +1,5 @@
 import { prisma } from "../prisma/prisma-client";
-import { ProcessStatus } from "@prisma/client";
+import { Status } from "@prisma/client";
 
 export class LogRepository {
   async create({
@@ -9,7 +9,7 @@ export class LogRepository {
   }: {
     imageId: number;
     processName: string;
-    status: ProcessStatus;
+    status: Status;
   }) {
     console.log(`log> imageId:${imageId} \t processName: ${processName} \t status: ${status}`)
     try {
@@ -30,7 +30,7 @@ export class LogRepository {
     return await this.create({
       imageId,
       processName,
-      status: ProcessStatus.STARTED
+      status: Status.STARTED
     });
   }
 
@@ -38,7 +38,7 @@ export class LogRepository {
     return await this.create({
       imageId,
       processName,
-      status: ProcessStatus.COMPLETED
+      status: Status.COMPLETED
     });
   }
 
@@ -49,7 +49,7 @@ export class LogRepository {
   }: {
     imageId: number;
     processName: string;
-    status: ProcessStatus;
+    status: Status;
   }) {
     return await prisma.log.findUnique({
       where: {

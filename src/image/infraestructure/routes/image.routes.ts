@@ -3,6 +3,7 @@ import { container } from '../../../shared/container';
 import { ProcessImagesUseCase } from '../../application/use-cases/process-images.use-case';
 import { ImageRepository } from '../repositories/image.repository';
 import { GetStatsUseCase } from '../../application/use-cases/get-stats.use-case';
+import { ProjectRepository } from '../repositories/project.repository';
 
 const router = express.Router();
 
@@ -39,8 +40,12 @@ router.get('/', async (_req, res) => {
  *         description: Server error during processing
  */
 router.post('/process', async (_req, res) => {
+  const projectRepository = container.resolve(ProjectRepository);
+  const project = await projectRepository.create({
+    name: 'iphone personal pictures',
+  });
   const processImagesUseCase = container.resolve(ProcessImagesUseCase);
-  await processImagesUseCase.execute();
+  await processImagesUseCase.execute(project.id);
 
   res.status(200).send();
 });
@@ -78,6 +83,7 @@ router.get('/stats', async (_req, res) => {
       error: 'Failed to fetch stats',
       details: process.env.NODE_ENV === 'development' ? err : undefined
     };
+    console.error('Error fetching stats:', err);
     res.status(500).json(response);
   }
 });

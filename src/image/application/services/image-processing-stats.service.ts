@@ -1,7 +1,7 @@
 import { LogRepository } from '../../infraestructure/repositories/log.repository';
 import { ImageRepository } from '../../infraestructure/repositories/image.repository';
 import { injectable } from 'tsyringe';
-import { ProcessStatus } from '@prisma/client';
+import { Status } from '@prisma/client';
 
 
 @injectable()
@@ -40,12 +40,12 @@ export class ImageProcessingStatsService {
       this.logRepository.findByImageIdAndStatusAndProcessName({
         imageId,
         processName,
-        status: ProcessStatus.STARTED,
+        status: Status.STARTED,
       }),
       this.logRepository.findByImageIdAndStatusAndProcessName({
         imageId,
         processName,
-        status: ProcessStatus.COMPLETED,
+        status: Status.COMPLETED,
       }),
     ]);
 

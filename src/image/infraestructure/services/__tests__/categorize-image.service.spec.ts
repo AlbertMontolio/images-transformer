@@ -10,8 +10,10 @@ jest.mock('sharp');
 describe('CategorizeImageService', () => {
   let service: CategorizeImageService;
   let mockModel: jest.Mocked<mobilenet.MobileNet>;
+  const projectId = 1;
   
   const image = {
+    projectId,
     name: 'test.jpg',
     id: 1,
     createdAt: new Date(),

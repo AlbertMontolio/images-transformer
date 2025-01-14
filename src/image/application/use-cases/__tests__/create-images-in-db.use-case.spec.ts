@@ -7,6 +7,7 @@ jest.mock('../../../infraestructure/repositories/image.repository');
 describe('CreateImagesInDbUseCase', () => {
   let useCase: CreateImagesInDbUseCase;
   let mockImageRepository: jest.Mocked<ImageRepository>;
+  const projectId = 1;
 
   beforeEach(() => {
     mockImageRepository = {
@@ -22,8 +23,10 @@ describe('CreateImagesInDbUseCase', () => {
     it('should create images one by one', async () => {
       // Arrange
       const imageNames = ['image1.jpg', 'image2.jpg'];
+      // TODO: use fixtures
       const mockImages = [
         {
+          projectId,
           id: 1,
           name: 'image1.jpg',
           logs: [],
@@ -35,6 +38,7 @@ describe('CreateImagesInDbUseCase', () => {
           height: 100,
         },
         {
+          projectId,
           id: 2,
           name: 'image2.jpg',
           logs: [],
@@ -51,7 +55,7 @@ describe('CreateImagesInDbUseCase', () => {
       );
 
       // Act
-      const result = await useCase.execute(imageNames);
+      const result = await useCase.execute(imageNames, projectId);
 
       // Assert
       expect(result).toEqual(mockImages);
@@ -67,7 +71,7 @@ describe('CreateImagesInDbUseCase', () => {
       const fileNames = ['image1.jpg', 'image2.jpg'];
 
       // Act
-      await useCase.executeMany(fileNames);
+      await useCase.executeMany(fileNames, projectId);
 
       // Assert
       expect(mockImageRepository.createMany).toHaveBeenCalledWith(fileNames);

@@ -54,6 +54,7 @@ export class TransformImageService {
       filter.applyFilter(sharpImage);
       console.log(`filter applied: ${filter.name}. Value: ${JSON.stringify(filter.value)}`);
 
+      // ### remove it to handler. service should do only one thing
       await this.transformedImageRepository.update({
         input: {
           filterType: filter.name,

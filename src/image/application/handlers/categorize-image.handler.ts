@@ -2,7 +2,7 @@ import { LogRepository } from '../../infraestructure/repositories/log.repository
 import { CategorizeImageService } from 'src/image/infraestructure/services/categorize-image.service';
 import { CategorizeImageCommand } from '../commands/categorize-image.command';
 import { CategorizationRepository, CreateCategorizationProp } from 'src/image/infraestructure/repositories/categorization.repository';
-import { ProcessStatus } from '@prisma/client';
+import { Status } from '@prisma/client';
 
 export class CategorizeImageHandler {
   constructor(
@@ -17,15 +17,16 @@ export class CategorizeImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'categorization',
-      status: ProcessStatus.STARTED
+      status: Status.STARTED
     });
 
+    // TODO: add error handling
     const predictions = await this.categorizeImageService.execute(image);
 
     await this.logRepository.create({
       imageId: image.id,
       processName: 'categorization',
-      status: ProcessStatus.COMPLETED
+      status: Status.COMPLETED
     });
 
     const inputs: CreateCategorizationProp[] = predictions.map((prediction) => {

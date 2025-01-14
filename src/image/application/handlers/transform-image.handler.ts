@@ -1,58 +1,33 @@
+import { injectable, inject } from 'tsyringe';
+import { Sharp } from 'sharp';
 import { TransformImageCommand } from '../commands/transform-image.command';
 import { TransformImageService } from '../../infraestructure/services/transform-image.service';
 import { LogRepository } from '../../infraestructure/repositories/log.repository';
-import { SaveImageInFolderService } from 'src/image/infraestructure/services/save-image-in-folder.service';
-import { Sharp } from 'sharp';
-import { ProcessStatus } from '@prisma/client';
 
+// @injectable()
 export class TransformImageHandler {
-  private static readonly BATCH_SIZE = 10;
-  private batch: { image: Sharp; filename: string }[] = [];
-
   constructor(
     private readonly transformImageService: TransformImageService,
-    private readonly logRepository: LogRepository,
-    private readonly saveImageInFolderService: SaveImageInFolderService
+    private readonly logRepository: LogRepository
   ) {}
 
-  async execute(command: TransformImageCommand): Promise<void> {
+  async execute(command: TransformImageCommand): Promise<Sharp> {
     const { image, watermarkText } = command;
 
-    await this.logRepository.createStartedProcessLog(image.id, 'transformation');
+    try {
+      await this.logRepository.createStartedProcessLog(image.id, 'transformation');
 
-    const sharpImage = await this.transformImageService.execute({
-      image,
-      watermarkText,
-    });
-    await this.logRepository.createCompletedProcessLog(image.id, 'transformation');
-
-    this.batch.push({ image: sharpImage, filename: image.name });
-
-    if (this.batch.length >= TransformImageHandler.BATCH_SIZE) {
-      await this.logRepository.create({
-        imageId: image.id,
-        processName: 'transformation_storage',
-        status: ProcessStatus.STARTED
+      const transformedImage = await this.transformImageService.execute({
+        image,
+        watermarkText,
       });
 
-      await this.saveImageInFolderService.executeMany([...this.batch]);
-
-      await this.logRepository.create({
-        imageId: image.id,
-        processName: 'transformation_storage',
-        status: ProcessStatus.COMPLETED
-      });
-      console.log('');
-
-      this.batch = []; // Clear the batch
-    }
-  }
-
-  // Method to flush remaining images
-  async flushBatch(): Promise<void> {
-    if (this.batch.length > 0) {
-      await this.saveImageInFolderService.executeMany([...this.batch]);
-      this.batch = [];
+      await this.logRepository.createCompletedProcessLog(image.id, 'transformation');
+      console.log('')
+      
+      return transformedImage;
+    } catch (error) {
+      console.error('Error transforming image:', error);
     }
   }
 } 

@@ -21,7 +21,7 @@ serverAdapter.setBasePath('/admin/queues');
 // Initialize queues in a more maintainable way
 const queues = {
   categorization: ImageCategorizationQueue.getInstance(),
-  transformation: ImageTransformationQueue.getInstance(),
+  transformation: ImageTransformationQueue.getQueue(),
   detection: ImageDetectionQueue.getInstance(),
 } as const;
 

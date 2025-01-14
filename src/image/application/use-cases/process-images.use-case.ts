@@ -19,6 +19,7 @@ export class ProcessImagesUseCase {
     @inject(INJECTION_TOKENS.IMAGE_CATEGORIZATION_QUEUE)
     private readonly imageCategorizationQueue: ImageCategorizationQueue,
     @inject(INJECTION_TOKENS.IMAGE_TRANSFORMATION_QUEUE)
+    // ### TODO: i think it's not necessary to inject in process images usecase
     private readonly imageTransformationQueue: ImageTransformationQueue,
     @inject(INJECTION_TOKENS.IMAGE_DETECTION_QUEUE)
     private readonly imageDetectionQueue: ImageDetectionQueue
@@ -32,7 +33,7 @@ export class ProcessImagesUseCase {
     return batches;
   }
 
-  async execute() {
+  async execute(projectId: number) {
     const inputPath = inputImagesDir
     const imagesFilesNames = await this.readImagesNamesUseCase.execute(inputPath)
 
@@ -43,7 +44,7 @@ export class ProcessImagesUseCase {
     const fileNameBatches = this.createBatches(imagesFilesNames, this.BATCH_SIZE);
 
     for (const fileNameBatch of fileNameBatches) {
-      const images = await this.createImagesInDbUseCase.executeMany(fileNameBatch);
+      const images = await this.createImagesInDbUseCase.executeMany(fileNameBatch, projectId);
       await Promise.all([
         this.imageCategorizationQueue.addBulk(
           images.map(image => ({
@@ -51,7 +52,7 @@ export class ProcessImagesUseCase {
             data: image
           }))
         ),
-        this.imageTransformationQueue.addBulk(
+        ImageTransformationQueue.getQueue().addBulk(
           images.map(image => ({
             name: 'transform-image',
             data: image

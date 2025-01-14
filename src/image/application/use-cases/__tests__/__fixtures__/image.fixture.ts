@@ -6,6 +6,7 @@ const detectedObjects = [
 ]
 
 export const createImage = (overrides: Partial<ImageWithRelations> = {}): ImageWithRelations => ({
+  projectId: 1,
   id: 1,
   name: 'default-name',
   createdAt: new Date(),

@@ -6,7 +6,7 @@ import { hostInputImagesDir, inputImagesDir } from '../../config';
 import { Prisma } from '@prisma/client';
 
 export class ImageRepository {
-  async create(imageName: string) {
+  async create(imageName: string, projectId: number) {
     const hostImagePath = path.join(hostInputImagesDir, imageName);
     const imagePath = path.join(inputImagesDir, imageName);
 
@@ -17,6 +17,7 @@ export class ImageRepository {
       where: { name: imageName },
       update: {},
       create: {
+        projectId,
         name: imageName,
         path: hostImagePath,
         size: stats.size,
@@ -80,9 +81,10 @@ export class ImageRepository {
     }
   }
 
-  async createMany(fileNames: string[]): Promise<void> {
+  async createMany(fileNames: string[], projectId: number): Promise<void> {
     await prisma.image.createMany({
       data: fileNames.map(name => ({
+        projectId,
         name,
         path: path.join(inputImagesDir, name)
       })),

@@ -15,11 +15,13 @@ import { GetStatsUseCase } from '../image/application/use-cases/get-stats.use-ca
 import { FilterStatsService } from '../image/application/services/filter-stats.service';
 import { TotalNumberImagesPerPathService } from '../image/application/services/total-number-images-per-path.service';
 import { SaveImageInFolderService } from '../image/infraestructure/services/save-image-in-folder.service';
+import { ProjectRepository } from '../image/infraestructure/repositories/project.repository';
 
 // Register services
 container.registerSingleton(TransformImageService);
 container.registerSingleton(LogRepository);
-container.registerSingleton(TransformImageHandler);
+// TODO: use it at some point
+// container.registerSingleton(TransformImageHandler);
 container.registerSingleton(CommandBus);
 
 // Register use cases
@@ -31,8 +33,9 @@ container.registerSingleton(GetStatsUseCase);
 container.register(INJECTION_TOKENS.IMAGE_CATEGORIZATION_QUEUE, {
   useValue: ImageCategorizationQueue.getInstance()
 });
+// ### TODO: i think it's not necessary to inject in process images usecase
 container.register(INJECTION_TOKENS.IMAGE_TRANSFORMATION_QUEUE, {
-  useValue: ImageTransformationQueue.getInstance()
+  useValue: ImageTransformationQueue.getQueue()
 });
 container.register(INJECTION_TOKENS.IMAGE_DETECTION_QUEUE, {
   useValue: ImageDetectionQueue.getInstance()
@@ -40,6 +43,7 @@ container.register(INJECTION_TOKENS.IMAGE_DETECTION_QUEUE, {
 
 // Register repositories
 container.registerSingleton(ImageRepository);
+container.registerSingleton(ProjectRepository);
 
 container.registerSingleton(
   'FilterStatsService',
