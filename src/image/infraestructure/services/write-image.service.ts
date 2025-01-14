@@ -1,7 +1,7 @@
 import path from "path";
 import { Sharp } from "sharp";
 
-export class SaveImageInFolderService {
+export class WriteImageService {
   constructor(private readonly outputImagesDir: string) {}
   
   async execute(image: Sharp, filename: string): Promise<void> {

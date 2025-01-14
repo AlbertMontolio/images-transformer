@@ -14,7 +14,7 @@ import { ImageRepository } from '../image/infraestructure/repositories/image.rep
 import { GetStatsUseCase } from '../image/application/use-cases/get-stats.use-case';
 import { FilterStatsService } from '../image/application/services/filter-stats.service';
 import { TotalNumberImagesPerPathService } from '../image/application/services/total-number-images-per-path.service';
-import { SaveImageInFolderService } from '../image/infraestructure/services/save-image-in-folder.service';
+import { WriteImageService } from '../image/infraestructure/services/write-image.service';
 import { ProjectRepository } from '../image/infraestructure/repositories/project.repository';
 
 // Register services
@@ -50,6 +50,6 @@ container.registerSingleton(
   FilterStatsService
 );
 container.registerSingleton('TotalNumberImagesPerPathService', TotalNumberImagesPerPathService);
-container.registerSingleton('SaveImageInFolderService', SaveImageInFolderService);
+container.registerSingleton('WriteImageService', WriteImageService);
 
 export { container }; 

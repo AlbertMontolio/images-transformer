@@ -8,6 +8,7 @@ type InputUpdate = {
   watermarkText?: string;
   filterType?: string;
   filterValue?: string;
+  writtenAt?: Date;
 }
 
 export class TransformedImageRepository {
@@ -56,5 +57,46 @@ export class TransformedImageRepository {
 
   async findAll(): Promise<TransformedImage[]> {
     return await prisma.transformedImage.findMany();
+  }
+
+  async updateMany(imageIds: number[], data: InputUpdate): Promise<void> {
+    try {
+      await prisma.transformedImage.updateMany({
+        where: {
+          imageId: {
+            in: imageIds
+          }
+        },
+        data: {
+          ...data,
+        }
+      });
+    } catch (err) {
+      console.log('### TransformedImageRepository#updateMany err: ', err);
+      throw err;
+    }
+  }
+
+  async findLastWrittenAt(): Promise<Date | null> {
+    try {
+      const lastWrittenImage = await prisma.transformedImage.findFirst({
+        where: {
+          writtenAt: {
+            not: null
+          }
+        },
+        orderBy: {
+          writtenAt: 'desc'
+        },
+        select: {
+          writtenAt: true
+        }
+      });
+
+      return lastWrittenImage?.writtenAt || null;
+    } catch (err) {
+      console.log('### TransformedImageRepository#findLastWrittenAt err: ', err);
+      return null;
+    }
   }
 }

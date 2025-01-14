@@ -3,24 +3,27 @@ import { Worker, Job } from 'bullmq';
 import { TransformImageCommand } from '../../application/commands/transform-image.command';
 import { TransformImageHandler } from '../../application/handlers/transform-image.handler';
 import { TransformImageService } from '../services/transform-image.service';
-import { SaveImageInFolderService } from '../services/save-image-in-folder.service';
+import { WriteImageService } from '../services/write-image.service';
 import { LogRepository } from '../repositories/log.repository';
 import { ImageTransformationQueue } from '../queues/image-transformation.queue';
 import { CommandBus } from '../../../shared/command-bus/command-bus';
 import { Image } from '@prisma/client';
 import { Sharp } from 'sharp';
 import { outputImagesDir } from '../../config';
+import { TransformedImageRepository } from '../repositories/transformed-image.repository';
 
 const WRITE_BATCH_SIZE = 20; // Larger batch for I/O operations
 
 class TransformImageBatchProcessor {
   private writeBuffer: { image: Sharp; filename: string; imageId: number }[] = [];
-  private readonly saveImageInFolderService: SaveImageInFolderService;
+  private readonly writeImageService: WriteImageService;
   private readonly logRepository: LogRepository;
+  private readonly transformedImageRepository: TransformedImageRepository;
 
   constructor() {
-    this.saveImageInFolderService = new SaveImageInFolderService(outputImagesDir);
+    this.writeImageService = new WriteImageService(outputImagesDir);
     this.logRepository = new LogRepository();
+    this.transformedImageRepository = new TransformedImageRepository();
   }
 
   async addToWriteBuffer(transformedImage: { image: Sharp; filename: string; imageId: number }) {
@@ -36,18 +39,17 @@ class TransformImageBatchProcessor {
 
     try {
       const batchId = `batch-${Date.now()}`;
-      // await this.logRepository.createStartedProcessLog(
-      //   batchId,
-      //   'transformation_storage_batch'
-      // );
 
       // Single bulk write operation
-      await this.saveImageInFolderService.executeMany([...this.writeBuffer]);
+      await this.writeImageService.executeMany([...this.writeBuffer]);
+      console.log('Batch storage completed successfully.');
 
-      // await this.logRepository.createCompletedProcessLog(
-      //   batchId,
-      //   'transformation_storage_batch'
-      // );
+      // Update writtenAt timestamp for all images in the batch
+      const imageIds = this.writeBuffer.map(item => item.imageId);
+      console.log('### imageIds', imageIds);
+      await this.transformedImageRepository.updateMany(imageIds, {
+        writtenAt: new Date()
+      });
 
       // Clear the buffer after successful write
       this.writeBuffer = [];
@@ -113,8 +115,8 @@ process.on('SIGINT', async () => {
 });
 
 // Event handlers stay the same
-transformImageWorker.on('completed', (job) => {
-  console.log(`Job ${job.id} completed successfully.`);
+transformImageWorker.on('completed', (_job) => {
+  // console.log(`Job ${job.id} completed successfully.`);
 });
 
 transformImageWorker.on('failed', (job, err) => {
