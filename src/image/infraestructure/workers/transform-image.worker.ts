@@ -52,7 +52,7 @@ transformImageWorker.on('failed', (job, err) => {
 });
 
 transformImageWorker.on('error', (err) => {
-console.error('transformImageWorker error:', err);
+  console.error('transformImageWorker error:', err);
 });
 
 // Add drain event handler to flush remaining batch

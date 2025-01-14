@@ -3,7 +3,7 @@ import { Image } from '@prisma/client';
 import { LogRepository } from '../repositories/log.repository';
 import { CommandBus } from '../../../shared/command-bus/command-bus';
 import { DetectImageHandler } from '../../application/handlers/detect-image.handler';
-import { DetectObjectsService } from '../services/detect-objects.service';
+import { DetectionError, DetectObjectsService } from '../services/detect-objects.service';
 import { ImageDetectionQueue } from '../queues/image-detection.queue';
 import { DetectImageCommand } from '../../application/commands/detect-image.command';
 import { SaveObjectPredictionsIntoImageUseCase } from '../../application/use-cases/save-object-predictions-into-image.use-case';
@@ -32,9 +32,16 @@ async function initializeWorker() {
   return new Worker(
     ImageDetectionQueue.queueName,
     async (job: { data: Image }) => {
-      const image = job.data;
-      const command = new DetectImageCommand(image);
-      await commandBus.execute(command);
+      try {
+        const image = job.data;
+        const command = new DetectImageCommand(image);
+        await commandBus.execute(command);
+      } catch (err) {
+        if (err instanceof Error && err.name !== 'Error') {
+          throw err;
+        }
+        throw new DetectionError('Detection process failed', err);
+      }
     },
     { connection: ImageDetectionQueue.getConnection() }
   );
@@ -50,7 +57,13 @@ initializeWorker().then(worker => {
   });
 
   worker.on('failed', (job, err) => {
-    console.error(`detectImageWorker Job ${job.id} failed: ${err.message}`);
+    console.error(`detectImageWorker Job ${job.id} failed:`, {
+      errorName: err.name,
+      errorMessage: err.message,
+      cause: (err as { cause?: unknown }).cause,
+      stack: err.stack,
+      jobData: job.data
+    });
   });
 
   worker.on('error', (err) => {

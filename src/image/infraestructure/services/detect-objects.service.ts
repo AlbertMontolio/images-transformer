@@ -5,14 +5,38 @@ import path from 'path';
 import { inputImagesDir } from '../../config';
 import { Image } from '@prisma/client';
 
+interface ErrorWithCause extends Error {
+  cause?: unknown;
+}
+
 export interface DetectedObjectPrediction {
   class: string;
   score: number;
   bbox: [number, number, number, number]; // [x, y, width, height]
 }
 
+export class DetectionError extends Error {
+  cause?: unknown;
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = 'DetectionError';
+    this.cause = cause;
+  }
+}
+
 export class DetectObjectsService {
   constructor(private readonly model: cocoSsd.ObjectDetection) {}
+
+  private async resizeImage(inputImagePath: string): Promise<Buffer> {
+    try {
+      return await sharp(inputImagePath)
+        .resize(640, 640)
+        .toFormat('jpeg')
+        .toBuffer();
+    } catch (err) {
+      throw new DetectionError('Failed to resize image: dimensions mismatch', err);
+    }
+  }
 
   async execute(image: Image): Promise<DetectedObjectPrediction[]> {
     const { name } = image;
@@ -23,23 +47,20 @@ export class DetectObjectsService {
 
     try {
       // Step 1: Load and Resize the Image
-      const resizedImageBuffer = await sharp(inputImagePath)
-        .resize(640, 640) // Resize image to 640x640 (Coco SSD works with flexible sizes)
-        .toFormat('jpeg')
-        .toBuffer();
+      const resizedImageBuffer = await this.resizeImage(inputImagePath);
 
       // Step 2: Decode the Image into a Tensor
       imageTensor = tf.node.decodeImage(resizedImageBuffer, 3) as tf.Tensor3D;
 
-      // Step 3: Ensure the Tensor Shape is Correct
+      // Step 3: Validate tensor shape
       if (imageTensor.shape.length !== 3) {
-        throw new Error(`Unexpected tensor shape: ${imageTensor.shape}`);
+        throw new DetectionError(`Invalid tensor shape: ${imageTensor.shape}`);
       }
 
       // Step 4: Convert Tensor to `int32`
       inputTensor = imageTensor.toInt();
 
-      // Perform object detection
+      // Step 5: Perform object detection
       const predictions = await this.model.detect(inputTensor);
 
       return predictions.map((prediction) => ({
@@ -48,12 +69,30 @@ export class DetectObjectsService {
         bbox: prediction.bbox as [number, number, number, number],
       }));
     } catch (err) {
-      console.error('Error during object detection:', err);
-      throw new Error('Object detection failed.');
+      console.log('Caught in execute:', err);
+      console.log('Error type:', err.constructor.name);
+      console.log('Is DetectionError:', err instanceof DetectionError);
+      
+      if (err instanceof DetectionError) {
+        throw err;
+      }
+      throw new DetectionError('Object detection failed', err);
     } finally {
       // Dispose of tensors to free memory
-      if (imageTensor) imageTensor.dispose();
-      if (inputTensor) inputTensor.dispose();
+      if (imageTensor) {
+        try {
+          imageTensor.dispose();
+        } catch (err) {
+          console.warn('Failed to dispose imageTensor:', err);
+        }
+      }
+      if (inputTensor) {
+        try {
+          inputTensor.dispose();
+        } catch (err) {
+          console.warn('Failed to dispose inputTensor:', err);
+        }
+      }
     }
   }
 }
