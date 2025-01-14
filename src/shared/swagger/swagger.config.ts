@@ -18,7 +18,19 @@ const options = {
       },
     ],
   },
-  apis: ['./src/image/infraestructure/routes/*.ts'], // Path to the API routes
+  apis: ['./src/image/infraestructure/routes/*.ts'],
 };
 
-export const specs = swaggerJsdoc(options); 
+type OpenAPISpec = {
+  info: {
+    title: string;
+    version: string;
+    description?: string;
+    contact?: {
+        name?: string;
+        email?: string;
+    };
+};
+};
+
+export const specs: OpenAPISpec = swaggerJsdoc(options); 

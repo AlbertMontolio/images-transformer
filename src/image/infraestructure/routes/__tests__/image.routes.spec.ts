@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import request from 'supertest';
 import express from 'express';
-import imagesRoutes from '../image.routes';
+import imageRoutes from '../image.routes';
 import { container } from '../../../../shared/container';
 import { ImageRepository } from '../../repositories/image.repository';
 import { ProcessImagesUseCase } from '../../../application/use-cases/process-images.use-case';
@@ -13,7 +13,7 @@ describe('Image Routes', () => {
   beforeEach(() => {
     app = express();
     app.use(express.json());
-    app.use('/images', imagesRoutes);
+    app.use('/images', imageRoutes);
   });
 
   afterEach(() => {
@@ -46,7 +46,10 @@ describe('Image Routes', () => {
 
       const response = await request(app).get('/images');
       expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'Failed to fetch images' });
+      expect(response.body.error).toBe('Failed to fetch images');
+      if (process.env.NODE_ENV === 'development') {
+        expect(response.body.details).toBeDefined();
+      }
     });
   });
 
@@ -99,7 +102,18 @@ describe('Image Routes', () => {
 
   describe('GET /images/stats', () => {
     it('should return stats', async () => {
-      const mockStats = { total: 5 };
+      const mockStats = {
+        processingTimes: {},
+        filterStats: { blur: 2, sharpen: 3 },
+        totalNumberImagesPerPathStats: {
+          inputImagesTotal: 5,
+          outputImagesTotal: {
+            transformedImagesTotal: 3,
+            detectedImagesTotal: 2
+          }
+        }
+      };
+      
       const mockGetStatsUseCase = {
         execute: jest.fn().mockResolvedValue(mockStats)
       } as unknown as GetStatsUseCase;
@@ -109,6 +123,18 @@ describe('Image Routes', () => {
       const response = await request(app).get('/images/stats');
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockStats);
+    });
+
+    it('should handle errors when fetching stats', async () => {
+      const mockGetStatsUseCase = {
+        execute: jest.fn().mockRejectedValue(new Error('Stats error'))
+      } as unknown as GetStatsUseCase;
+      
+      container.registerInstance(GetStatsUseCase, mockGetStatsUseCase);
+
+      const response = await request(app).get('/images/stats');
+      expect(response.status).toBe(500);
+      expect(response.body.error).toBe('Failed to fetch stats');
     });
   });
 }); 

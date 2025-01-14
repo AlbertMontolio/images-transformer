@@ -51,13 +51,13 @@ export class TransformImageService {
       sharpImage.resize(targetWidth);
 
       const filter = this.filterSelectorService.getRandomFilter();
-      console.log('### filter', filter);
       filter.applyFilter(sharpImage);
+      console.log(`filter applied: ${filter.name}. Value: ${JSON.stringify(filter.value)}`);
 
       await this.transformedImageRepository.update({
         input: {
           filterType: filter.name,
-          filterValue: filter.value?.toString(),
+          filterValue: JSON.stringify(filter.value),
         },
         transformedId: transformedImage.id,
       });

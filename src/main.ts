@@ -18,16 +18,28 @@ dotenv.config();
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/admin/queues');
 
-// create dashboard to monitor and manage queues with bull-dashboard
-const imageCategorizationQueue = ImageCategorizationQueue.getInstance()
-const imageTransformationQueue = ImageTransformationQueue.getInstance()
-const imageDetectionQueue = ImageDetectionQueue.getInstance()
+// Initialize queues in a more maintainable way
+const queues = {
+  categorization: ImageCategorizationQueue.getInstance(),
+  transformation: ImageTransformationQueue.getInstance(),
+  detection: ImageDetectionQueue.getInstance(),
+} as const;
+
+// Validate required environment variables
+const validateEnv = () => {
+  const required = ['PORT', 'CORS_ORIGIN'];
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+};
 
 createBullBoard({
     queues: [
-        new BullMQAdapter(imageCategorizationQueue),
-        new BullMQAdapter(imageTransformationQueue),
-        new BullMQAdapter(imageDetectionQueue),
+        new BullMQAdapter(queues.categorization),
+        new BullMQAdapter(queues.transformation),
+        new BullMQAdapter(queues.detection),
     ],
     serverAdapter: serverAdapter,
 });
@@ -41,41 +53,64 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 export const getCorsOrigin = (): string => process.env.CORS_ORIGIN || '*';
 
-export const startServer = () => {
+export const startServer = async () => {
+  try {
+    validateEnv();
+    
     const PORT = process.env.PORT || 3000;
     const CORS_ORIGIN = getCorsOrigin();
+    
     app.use(cors({
-        origin: CORS_ORIGIN,
+      origin: CORS_ORIGIN,
     }));
 
     const server = app.listen(PORT, () => {
-        console.log(`Server running on http://localhost:${PORT}`)
+      console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
+      console.log(`Queue Dashboard available at http://localhost:${PORT}/admin/queues`);
     });
 
     return server;
-}
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
 
-const server = startServer()
+// Change the type declaration
+let server: ReturnType<typeof app.listen>;
+
+// Update the IIFE to properly assign the server
+(async () => {
+  const serverPromise = await startServer();
+  if (serverPromise) {
+    server = serverPromise;
+  }
+})();
 
 export { app, server };
 
 export const shutdown = async () => {
-    console.log('Shutting down gracefully...');
+  console.log('Shutting down gracefully...');
 
-    try {
-        await imageCategorizationQueue.close();
-        await imageTransformationQueue.close();
-        console.log('Queues closed.');
+  try {
+    // Close all queues
+    await Promise.all([
+      queues.categorization.close(),
+      queues.transformation.close(),
+      queues.detection.close(),
+    ]);
+    console.log('Queues closed.');
 
-        server.close(() => {
-            console.log('HTTP server closed.');
-            process.exit(0);
-        });
+    server.close(() => {
+      console.log('HTTP server closed.');
+      process.exit(0);
+    });
 
-    } catch (error) {
-        console.error('Error during shutdown:', error);
-        process.exit(1);
-    }
+  } catch (error) {
+    console.error('Error during shutdown:', error);
+    process.exit(1);
+  }
 };
 
 process.on('SIGINT', shutdown);

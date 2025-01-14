@@ -36,9 +36,6 @@ export class TransformImageHandler {
 
     this.batch.push({ image: sharpImage, filename: image.name });
 
-    console.log('### this.batch', this.batch);
-
-
     if (this.batch.length >= TransformImageHandler.BATCH_SIZE) {
       await this.logRepository.create({
         imageId: image.id,

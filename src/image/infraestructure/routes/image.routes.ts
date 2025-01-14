@@ -6,14 +6,23 @@ import { GetStatsUseCase } from '../../application/use-cases/get-stats.use-case'
 
 const router = express.Router();
 
+interface ErrorResponse {
+  error: string;
+  details?: unknown;
+}
+
 router.get('/', async (_req, res) => {
   try {
     const imageRepository = container.resolve(ImageRepository);
     const images = await imageRepository.findAll();
-    res.send(images);
+    res.json(images);
   } catch (err) {
     console.error('Error fetching images:', err);
-    res.status(500).json({ error: 'Failed to fetch images' });
+    const response: ErrorResponse = { 
+      error: 'Failed to fetch images',
+      details: process.env.NODE_ENV === 'development' ? err : undefined
+    };
+    res.status(500).json(response);
   }
 });
 
@@ -23,7 +32,7 @@ router.get('/', async (_req, res) => {
  *   post:
  *     summary: Process images in the input directory
  *     description: Processes all images in the input directory for categorization, transformation, and object detection
- *     responses:
+ *     responses, and stores it in the output directory provided as env var:
  *       200:
  *         description: Images processed successfully
  *       500:
@@ -60,10 +69,17 @@ router.post('/process', async (_req, res) => {
  *         description: Server error while retrieving stats
  */
 router.get('/stats', async (_req, res) => {
-  const getStatsUseCase = container.resolve(GetStatsUseCase);
-  const stats = await getStatsUseCase.execute();
-
-  res.status(200).send(stats);
+  try {
+    const getStatsUseCase = container.resolve(GetStatsUseCase);
+    const stats = await getStatsUseCase.execute();
+    res.status(200).json(stats);
+  } catch (err) {
+    const response: ErrorResponse = {
+      error: 'Failed to fetch stats',
+      details: process.env.NODE_ENV === 'development' ? err : undefined
+    };
+    res.status(500).json(response);
+  }
 });
 
 router.get('/:id', async (req, res) => {

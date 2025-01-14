@@ -16,7 +16,6 @@ export class CategorizeImageService {
     try {
       // Read and process the image using Sharp
       const inputImagePath = path.join(inputImagesDir, name);
-      console.log('### cis inputImagePath', inputImagePath);
       const imageBuffer = await sharp(inputImagePath).toBuffer();
 
       // Decode image to a tensor

@@ -13,13 +13,14 @@ export class LogRepository {
     processName: ProcessName;
     status: 'started' | 'completed' | 'error';
   }) {
+    console.log(`### log for image ${imageId} with process ${processName} and status ${status}`);
     try {
       return await prisma.log.create({
         data: {
           imageId,
           processName,
           status,
-        }
+        },
       });
     } catch (err) {
       console.error('Error creating log:', err);
