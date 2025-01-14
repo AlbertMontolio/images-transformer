@@ -6,7 +6,6 @@ import { ImageTransformationQueue } from "../../infraestructure/queues/image-tra
 import { ImageDetectionQueue } from "../../infraestructure/queues/image-detection.queue";
 import { INJECTION_TOKENS } from '../../../shared/injection-tokens';
 import { inputImagesDir } from '../../config';
-import { ImageRepository } from '../../infraestructure/repositories/image.repository';
 
 @injectable()
 export class ProcessImagesUseCase {
@@ -15,19 +14,12 @@ export class ProcessImagesUseCase {
   constructor(
     @inject(ReadImagesNamesUseCase) 
     private readonly readImagesNamesUseCase: ReadImagesNamesUseCase,
-    
-    @inject(ImageRepository)
-    private readonly imageRepository: ImageRepository,
-
     @inject(CreateImagesInDbUseCase)
     private readonly createImagesInDbUseCase: CreateImagesInDbUseCase,
-    
     @inject(INJECTION_TOKENS.IMAGE_CATEGORIZATION_QUEUE)
     private readonly imageCategorizationQueue: ImageCategorizationQueue,
-    
     @inject(INJECTION_TOKENS.IMAGE_TRANSFORMATION_QUEUE)
     private readonly imageTransformationQueue: ImageTransformationQueue,
-    
     @inject(INJECTION_TOKENS.IMAGE_DETECTION_QUEUE)
     private readonly imageDetectionQueue: ImageDetectionQueue
   ) {}

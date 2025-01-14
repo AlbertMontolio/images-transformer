@@ -2,13 +2,6 @@ import { Queue, QueueOptions } from 'bullmq';
 import { redisConnection } from './redis-connection';
 import { Image } from '@prisma/client';
 
-export type ImageTransformationJobData = {
-  imagePath: string; // ### TODO: remove
-  imageName: string;
-  watermarkText: string;
-  imageId: number;
-};
-
 export class ImageTransformationQueue extends Queue<Image> {
   public static readonly queueName = 'image-transformation-queue';
 
@@ -21,9 +14,7 @@ export class ImageTransformationQueue extends Queue<Image> {
     });
   }
 
-  /**
-   * Get the singleton instance of the queue
-   */
+  // ### TODO: refactor with base class
   public static getInstance(options?: QueueOptions): ImageTransformationQueue {
     if (!this.instance) {
       this.instance = new ImageTransformationQueue(options);
@@ -31,9 +22,6 @@ export class ImageTransformationQueue extends Queue<Image> {
     return this.instance;
   }
 
-  /**
-   * Expose the Redis connection
-   */
   public static getConnection() {
     return redisConnection;
   }

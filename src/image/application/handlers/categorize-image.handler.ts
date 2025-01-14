@@ -4,7 +4,6 @@ import { CategorizeImageCommand } from '../commands/categorize-image.command';
 import { CategorizationRepository, CreateCategorizationProp } from 'src/image/infraestructure/repositories/categorization.repository';
 import { ProcessStatus } from '@prisma/client';
 
-// ### TODO: add extend type
 export class CategorizeImageHandler {
   constructor(
     private readonly categorizeImageService: CategorizeImageService,
