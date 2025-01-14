@@ -3,6 +3,7 @@ import { TransformImageService } from '../../infraestructure/services/transform-
 import { LogRepository } from '../../infraestructure/repositories/log.repository';
 import { SaveImageInFolderService } from 'src/image/infraestructure/services/save-image-in-folder.service';
 import { Sharp } from 'sharp';
+import { ProcessStatus } from '@prisma/client';
 
 export class TransformImageHandler {
   private static readonly BATCH_SIZE = 10;
@@ -20,7 +21,7 @@ export class TransformImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'transformation',
-      status: 'started'
+      status: ProcessStatus.STARTED
     });
 
     const sharpImage = await this.transformImageService.execute({
@@ -31,7 +32,7 @@ export class TransformImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'transformation',
-      status: 'completed'
+      status: ProcessStatus.COMPLETED
     });
     console.log('');
 
@@ -41,7 +42,7 @@ export class TransformImageHandler {
       await this.logRepository.create({
         imageId: image.id,
         processName: 'transformation_storage',
-        status: 'started'
+        status: ProcessStatus.STARTED
       });
 
       await this.saveImageInFolderService.executeMany([...this.batch]);
@@ -49,7 +50,7 @@ export class TransformImageHandler {
       await this.logRepository.create({
         imageId: image.id,
         processName: 'transformation_storage',
-        status: 'completed'
+        status: ProcessStatus.COMPLETED
       });
       console.log('');
 

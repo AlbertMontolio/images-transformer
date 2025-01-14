@@ -2,6 +2,7 @@ import { LogRepository } from '../../infraestructure/repositories/log.repository
 import { CategorizeImageService } from 'src/image/infraestructure/services/categorize-image.service';
 import { CategorizeImageCommand } from '../commands/categorize-image.command';
 import { CategorizationRepository, CreateCategorizationProp } from 'src/image/infraestructure/repositories/categorization.repository';
+import { ProcessStatus } from '@prisma/client';
 
 // ### TODO: add extend type
 export class CategorizeImageHandler {
@@ -17,7 +18,7 @@ export class CategorizeImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'categorization',
-      status: 'started'
+      status: ProcessStatus.STARTED
     });
 
     const predictions = await this.categorizeImageService.execute(image);
@@ -25,7 +26,7 @@ export class CategorizeImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'categorization',
-      status: 'completed'
+      status: ProcessStatus.COMPLETED
     });
 
     const inputs: CreateCategorizationProp[] = predictions.map((prediction) => {

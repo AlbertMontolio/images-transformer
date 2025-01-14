@@ -13,6 +13,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ProcessStatus {
+  STARTED
+  COMPLETED
+  ERROR
+}
+
 model Image {
   id        Int       @id @default(autoincrement()) // Primary key
   path      String?    
@@ -30,15 +36,15 @@ model Image {
 }
 
 model Log {
-  id                Int      @id @default(autoincrement())
+  id                Int           @id @default(autoincrement())
   
-  status            String   // 'started', 'completed', 'error'
-  processName       String   // 'object_detection', 'transformation', 'categorization'
+  status            ProcessStatus // Using enum for status
+  processName       String        // Keeping this as String for flexibility
 
-  createdAt         DateTime @default(now())
+  createdAt         DateTime      @default(now())
   
   imageId           Int
-  image             Image    @relation(fields: [imageId], references: [id])
+  image             Image         @relation(fields: [imageId], references: [id])
 
   @@index([imageId])
   @@index([status])

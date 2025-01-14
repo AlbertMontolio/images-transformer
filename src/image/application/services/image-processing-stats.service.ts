@@ -1,6 +1,7 @@
-import { LogRepository, ProcessName } from '../../infraestructure/repositories/log.repository';
+import { LogRepository } from '../../infraestructure/repositories/log.repository';
 import { ImageRepository } from '../../infraestructure/repositories/image.repository';
 import { injectable } from 'tsyringe';
+import { ProcessStatus } from '@prisma/client';
 
 
 @injectable()
@@ -12,7 +13,7 @@ export class ImageProcessingStatsService {
 
   async getImagesProcessingTimes() {
     // ### TODO: get from prisma enums
-    const processNames: ProcessName[] = ['transformation', 'categorization', 'object_detection', 'transformation_storage'];
+    const processNames: string[] = ['transformation', 'categorization', 'object_detection', 'transformation_storage'];
     const images = await this.imageRepository.findAll();
 
     const processNamesMap = processNames.reduce((acc, name) => {
@@ -34,17 +35,17 @@ export class ImageProcessingStatsService {
     return processNamesMap;
   }
 
-  private async getProcessingDuration(imageId: number, processName: ProcessName): Promise<number | null> {
+  private async getProcessingDuration(imageId: number, processName: string): Promise<number | null> {
     const [startedLog, completedLog] = await Promise.all([
       this.logRepository.findByImageIdAndStatusAndProcessName({
         imageId,
         processName,
-        status: 'started',
+        status: ProcessStatus.STARTED,
       }),
       this.logRepository.findByImageIdAndStatusAndProcessName({
         imageId,
         processName,
-        status: 'completed',
+        status: ProcessStatus.COMPLETED,
       }),
     ]);
 

@@ -1,7 +1,5 @@
 import { prisma } from "../prisma/prisma-client";
-
-// ### TODO: add enums from Prisma
-export type ProcessName = 'object_detection' | 'transformation' | 'categorization' | 'transformation_storage';
+import { ProcessStatus } from "@prisma/client";
 
 export class LogRepository {
   async create({
@@ -10,29 +8,11 @@ export class LogRepository {
     status,
   }: {
     imageId: number;
-    processName: ProcessName;
-    status: 'started' | 'completed' | 'error';
+    processName: string;
+    status: ProcessStatus;
   }) {
     console.log(`log> imageId:${imageId} \t processName: ${processName} \t status: ${status}`)
     try {
-      // First check if the log already exists
-      const existingLog = await prisma.log.findUnique({
-        where: {
-          imageId_processName_status: {
-            imageId,
-            processName,
-            status,
-          }
-        }
-      });
-
-      // If it exists, return it
-      if (existingLog) {
-        console.log('### log already exists');
-        return existingLog;
-      }
-
-      // If it doesn't exist, create a new one
       return await prisma.log.create({
         data: {
           imageId,
@@ -53,7 +33,7 @@ export class LogRepository {
   }: {
     imageId: number;
     processName: string;
-    status: string;
+    status: ProcessStatus;
   }) {
     return await prisma.log.findUnique({
       where: {

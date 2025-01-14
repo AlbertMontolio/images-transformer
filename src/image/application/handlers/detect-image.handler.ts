@@ -3,6 +3,7 @@ import { LogRepository } from '../../infraestructure/repositories/log.repository
 import { DetectImageCommand } from '../commands/detect-image.command';
 import { SaveObjectPredictionsIntoImageUseCase } from '../use-cases/save-object-predictions-into-image.use-case';
 import { DetectedObjectRepository } from 'src/image/infraestructure/repositories/detected-object.repository';
+import { ProcessStatus } from '@prisma/client';
 
 export class DetectImageHandler {
   constructor(
@@ -18,7 +19,7 @@ export class DetectImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'object_detection',
-      status: 'started'
+      status: ProcessStatus.STARTED
     });
 
     const predictions = await this.detectObjectsService.execute(image);
@@ -26,13 +27,11 @@ export class DetectImageHandler {
     await this.logRepository.create({
       imageId: image.id,
       processName: 'object_detection',
-      status: 'completed'
+      status: ProcessStatus.COMPLETED
     });
 
-    // ### TODO: save in batch like in transform-image.handler.ts
     await this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions);
 
-    // ### TODO: save in batch
     for (const prediction of predictions) {
       const [x, y, width, height] = prediction.bbox;
       const detectedObject = {
