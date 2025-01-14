@@ -51,9 +51,7 @@ export class ProcessImagesUseCase {
     const fileNameBatches = this.createBatches(imagesFilesNames, this.BATCH_SIZE);
 
     for (const fileNameBatch of fileNameBatches) {
-      await this.createImagesInDbUseCase.executeMany(fileNameBatch);
-      const images = await this.imageRepository.findAll();
-      
+      const images = await this.createImagesInDbUseCase.executeMany(fileNameBatch);
       await Promise.all([
         this.imageCategorizationQueue.addBulk(
           images.map(image => ({

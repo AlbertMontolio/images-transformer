@@ -13,8 +13,26 @@ export class LogRepository {
     processName: ProcessName;
     status: 'started' | 'completed' | 'error';
   }) {
-    console.log(`### log for image ${imageId} with process ${processName} and status ${status}`);
+    console.log(`log> imageId:${imageId} \t processName: ${processName} \t status: ${status}`)
     try {
+      // First check if the log already exists
+      const existingLog = await prisma.log.findUnique({
+        where: {
+          imageId_processName_status: {
+            imageId,
+            processName,
+            status,
+          }
+        }
+      });
+
+      // If it exists, return it
+      if (existingLog) {
+        console.log('### log already exists');
+        return existingLog;
+      }
+
+      // If it doesn't exist, create a new one
       return await prisma.log.create({
         data: {
           imageId,

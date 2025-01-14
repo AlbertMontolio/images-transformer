@@ -43,8 +43,8 @@ const transformImageWorker = new Worker(
 );
 
 // Log worker status
-transformImageWorker.on('completed', (job) => {
-  console.log(`transformImageWorker Job ${job.id} completed successfully.`);
+transformImageWorker.on('completed', (_job) => {
+  // console.log(`transformImageWorker Job ${job.id} completed successfully.`);
 });
 
 transformImageWorker.on('failed', (job, err) => {

@@ -19,7 +19,14 @@ export class CreateImagesInDbUseCase {
     return images;
   }
 
-  async executeMany(fileNames: string[]): Promise<void> {
+  async executeMany(fileNames: string[]): Promise<Image[]> {
     await this.imageRepository.createMany(fileNames);
+
+    // Fetch the inserted records
+    return await this.imageRepository.findAll({
+      where: {
+        name: { in: fileNames },
+      },
+    });
   }
 }

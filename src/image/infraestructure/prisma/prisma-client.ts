@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
-console.log('### PrismaClient instantiated');
+console.log('PrismaClient instantiated');
 
 // Exported Prisma instance
 export const prisma = new PrismaClient();

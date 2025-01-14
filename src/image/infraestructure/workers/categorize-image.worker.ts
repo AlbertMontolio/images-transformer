@@ -47,8 +47,8 @@ initializeWorker().then(worker => {
   categorizeImageWorker = worker;
 
   // Log worker status
-  worker.on('completed', (job) => {
-    console.log(`categorizationImageWorker Job ${job.id} completed successfully.`);
+  worker.on('completed', (_job) => {
+    // console.log(`categorizationImageWorker Job ${job.id} completed successfully.`);
   });
 
   worker.on('failed', (job, err) => {

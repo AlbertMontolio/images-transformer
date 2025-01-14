@@ -45,8 +45,8 @@ let detectImageWorker: Worker;
 initializeWorker().then(worker => {
   detectImageWorker = worker;
   
-  worker.on('completed', (job) => {
-    console.log(`detectImageWorker Job ${job.id} completed successfully.`);
+  worker.on('completed', (_job) => {
+    // console.log(`detectImageWorker Job ${job.id} completed successfully.`);
   });
 
   worker.on('failed', (job, err) => {

@@ -33,6 +33,7 @@ export class TransformImageHandler {
       processName: 'transformation',
       status: 'completed'
     });
+    console.log('');
 
     this.batch.push({ image: sharpImage, filename: image.name });
 
@@ -50,6 +51,7 @@ export class TransformImageHandler {
         processName: 'transformation_storage',
         status: 'completed'
       });
+      console.log('');
 
       this.batch = []; // Clear the batch
     }

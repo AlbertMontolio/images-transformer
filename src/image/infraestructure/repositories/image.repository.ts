@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import sharp from 'sharp';
 import path from 'path';
 import { hostInputImagesDir, inputImagesDir } from '../../config';
+import { Prisma } from '@prisma/client';
 
 export class ImageRepository {
   async create(imageName: string) {
@@ -43,8 +44,9 @@ export class ImageRepository {
     })
   }
 
-  async findAll() {
+  async findAll({where}: {where?: Prisma.ImageWhereInput} = {}) {
     const images = await prisma.image.findMany({
+      where,
       include: {
         transformedImage: true,
         logs: true,
