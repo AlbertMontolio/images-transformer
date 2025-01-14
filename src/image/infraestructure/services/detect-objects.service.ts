@@ -4,24 +4,12 @@ import sharp from 'sharp';
 import path from 'path';
 import { inputImagesDir } from '../../config';
 import { Image } from '@prisma/client';
-
-interface ErrorWithCause extends Error {
-  cause?: unknown;
-}
+import { DetectionError } from '../../domain/errors/detection.error';
 
 export interface DetectedObjectPrediction {
   class: string;
   score: number;
   bbox: [number, number, number, number]; // [x, y, width, height]
-}
-
-export class DetectionError extends Error {
-  cause?: unknown;
-  constructor(message: string, cause?: unknown) {
-    super(message);
-    this.name = 'DetectionError';
-    this.cause = cause;
-  }
 }
 
 export class DetectObjectsService {

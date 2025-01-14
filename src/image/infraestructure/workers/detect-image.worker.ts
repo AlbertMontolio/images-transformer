@@ -3,12 +3,13 @@ import { Image } from '@prisma/client';
 import { LogRepository } from '../repositories/log.repository';
 import { CommandBus } from '../../../shared/command-bus/command-bus';
 import { DetectImageHandler } from '../../application/handlers/detect-image.handler';
-import { DetectionError, DetectObjectsService } from '../services/detect-objects.service';
+import { DetectObjectsService } from '../services/detect-objects.service';
 import { ImageDetectionQueue } from '../queues/image-detection.queue';
 import { DetectImageCommand } from '../../application/commands/detect-image.command';
 import { SaveObjectPredictionsIntoImageUseCase } from '../../application/use-cases/save-object-predictions-into-image.use-case';
 import { DetectedObjectRepository } from '../repositories/detected-object.repository';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
+import { DetectionError } from '../../domain/errors/detection.error';
 
 async function initializeWorker() {
   console.log('Loading COCO-SSD model...');

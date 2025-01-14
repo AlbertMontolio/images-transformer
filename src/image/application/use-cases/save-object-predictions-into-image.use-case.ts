@@ -3,15 +3,7 @@ import sharp from 'sharp';
 import path from 'path';
 import { inputImagesDir, outputImagesDir } from "../../config";
 import { DetectedObjectPrediction } from "../../infraestructure/services/detect-objects.service";
-
-export class SavePredictionError extends Error {
-  cause?: unknown;
-  constructor(message: string, cause?: unknown) {
-    super(message);
-    this.name = 'SavePredictionError';
-    this.cause = cause;
-  }
-}
+import { SavePredictionError } from "../../domain/errors/save-prediction.error";
 
 export class SaveObjectPredictionsIntoImageUseCase {
   async execute(image: Image, predictions: DetectedObjectPrediction[] | undefined) {
