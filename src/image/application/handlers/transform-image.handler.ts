@@ -18,23 +18,13 @@ export class TransformImageHandler {
   async execute(command: TransformImageCommand): Promise<void> {
     const { image, watermarkText } = command;
 
-    await this.logRepository.create({
-      imageId: image.id,
-      processName: 'transformation',
-      status: ProcessStatus.STARTED
-    });
+    await this.logRepository.createStartedProcessLog(image.id, 'transformation');
 
     const sharpImage = await this.transformImageService.execute({
       image,
       watermarkText,
     });
-
-    await this.logRepository.create({
-      imageId: image.id,
-      processName: 'transformation',
-      status: ProcessStatus.COMPLETED
-    });
-    console.log('');
+    await this.logRepository.createCompletedProcessLog(image.id, 'transformation');
 
     this.batch.push({ image: sharpImage, filename: image.name });
 

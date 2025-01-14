@@ -26,6 +26,22 @@ export class LogRepository {
     }
   }
 
+  async createStartedProcessLog(imageId: number, processName: string) {
+    return await this.create({
+      imageId,
+      processName,
+      status: ProcessStatus.STARTED
+    });
+  }
+
+  async createCompletedProcessLog(imageId: number, processName: string) {
+    return await this.create({
+      imageId,
+      processName,
+      status: ProcessStatus.COMPLETED
+    });
+  }
+
   async findByImageIdAndStatusAndProcessName({
     imageId,
     processName,
