@@ -15,14 +15,14 @@ export class TotalNumberImagesPerPathService {
     // ### TODO: improve this naming strategy
     const outputPath = outputImagesDir
     const transformedOutputPath = path.join(outputPath, 'transformed_images')
-    const detectedOutputPath = path.join(outputPath, 'detected_images')
+    // const detectedOutputPath = path.join(outputPath, 'detected_images')
 
     const transformedImages = await this.readImagesNamesUseCase.execute(transformedOutputPath);
-    const detectedImages = await this.readImagesNamesUseCase.execute(detectedOutputPath);
+    // const detectedImages = await this.readImagesNamesUseCase.execute(detectedOutputPath);
 
     const outputImagesTotal = {
       transformedImagesTotal: transformedImages.length,
-      detectedImagesTotal: detectedImages.length,
+      // detectedImagesTotal: detectedImages.length,
     }
 
     return {
