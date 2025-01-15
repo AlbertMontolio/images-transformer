@@ -10,6 +10,7 @@ import { SaveObjectPredictionsIntoImageUseCase } from '../../application/use-cas
 import { DetectedObjectRepository } from '../repositories/detected-object.repository';
 import * as cocoSsd from '@tensorflow-models/coco-ssd';
 import { DetectionError } from '../../domain/errors/detection.error';
+import { ErrorRepository } from '../repositories/error.repository';
 
 async function initializeWorker() {
   console.log('Loading COCO-SSD model...');
@@ -23,7 +24,7 @@ async function initializeWorker() {
   const detectImageHandler = new DetectImageHandler(
     detectObjectsService,
     new LogRepository(),
-    new SaveObjectPredictionsIntoImageUseCase(),
+    new SaveObjectPredictionsIntoImageUseCase(new ErrorRepository()),
     new DetectedObjectRepository()
   );
 

@@ -53,10 +53,6 @@ transformImageWorker.on('drained', () => {
   console.log('Transform image worker is drained.', new Date());
 });
 
-transformImageWorker.on('completed', (job) => {
-  console.log(`Job ${job.id} completed successfully.`);
-});
-
 transformImageWorker.on('failed', (job, err) => {
   console.error(`Job ${job.id} failed: ${err.message}`);
 });

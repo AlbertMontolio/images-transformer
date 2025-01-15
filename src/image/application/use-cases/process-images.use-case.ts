@@ -8,6 +8,7 @@ import { INJECTION_TOKENS } from '../../../shared/injection-tokens';
 import { inputImagesDir } from '../../config';
 import { QueueEvents } from 'bullmq';
 import { ProcessRepository } from '../../infraestructure/repositories/process.repository';
+import { ProcessName } from '../../utils/constants';
 
 @injectable()
 export class ProcessImagesUseCase {
@@ -37,9 +38,9 @@ export class ProcessImagesUseCase {
   }
 
   async execute(projectId: number) {
-    const transformProcess = await this.processRepository.create({ name: 'transformation', projectId });
-    const categorizationProcess = await this.processRepository.create({ name: 'categorization', projectId });
-    const detectionProcess = await this.processRepository.create({ name: 'detection', projectId });
+    const transformProcess = await this.processRepository.create({ name: ProcessName.TRANSFORMATION, projectId });
+    const categorizationProcess = await this.processRepository.create({ name: ProcessName.CATEGORIZATION, projectId });
+    const detectionProcess = await this.processRepository.create({ name: ProcessName.DETECTION, projectId });
 
     const inputPath = inputImagesDir
     const imagesFilesNames = await this.readImagesNamesUseCase.execute(inputPath)
@@ -55,7 +56,7 @@ export class ProcessImagesUseCase {
       await Promise.all([
         this.imageCategorizationQueue.addBulk(
           images.map(image => ({
-            name: 'categorize-image',
+            name: 'categorize-image', // TODO: change to ProcessName.CATEGORIZATION
             data: image
           }))
         ),

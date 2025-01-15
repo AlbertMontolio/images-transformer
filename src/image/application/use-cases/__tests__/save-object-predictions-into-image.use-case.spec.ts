@@ -4,6 +4,7 @@ import { SaveObjectPredictionsIntoImageUseCase } from '../save-object-prediction
 import { inputImagesDir, outputImagesDir } from '../../../config';
 import { createImage } from './__fixtures__/image.fixture';
 import { DetectedObjectPrediction } from '../../../infraestructure/services/detect-objects.service';
+import { ErrorRepository } from '../../../infraestructure/repositories/error.repository';
 
 jest.mock('sharp');
 
@@ -18,7 +19,8 @@ describe('SaveObjectPredictionsIntoImageUseCase', () => {
     } as unknown as jest.Mocked<sharp.Sharp>;
 
     (sharp as unknown as jest.Mock).mockReturnValue(mockSharpInstance);
-    saveObjectPredictionsIntoImageUseCase = new SaveObjectPredictionsIntoImageUseCase();
+    const errorRepository = new ErrorRepository();
+    saveObjectPredictionsIntoImageUseCase = new SaveObjectPredictionsIntoImageUseCase(errorRepository);
   });
 
   afterEach(() => {

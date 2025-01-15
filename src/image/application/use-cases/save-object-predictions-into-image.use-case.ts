@@ -4,8 +4,11 @@ import path from 'path';
 import { inputImagesDir, outputImagesDir } from "../../config";
 import { DetectedObjectPrediction } from "../../infraestructure/services/detect-objects.service";
 import { SavePredictionError } from "../../domain/errors/save-prediction.error";
+import { ErrorRepository } from "src/image/infraestructure/repositories/error.repository";
+import { ProcessName } from "../../utils/constants";
 
 export class SaveObjectPredictionsIntoImageUseCase {
+  constructor(private readonly errorRepository: ErrorRepository) {}
   async execute(image: Image, predictions: DetectedObjectPrediction[] | undefined) {
     if (!predictions || predictions.length === 0) {
       return;
@@ -31,6 +34,14 @@ export class SaveObjectPredictionsIntoImageUseCase {
         .composite([{ input: Buffer.from(svgImage), top: 0, left: 0 }])
         .toFile(outputFilePath);
     } catch (err) {
+      // create an error instance with traceId
+      // pass traceId to the error
+      this.errorRepository.create({
+        message: err.message,
+        stack: err.stack,
+        imageId: image.id,
+        processName: ProcessName.DETECTION
+      });
       throw new SavePredictionError('Failed to save predictions on image', err);
     }
   }
