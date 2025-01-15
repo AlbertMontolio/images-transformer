@@ -6,6 +6,7 @@ import { container } from '../../../../shared/container';
 import { ImageRepository } from '../../repositories/image.repository';
 import { ProcessImagesUseCase } from '../../../application/use-cases/process-images.use-case';
 import { GetStatsUseCase } from '../../../application/use-cases/get-stats.use-case';
+import { ProjectRepository } from '../../repositories/project.repository';
 
 describe('Image Routes', () => {
   let app: express.Application;
@@ -55,15 +56,36 @@ describe('Image Routes', () => {
 
   describe('POST /images/process', () => {
     it('should process images', async () => {
+      const mockProjectRepository = {
+        create: jest.fn().mockResolvedValue({ id: 1, name: 'test project' })
+      } as unknown as ProjectRepository;
+
       const mockProcessImagesUseCase = {
         execute: jest.fn().mockResolvedValue(undefined)
       } as unknown as ProcessImagesUseCase;
       
+      container.registerInstance(ProjectRepository, mockProjectRepository);
       container.registerInstance(ProcessImagesUseCase, mockProcessImagesUseCase);
 
       const response = await request(app).post('/images/process');
+      
       expect(response.status).toBe(200);
-      expect(mockProcessImagesUseCase.execute).toHaveBeenCalled();
+      expect(mockProjectRepository.create).toHaveBeenCalledWith({
+        name: 'iphone personal pictures'
+      });
+      expect(mockProcessImagesUseCase.execute).toHaveBeenCalledWith(1);
+    });
+
+    it('should handle errors during processing', async () => {
+      const mockProjectRepository = {
+        create: jest.fn().mockRejectedValue(new Error('Project creation failed'))
+      } as unknown as ProjectRepository;
+      
+      container.registerInstance(ProjectRepository, mockProjectRepository);
+
+      const response = await request(app).post('/images/process');
+      
+      expect(response.status).toBe(500);
     });
   });
 

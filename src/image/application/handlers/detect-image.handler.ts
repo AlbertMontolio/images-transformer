@@ -4,6 +4,7 @@ import { DetectImageCommand } from '../commands/detect-image.command';
 import { SaveObjectPredictionsIntoImageUseCase } from '../use-cases/save-object-predictions-into-image.use-case';
 import { DetectedObjectRepository } from 'src/image/infraestructure/repositories/detected-object.repository';
 import { Status } from '@prisma/client';
+import { RedisPublisherService } from '../../../shared/services/redis-publisher.service';
 
 export class DetectImageHandler {
   constructor(
@@ -30,7 +31,16 @@ export class DetectImageHandler {
       status: Status.COMPLETED
     });
 
-    await this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions);
+    // Publish progress through Redis
+    RedisPublisherService.getInstance().publish({
+      type: 'detection-progress',
+      data: {
+        imageId: image.id,
+        status: 'completed',
+        image,
+      }
+    });
+    this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions);
 
     for (const prediction of predictions) {
       const [x, y, width, height] = prediction.bbox;

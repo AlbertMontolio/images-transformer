@@ -9,10 +9,12 @@ import { inputImagesDir, redisHost } from '../../config';
 import { QueueEvents } from 'bullmq';
 import { ProcessRepository } from '../../infraestructure/repositories/process.repository';
 import { ProcessName } from '../../utils/constants';
+import { Image } from '@prisma/client';
+import { RedisPublisherService } from '../../../shared/services/redis-publisher.service';
 
 @injectable()
 export class ProcessImagesUseCase {
-  private readonly BATCH_SIZE = 5; // Adjust based on your needs
+  private readonly BATCH_SIZE = 50; // Reduce from 100 to 20
   
   constructor(
     @inject(ReadImagesNamesUseCase) 
@@ -54,6 +56,7 @@ export class ProcessImagesUseCase {
 
     for (const fileNameBatch of fileNameBatches) {
       const images = await this.createImagesInDbUseCase.executeMany(fileNameBatch, projectId);
+      this.sendSavedImagesToSocket(images);
       await Promise.all([
         this.imageCategorizationQueue.addBulk(
           images.map(image => ({
@@ -76,12 +79,25 @@ export class ProcessImagesUseCase {
       ]);
     }
 
-
     console.log('### before queuesFinished', new Date().toISOString());
     this.waitForQueueDrain(ImageTransformationQueue.queueName, transformProcess.id);
     this.waitForQueueDrain(ImageCategorizationQueue.queueName, categorizationProcess.id);
     this.waitForQueueDrain(ImageDetectionQueue.queueName, detectionProcess.id);
     console.log('### after queuesFinished', new Date().toISOString());
+  }
+
+  private sendSavedImagesToSocket(images: Image[]) {
+    // comment
+    for (const image of images) {
+      RedisPublisherService.getInstance().publish({
+        type: 'saved-image',
+        data: {
+          imageId: image.id,
+          status: 'pending',
+          image,
+        }
+      });
+    }
   }
 
   private async waitForQueueDrain(queueName: string, processId: number) {

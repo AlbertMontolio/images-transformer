@@ -34,7 +34,7 @@ const transformImageWorker = new Worker(
       );
       
       const transformedImage = await commandBus.execute(command) as Sharp;
-      await writeImageService.execute(transformedImage, image.name);
+      // await writeImageService.execute(transformedImage, image.name);
 
     } catch (error) {
       console.error('Worker processing failed:', error);

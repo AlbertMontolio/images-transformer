@@ -24,6 +24,16 @@ export class CategorizeImageHandler {
     // TODO: add error handling
     const predictions = await this.categorizeImageService.execute(image);
 
+    // Publish progress through Redis
+    RedisPublisherService.getInstance().publish({
+      type: 'categorization-progress',
+      data: {
+        imageId: image.id,
+        status: 'completed',
+        image,
+      }
+    });
+
     await this.logRepository.create({
       imageId: image.id,
       processName: 'categorization',
@@ -40,14 +50,5 @@ export class CategorizeImageHandler {
       inputs,
       imageId: image.id,
     })
-
-    // Publish progress through Redis
-    await RedisPublisherService.getInstance().publish({
-      type: 'categorization-progress',
-      data: {
-        imageId: image.id,
-        status: 'completed'
-      }
-    });
   }
 } 

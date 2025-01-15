@@ -73,7 +73,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: categorize_image_worker
+    # container_name: categorize_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/categorize-image.worker.js"]
     volumes: *common-volumes
@@ -88,7 +88,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: transform_image_worker
+    # container_name: transform_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/transform-image.worker.js"]
     volumes: *common-volumes
@@ -103,7 +103,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: detect_image_worker
+    # container_name: detect_image_worker
     restart: always
     command: ["node", "dist/image/infraestructure/workers/detect-image.worker.js"]
     volumes: *common-volumes

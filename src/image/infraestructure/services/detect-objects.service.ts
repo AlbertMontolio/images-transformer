@@ -51,6 +51,7 @@ export class DetectObjectsService {
       // Step 5: Perform object detection
       const predictions = await this.model.detect(inputTensor);
 
+      // transform predictions to real size
       return predictions.map((prediction) => ({
         class: prediction.class,
         score: prediction.score,

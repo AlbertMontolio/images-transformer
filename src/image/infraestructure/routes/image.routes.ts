@@ -14,11 +14,8 @@ interface ErrorResponse {
 
 router.get('/', async (_req, res) => {
   try {
-    console.log('### before imageRepository', new Date().toISOString());
     const imageRepository = container.resolve(ImageRepository);
     const images = await imageRepository.findAll();
-    console.log('### images.length', images.length);
-    console.log('### after imageRepository', new Date().toISOString());
     res.json(images);
   } catch (err) {
     console.error('Error fetching images:', err);
@@ -43,14 +40,23 @@ router.get('/', async (_req, res) => {
  *         description: Server error during processing
  */
 router.post('/process', async (_req, res) => {
-  const projectRepository = container.resolve(ProjectRepository);
-  const project = await projectRepository.create({
-    name: 'iphone personal pictures',
-  });
-  const processImagesUseCase = container.resolve(ProcessImagesUseCase);
-  await processImagesUseCase.execute(project.id);
+  try {
+    const projectRepository = container.resolve(ProjectRepository);
+    const project = await projectRepository.create({
+      name: 'iphone personal pictures',
+    });
+    const processImagesUseCase = container.resolve(ProcessImagesUseCase);
+    await processImagesUseCase.execute(project.id);
 
-  res.status(200).send();
+    res.status(200).send();
+  } catch (err) {
+    console.error('Error processing images:', err);
+    const response: ErrorResponse = {
+      error: 'Failed to process images',
+      details: process.env.NODE_ENV === 'development' ? err : undefined
+    };
+    res.status(500).json(response);
+  }
 });
 
 /**

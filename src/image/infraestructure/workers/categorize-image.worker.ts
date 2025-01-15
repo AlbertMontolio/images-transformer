@@ -45,7 +45,14 @@ async function initializeWorker() {
         console.log('categorizeImageWorker finally.', new Date());
       }
     },
-    { connection: ImageCategorizationQueue.getConnection() }
+    { 
+      connection: ImageCategorizationQueue.getConnection(),
+      concurrency: 2,  // Reduce from 5 to 2
+      limiter: {
+        max: 5,
+        duration: 1000  // 5 jobs per second
+      }
+    }
   );
 }
 
