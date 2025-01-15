@@ -69,49 +69,32 @@ export class ProcessImagesUseCase {
     }
 
     console.log('### before queuesFinished', new Date().toISOString());
-    this.categorizationQueueFinished();
-    this.transformationQueueFinished();
+    this.waitForQueueDrain(ImageTransformationQueue.queueName);
+    this.waitForQueueDrain(ImageCategorizationQueue.queueName);
+    this.waitForQueueDrain(ImageDetectionQueue.queueName);
     console.log('### after queuesFinished', new Date().toISOString());
   }
-  async categorizationQueueFinished() {
-    const categorizationQueueEvents = new QueueEvents(ImageCategorizationQueue.queueName);
+
+  async waitForQueueDrain(queueName: string) {
+    const queueEvents = new QueueEvents(queueName);
     const cleanup = () => {
-      categorizationQueueEvents.removeAllListeners();
-      // Remove other queue event listeners
+      queueEvents.removeAllListeners();
     };
 
     try {
-      const categorizationDrainedPromise = new Promise((resolve) => {
-        categorizationQueueEvents.on('drained', () => {
-          console.log('p categorizationQueueEvents is drained.');
+      const drainedPromise = new Promise((resolve) => {
+        queueEvents.on('drained', () => {
+          console.log(`${queueName}QueueEvents is drained.`);
           resolve(void 0);
         });
       });
 
-      await categorizationDrainedPromise;
+      await drainedPromise;
     } catch (error) {
-      console.error('Error setting up categorization queue event listener:', error);
+      console.error(`Error setting up ${queueName} queue event listener:`, error);
     } finally {
-      console.log('p categorizationQueueEvents finally.', new Date());
-    }
-  }
-
-  async transformationQueueFinished() {
-    const transformationQueueEvents = new QueueEvents(ImageTransformationQueue.queueName);
-
-    try {
-      const transformationDrainedPromise = new Promise((resolve) => {
-        transformationQueueEvents.on('drained', () => {
-          console.log('p transformationQueueEvents is drained.');
-          resolve(void 0);
-        });
-      });
-
-      await transformationDrainedPromise;
-    } catch (error) {
-      console.error('Error setting up transformation queue event listener:', error);
-    } finally {
-      console.log('p transformationQueueEvents finally.', new Date());
+      console.log(`${queueName} queue finally.`, new Date());
+      cleanup();
     }
   }
 }
