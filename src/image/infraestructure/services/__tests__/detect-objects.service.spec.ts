@@ -112,7 +112,7 @@ describe('DetectObjectsService', () => {
     expect(mockTensor.dispose).toHaveBeenCalled();
   });
 
-  it('should dispose tensors even if an error occurs during sharp processing', async () => {
+  it('should throw an error if sharp processing fails', async () => {
     // Arrange
     const mockImage = createImage({ 
       id: 1, 
@@ -133,6 +133,6 @@ describe('DetectObjectsService', () => {
     );
 
     // Act & Assert
-    await expect(service.execute(mockImage)).rejects.toThrow('Object detection failed');
+    await expect(service.execute(mockImage)).rejects.toThrow('Failed to resize image: dimensions mismatch');
   });
 });
