@@ -8,7 +8,7 @@ export class ProcessRepository {
     name: string;
     projectId: number;
   }): Promise<Process> {
-    return prisma.process.create({
+    return await prisma.process.create({
       data: {
         name: data.name,
         projectId: data.projectId,
@@ -17,7 +17,7 @@ export class ProcessRepository {
   }
 
   async getByProjectId(projectId: number): Promise<Process[]> {
-    return prisma.process.findMany({
+    return await prisma.process.findMany({
       where: {
         projectId,
       },
@@ -27,7 +27,7 @@ export class ProcessRepository {
   async update(id: number, data: {
     finishedAt?: Date;
   }): Promise<Process> {
-    return prisma.process.update({
+    return await prisma.process.update({
       where: { id },
       data: {
         ...data

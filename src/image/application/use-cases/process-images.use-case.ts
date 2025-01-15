@@ -5,7 +5,7 @@ import { ImageCategorizationQueue } from "../../infraestructure/queues/image-cat
 import { ImageTransformationQueue } from "../../infraestructure/queues/image-transformation.queue";
 import { ImageDetectionQueue } from "../../infraestructure/queues/image-detection.queue";
 import { INJECTION_TOKENS } from '../../../shared/injection-tokens';
-import { inputImagesDir } from '../../config';
+import { inputImagesDir, redisHost } from '../../config';
 import { QueueEvents } from 'bullmq';
 import { ProcessRepository } from '../../infraestructure/repositories/process.repository';
 import { ProcessName } from '../../utils/constants';
@@ -39,6 +39,7 @@ export class ProcessImagesUseCase {
 
   async execute(projectId: number) {
     const transformProcess = await this.processRepository.create({ name: ProcessName.TRANSFORMATION, projectId });
+    console.log('### transformProcess', transformProcess);
     const categorizationProcess = await this.processRepository.create({ name: ProcessName.CATEGORIZATION, projectId });
     const detectionProcess = await this.processRepository.create({ name: ProcessName.DETECTION, projectId });
 
@@ -84,7 +85,14 @@ export class ProcessImagesUseCase {
   }
 
   private async waitForQueueDrain(queueName: string, processId: number) {
-    const queueEvents = new QueueEvents(queueName);
+    console.log('### waitForQueueDrain', queueName, processId);
+    console.log('### piusc redisHost', redisHost);
+    const queueEvents = new QueueEvents(queueName, {
+      connection: {
+        host: redisHost,
+        port: parseInt(process.env.REDIS_PORT || '6379')
+      }
+    });
     const cleanup = () => {
       queueEvents.removeAllListeners();
     };

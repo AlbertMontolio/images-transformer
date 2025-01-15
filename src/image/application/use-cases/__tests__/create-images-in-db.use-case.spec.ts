@@ -13,6 +13,7 @@ describe('CreateImagesInDbUseCase', () => {
     mockImageRepository = {
       create: jest.fn(),
       createMany: jest.fn(),
+      findAll: jest.fn(),
     } as unknown as jest.Mocked<ImageRepository>;
 
     useCase = new CreateImagesInDbUseCase();
@@ -36,6 +37,8 @@ describe('CreateImagesInDbUseCase', () => {
           size: 1000,
           width: 100,
           height: 100,
+          transformedImage: null,
+          detectedObjects: [],
         },
         {
           projectId,
@@ -48,9 +51,11 @@ describe('CreateImagesInDbUseCase', () => {
           size: 1000,
           width: 100,
           height: 100,
+          transformedImage: null,
+          detectedObjects: [],
         },
       ];
-      mockImageRepository.create.mockImplementation(async (name) => 
+      mockImageRepository.create.mockImplementation(async (name, pId) => 
         mockImages.find(img => img.name === name)!
       );
 
@@ -60,21 +65,58 @@ describe('CreateImagesInDbUseCase', () => {
       // Assert
       expect(result).toEqual(mockImages);
       expect(mockImageRepository.create).toHaveBeenCalledTimes(2);
-      expect(mockImageRepository.create).toHaveBeenCalledWith('image1.jpg');
-      expect(mockImageRepository.create).toHaveBeenCalledWith('image2.jpg');
+      expect(mockImageRepository.create).toHaveBeenCalledWith('image1.jpg', projectId);
+      expect(mockImageRepository.create).toHaveBeenCalledWith('image2.jpg', projectId);
     });
   });
 
   describe('executeMany', () => {
     it('should create multiple images at once', async () => {
-      // Arrange
       const fileNames = ['image1.jpg', 'image2.jpg'];
+      const mockImages = [
+        {
+          projectId,
+          id: 1,
+          name: 'image1.jpg',
+          logs: [],
+          categorizations: [],
+          createdAt: new Date(),
+          path: '/path/to/image1.jpg',
+          size: 1000,
+          width: 100,
+          height: 100,
+          transformedImage: null,
+          detectedObjects: [],
+        },
+        {
+          projectId,
+          id: 2,
+          name: 'image2.jpg',
+          logs: [],
+          categorizations: [],
+          createdAt: new Date(),
+          path: '/path/to/image2.jpg',
+          size: 1000,
+          width: 100,
+          height: 100,
+          transformedImage: null,
+          detectedObjects: [],
+        },
+      ];
+      
+      mockImageRepository.createMany.mockResolvedValue(undefined);
+      mockImageRepository.findAll.mockResolvedValue(mockImages);
 
-      // Act
-      await useCase.executeMany(fileNames, projectId);
+      const result = await useCase.executeMany(fileNames, projectId);
 
-      // Assert
-      expect(mockImageRepository.createMany).toHaveBeenCalledWith(fileNames);
+      expect(mockImageRepository.createMany).toHaveBeenCalledWith(fileNames, projectId);
+      expect(mockImageRepository.findAll).toHaveBeenCalledWith({
+        where: {
+          name: { in: fileNames },
+          projectId,
+        },
+      });
+      expect(result).toEqual(mockImages);
     });
   });
 });

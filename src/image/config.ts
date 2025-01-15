@@ -8,3 +8,5 @@ export const inputImagesDir = dockerInputImagesDir || hostInputImagesDir
 export const hostOutputImagesDir = process.env.HOST_OUTPUT_FOLDER
 const dockerOutputImagesDir = process.env.CONTAINER_OUTPUT_FOLDER
 export const outputImagesDir = dockerOutputImagesDir || hostOutputImagesDir
+
+export const redisHost = process.env.REDIS_HOST || 'localhost'
