@@ -94,7 +94,6 @@ model DetectedObject {
 model TransformedImage {
   id          Int        @id @default(autoincrement()) // Primary key
   createdAt   DateTime   @default(now()) // Log creation timestamp
-  writtenAt   DateTime?
 
   width                 Float?     
   height                Float?    

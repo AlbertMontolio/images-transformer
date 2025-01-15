@@ -42,6 +42,8 @@ async function initializeWorker() {
           throw err;
         }
         throw new DetectionError('Detection process failed', err);
+      } finally {
+        console.log('detectImageWorker finally.', new Date());
       }
     },
     { connection: ImageDetectionQueue.getConnection() }
@@ -52,6 +54,10 @@ let detectImageWorker: Worker;
 
 initializeWorker().then(worker => {
   detectImageWorker = worker;
+
+  worker.on('drained', () => {
+    console.log('detectImageWorker is drained.', new Date());
+  });
   
   worker.on('completed', (_job) => {
     // console.log(`detectImageWorker Job ${job.id} completed successfully.`);

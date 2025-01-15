@@ -6,11 +6,11 @@ import { ExpressAdapter } from '@bull-board/express';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter.js'
 import { createBullBoard } from '@bull-board/api'
 import { ImageCategorizationQueue } from './image/infraestructure/queues/image-categorization.queue';
-import { ImageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
 import { ImageDetectionQueue } from './image/infraestructure/queues/image-detection.queue';
 import imagesRoutes from './image/infraestructure/routes/image.routes';
 import swaggerUi from 'swagger-ui-express';
 import { specs } from './shared/swagger/swagger.config';
+import { ImageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ serverAdapter.setBasePath('/admin/queues');
 // Initialize queues in a more maintainable way
 const queues = {
   categorization: ImageCategorizationQueue.getInstance(),
-  transformation: ImageTransformationQueue.getQueue(),
+  transformation: ImageTransformationQueue.getInstance(),
   detection: ImageDetectionQueue.getInstance(),
 } as const;
 

@@ -6,6 +6,7 @@ import { ImageTransformationQueue } from "../../infraestructure/queues/image-tra
 import { ImageDetectionQueue } from "../../infraestructure/queues/image-detection.queue";
 import { INJECTION_TOKENS } from '../../../shared/injection-tokens';
 import { inputImagesDir } from '../../config';
+import { QueueEvents } from 'bullmq';
 
 @injectable()
 export class ProcessImagesUseCase {
@@ -52,7 +53,7 @@ export class ProcessImagesUseCase {
             data: image
           }))
         ),
-        ImageTransformationQueue.getQueue().addBulk(
+        this.imageTransformationQueue.addBulk(
           images.map(image => ({
             name: 'transform-image',
             data: image
@@ -66,5 +67,82 @@ export class ProcessImagesUseCase {
         )
       ]);
     }
+
+    console.log('### before queuesFinished', new Date().toISOString());
+    this.categorizationQueueFinished();
+    this.transformationQueueFinished();
+    console.log('### after queuesFinished', new Date().toISOString());
   }
+  async categorizationQueueFinished() {
+    const categorizationQueueEvents = new QueueEvents(ImageCategorizationQueue.queueName);
+    const cleanup = () => {
+      categorizationQueueEvents.removeAllListeners();
+      // Remove other queue event listeners
+    };
+
+    try {
+      const categorizationDrainedPromise = new Promise((resolve) => {
+        categorizationQueueEvents.on('drained', () => {
+          console.log('p categorizationQueueEvents is drained.');
+          resolve(void 0);
+        });
+      });
+
+      await categorizationDrainedPromise;
+    } catch (error) {
+      console.error('Error setting up categorization queue event listener:', error);
+    } finally {
+      console.log('p categorizationQueueEvents finally.', new Date());
+    }
+  }
+
+  async transformationQueueFinished() {
+    const transformationQueueEvents = new QueueEvents(ImageTransformationQueue.queueName);
+
+    try {
+      const transformationDrainedPromise = new Promise((resolve) => {
+        transformationQueueEvents.on('drained', () => {
+          console.log('p transformationQueueEvents is drained.');
+          resolve(void 0);
+        });
+      });
+
+      await transformationDrainedPromise;
+    } catch (error) {
+      console.error('Error setting up transformation queue event listener:', error);
+    } finally {
+      console.log('p transformationQueueEvents finally.', new Date());
+    }
+  }
+
+  // async queuesFinished() {
+  //   const categorizationQueueEvents = new QueueEvents(ImageCategorizationQueue.queueName);
+  //   const transformationQueueEvents = new QueueEvents(ImageTransformationQueue.name);
+
+  //   const queuesAndEvents = [
+  //     { name: ImageCategorizationQueue.queueName, events: categorizationQueueEvents },
+  //     { name: ImageTransformationQueue.queueName, events: transformationQueueEvents },
+  //   ];
+
+  //   const cleanup = () => {
+  //     categorizationQueueEvents.removeAllListeners();
+  //     // Remove other queue event listeners
+  //   };
+
+  //   try {
+  //     const drainedPromises = queuesAndEvents.map(({ name, events }) => {
+  //       return new Promise((resolve) => {
+  //         events.on('drained', () => {
+  //           console.log(`Queue ${name} is drained.`);
+  //           resolve(void 0);
+  //         });
+  //       });
+  //     });
+
+  //     await Promise.all(drainedPromises);
+  //   } finally {
+  //     // await store in db time where all queues are drained
+  //     cleanup();
+  //   }
+  // }
 }

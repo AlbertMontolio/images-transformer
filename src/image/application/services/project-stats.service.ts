@@ -17,7 +17,7 @@ export class ProjectStatsService {
       throw new Error('Project not found');
     }
 
-    const lastWrittenAt = await this.transformedImageRepository.findLastWrittenAt();
+    const lastWrittenAt = null;
     console.log('lastWrittenAt', lastWrittenAt);
     const duration = lastWrittenAt ? lastWrittenAt.getTime() - project.createdAt.getTime() : 0;
     const durationInSeconds = duration / 1000;
@@ -37,8 +37,8 @@ export class ProjectStatsService {
   }
 
   async getTransformationLastWrittenAt() {
-    const lastWrittenAt = await this.transformedImageRepository.findLastWrittenAt();
-    return lastWrittenAt;
+
+    return null;
   }
 }
 

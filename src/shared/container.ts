@@ -7,7 +7,6 @@ import { ProcessImagesUseCase } from '../image/application/use-cases/process-ima
 import { ReadImagesNamesUseCase } from '../image/application/use-cases/read-images-names.use-case';
 import { CreateImagesInDbUseCase } from '../image/application/use-cases/create-images-in-db.use-case';
 import { ImageCategorizationQueue } from '../image/infraestructure/queues/image-categorization.queue';
-import { ImageTransformationQueue } from '../image/infraestructure/queues/image-transformation.queue';
 import { ImageDetectionQueue } from '../image/infraestructure/queues/image-detection.queue';
 import { INJECTION_TOKENS } from './injection-tokens';
 import { ImageRepository } from '../image/infraestructure/repositories/image.repository';
@@ -16,6 +15,7 @@ import { FilterStatsService } from '../image/application/services/filter-stats.s
 import { TotalNumberImagesPerPathService } from '../image/application/services/total-number-images-per-path.service';
 import { WriteImageService } from '../image/infraestructure/services/write-image.service';
 import { ProjectRepository } from '../image/infraestructure/repositories/project.repository';
+import { ImageTransformationQueue } from '../image/infraestructure/queues/image-transformation.queue';
 
 // Register services
 container.registerSingleton(TransformImageService);
@@ -35,7 +35,7 @@ container.register(INJECTION_TOKENS.IMAGE_CATEGORIZATION_QUEUE, {
 });
 // ### TODO: i think it's not necessary to inject in process images usecase
 container.register(INJECTION_TOKENS.IMAGE_TRANSFORMATION_QUEUE, {
-  useValue: ImageTransformationQueue.getQueue()
+  useValue: ImageTransformationQueue.getInstance()
 });
 container.register(INJECTION_TOKENS.IMAGE_DETECTION_QUEUE, {
   useValue: ImageDetectionQueue.getInstance()

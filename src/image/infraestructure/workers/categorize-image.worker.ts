@@ -32,9 +32,18 @@ async function initializeWorker() {
   return new Worker(
     ImageCategorizationQueue.queueName,
     async (job: { data: Image }) => {
-      const image = job.data;
-      const command = new CategorizeImageCommand(image);
-      await commandBus.execute(command);
+      try {
+        const image = job.data;
+        const command = new CategorizeImageCommand(image);
+        await commandBus.execute(command);
+      } catch (err) {
+        if (err instanceof Error && err.name !== 'Error') {
+          throw err;
+        }
+          throw new Error('CategorizeImage process failed', err);
+      } finally {
+        console.log('categorizeImageWorker finally.', new Date());
+      }
     },
     { connection: ImageCategorizationQueue.getConnection() }
   );
@@ -45,6 +54,10 @@ let categorizeImageWorker: Worker;
 
 initializeWorker().then(worker => {
   categorizeImageWorker = worker;
+
+  worker.on('drained', () => {
+    console.log('categorizeImageWorker is drained.', new Date());
+  });
 
   // Log worker status
   worker.on('completed', (_job) => {

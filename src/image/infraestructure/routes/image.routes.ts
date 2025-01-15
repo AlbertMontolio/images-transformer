@@ -14,8 +14,11 @@ interface ErrorResponse {
 
 router.get('/', async (_req, res) => {
   try {
+    console.log('### before imageRepository', new Date().toISOString());
     const imageRepository = container.resolve(ImageRepository);
     const images = await imageRepository.findAll();
+    console.log('### images.length', images.length);
+    console.log('### after imageRepository', new Date().toISOString());
     res.json(images);
   } catch (err) {
     console.error('Error fetching images:', err);

@@ -76,27 +76,4 @@ export class TransformedImageRepository {
       throw err;
     }
   }
-
-  async findLastWrittenAt(): Promise<Date | null> {
-    try {
-      const lastWrittenImage = await prisma.transformedImage.findFirst({
-        where: {
-          writtenAt: {
-            not: null
-          }
-        },
-        orderBy: {
-          writtenAt: 'desc'
-        },
-        select: {
-          writtenAt: true
-        }
-      });
-
-      return lastWrittenImage?.writtenAt || null;
-    } catch (err) {
-      console.log('### TransformedImageRepository#findLastWrittenAt err: ', err);
-      return null;
-    }
-  }
 }

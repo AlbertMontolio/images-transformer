@@ -47,9 +47,6 @@ class TransformImageBatchProcessor {
       // Update writtenAt timestamp for all images in the batch
       const imageIds = this.writeBuffer.map(item => item.imageId);
       console.log('### imageIds', imageIds);
-      await this.transformedImageRepository.updateMany(imageIds, {
-        writtenAt: new Date()
-      });
 
       // Clear the buffer after successful write
       this.writeBuffer = [];
@@ -81,21 +78,18 @@ const transformImageWorker = new Worker(
         'Albert Montolio watermark'
       );
       
-      try {
-        const transformedImage = await commandBus.execute(command) as Sharp;
-        await batchProcessor.addToWriteBuffer({
-          image: transformedImage,
-          filename: image.name,
-          imageId: image.id
-        });
-      } catch (error) {
-        console.error(`Failed to transform image ${image.id}:`, error);
-        throw error;
-      }
+      const transformedImage = await commandBus.execute(command) as Sharp;
+      await batchProcessor.addToWriteBuffer({
+        image: transformedImage,
+        filename: image.name,
+        imageId: image.id
+      });
 
     } catch (error) {
       console.error('Worker processing failed:', error);
       throw error; // This will mark the job as failed
+    } finally {
+      console.log('transformImageWorker finally.', new Date());
     }
   },
   { 
@@ -105,6 +99,7 @@ const transformImageWorker = new Worker(
   }
 );
 
+// ### TODO: process???????? or worker???????
 // Shutdown handlers stay the same
 process.on('SIGTERM', async () => {
   await batchProcessor.flushWriteBuffer();
@@ -114,6 +109,12 @@ process.on('SIGINT', async () => {
   await batchProcessor.flushWriteBuffer();
 });
 
+transformImageWorker.on('drained', async () => {
+  await batchProcessor.flushWriteBuffer();
+
+  console.log('transformImageWorker is drained.', new Date());
+});
+
 // Event handlers stay the same
 transformImageWorker.on('completed', (_job) => {
   // console.log(`Job ${job.id} completed successfully.`);
@@ -121,10 +122,6 @@ transformImageWorker.on('completed', (_job) => {
 
 transformImageWorker.on('failed', (job, err) => {
   console.error(`Job ${job.id} failed: ${err.message}`);
-});
-
-transformImageWorker.on('drained', async () => {
-  await batchProcessor.flushWriteBuffer();
 });
 
 console.log('Transform image worker is running...');
