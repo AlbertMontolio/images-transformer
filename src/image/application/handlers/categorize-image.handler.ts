@@ -3,6 +3,7 @@ import { CategorizeImageService } from 'src/image/infraestructure/services/categ
 import { CategorizeImageCommand } from '../commands/categorize-image.command';
 import { CategorizationRepository, CreateCategorizationProp } from 'src/image/infraestructure/repositories/categorization.repository';
 import { Status } from '@prisma/client';
+import { RedisPublisherService } from '../../../shared/services/redis-publisher.service';
 
 export class CategorizeImageHandler {
   constructor(
@@ -40,5 +41,13 @@ export class CategorizeImageHandler {
       imageId: image.id,
     })
 
+    // Publish progress through Redis
+    await RedisPublisherService.getInstance().publish({
+      type: 'categorization-progress',
+      data: {
+        imageId: image.id,
+        status: 'completed'
+      }
+    });
   }
 } 

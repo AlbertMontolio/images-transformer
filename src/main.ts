@@ -11,6 +11,10 @@ import imagesRoutes from './image/infraestructure/routes/image.routes';
 import swaggerUi from 'swagger-ui-express';
 import { specs } from './shared/swagger/swagger.config';
 import { ImageTransformationQueue } from './image/infraestructure/queues/image-transformation.queue';
+import { createServer } from 'http';
+import { WebSocketService } from './shared/services/websocket.service';
+import { createClient } from 'redis';
+import { redisHost } from './image/config';
 
 dotenv.config();
 
@@ -53,36 +57,40 @@ app.use('/admin/queues', serverAdapter.getRouter());
 app.use('/images', imagesRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
-export const startServer = async () => {
-  try {
-    const PORT = process.env.PORT || 3000;
-    
-    // Remove CORS configuration from here since we moved it above
-    const server = app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-      console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
-      console.log(`Queue Dashboard available at http://localhost:${PORT}/admin/queues`);
-    });
+// Create HTTP server explicitly
+const server = createServer(app);
 
-    return server;
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-};
+// Initialize WebSocket with the HTTP server
+const wsService = WebSocketService.getInstance(server);
+console.log('wsService', wsService);
 
-// Change the type declaration
-let server: ReturnType<typeof app.listen>;
+// After WebSocket initialization
+const subscriber = createClient({
+  url: `redis://${redisHost}:${process.env.REDIS_PORT}`
+});
 
-// Update the IIFE to properly assign the server
-(async () => {
-  const serverPromise = await startServer();
-  if (serverPromise) {
-    server = serverPromise;
-  }
-})();
+subscriber.connect().then(async () => {
+  console.log('Redis subscriber connected');
+  
+  await subscriber.subscribe('websocket-channel', (message) => {
+    try {
+      const data = JSON.parse(message);
+      console.log('### send it to wsService data', data);
+      wsService.broadcast(data);
+    } catch (error) {
+      console.error('Error processing message:', error);
+    }
+  });
+});
 
-export { app, server };
+const PORT = process.env.PORT || 3000;
+
+// Start server
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`API Documentation available at http://localhost:${PORT}/api-docs`);
+  console.log(`Queue Dashboard available at http://localhost:${PORT}/admin/queues`);
+});
 
 export const shutdown = async () => {
   console.log('Shutting down gracefully...');
@@ -109,3 +117,5 @@ export const shutdown = async () => {
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+export { app, server };
