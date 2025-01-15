@@ -13,6 +13,7 @@ export class TransformImageHandler {
 
   async execute(command: TransformImageCommand): Promise<Sharp> {
     const { image, watermarkText } = command;
+    console.log('### TransformImageHandler', image);
 
     try {
       await this.logRepository.createStartedProcessLog(image.id, 'transformation');

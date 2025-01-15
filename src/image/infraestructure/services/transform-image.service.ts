@@ -21,6 +21,7 @@ export class TransformImageService {
     image: Image;
     watermarkText: string;
   }): Promise<Sharp | undefined> {
+    console.log('### TransformImageService', image);
     const { id, name } = image;
     const repositoryOutputFilePath = path.join(hostOutputImagesDir, 'transformed_images', name);
 

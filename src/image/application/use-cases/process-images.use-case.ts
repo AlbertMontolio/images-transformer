@@ -114,35 +114,4 @@ export class ProcessImagesUseCase {
       console.log('p transformationQueueEvents finally.', new Date());
     }
   }
-
-  // async queuesFinished() {
-  //   const categorizationQueueEvents = new QueueEvents(ImageCategorizationQueue.queueName);
-  //   const transformationQueueEvents = new QueueEvents(ImageTransformationQueue.name);
-
-  //   const queuesAndEvents = [
-  //     { name: ImageCategorizationQueue.queueName, events: categorizationQueueEvents },
-  //     { name: ImageTransformationQueue.queueName, events: transformationQueueEvents },
-  //   ];
-
-  //   const cleanup = () => {
-  //     categorizationQueueEvents.removeAllListeners();
-  //     // Remove other queue event listeners
-  //   };
-
-  //   try {
-  //     const drainedPromises = queuesAndEvents.map(({ name, events }) => {
-  //       return new Promise((resolve) => {
-  //         events.on('drained', () => {
-  //           console.log(`Queue ${name} is drained.`);
-  //           resolve(void 0);
-  //         });
-  //       });
-  //     });
-
-  //     await Promise.all(drainedPromises);
-  //   } finally {
-  //     // await store in db time where all queues are drained
-  //     cleanup();
-  //   }
-  // }
 }
