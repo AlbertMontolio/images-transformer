@@ -7,6 +7,7 @@ import { ImageDetectionQueue } from "../../infraestructure/queues/image-detectio
 import { INJECTION_TOKENS } from '../../../shared/injection-tokens';
 import { inputImagesDir } from '../../config';
 import { QueueEvents } from 'bullmq';
+import { ProcessRepository } from '../../infraestructure/repositories/process.repository';
 
 @injectable()
 export class ProcessImagesUseCase {
@@ -20,10 +21,11 @@ export class ProcessImagesUseCase {
     @inject(INJECTION_TOKENS.IMAGE_CATEGORIZATION_QUEUE)
     private readonly imageCategorizationQueue: ImageCategorizationQueue,
     @inject(INJECTION_TOKENS.IMAGE_TRANSFORMATION_QUEUE)
-    // ### TODO: i think it's not necessary to inject in process images usecase
     private readonly imageTransformationQueue: ImageTransformationQueue,
     @inject(INJECTION_TOKENS.IMAGE_DETECTION_QUEUE)
-    private readonly imageDetectionQueue: ImageDetectionQueue
+    private readonly imageDetectionQueue: ImageDetectionQueue,
+    @inject(ProcessRepository)
+    private readonly processRepository: ProcessRepository
   ) {}
 
   private createBatches<T>(items: T[], batchSize: number): T[][] {
@@ -35,6 +37,10 @@ export class ProcessImagesUseCase {
   }
 
   async execute(projectId: number) {
+    const transformProcess = await this.processRepository.create({ name: 'transformation', projectId });
+    const categorizationProcess = await this.processRepository.create({ name: 'categorization', projectId });
+    const detectionProcess = await this.processRepository.create({ name: 'detection', projectId });
+
     const inputPath = inputImagesDir
     const imagesFilesNames = await this.readImagesNamesUseCase.execute(inputPath)
 
@@ -68,14 +74,15 @@ export class ProcessImagesUseCase {
       ]);
     }
 
+
     console.log('### before queuesFinished', new Date().toISOString());
-    this.waitForQueueDrain(ImageTransformationQueue.queueName);
-    this.waitForQueueDrain(ImageCategorizationQueue.queueName);
-    this.waitForQueueDrain(ImageDetectionQueue.queueName);
+    this.waitForQueueDrain(ImageTransformationQueue.queueName, transformProcess.id);
+    this.waitForQueueDrain(ImageCategorizationQueue.queueName, categorizationProcess.id);
+    this.waitForQueueDrain(ImageDetectionQueue.queueName, detectionProcess.id);
     console.log('### after queuesFinished', new Date().toISOString());
   }
 
-  async waitForQueueDrain(queueName: string) {
+  private async waitForQueueDrain(queueName: string, processId: number) {
     const queueEvents = new QueueEvents(queueName);
     const cleanup = () => {
       queueEvents.removeAllListeners();
@@ -84,7 +91,7 @@ export class ProcessImagesUseCase {
     try {
       const drainedPromise = new Promise((resolve) => {
         queueEvents.on('drained', () => {
-          console.log(`${queueName}QueueEvents is drained.`);
+          console.log(`${queueName} queue is drained.`);
           resolve(void 0);
         });
       });
@@ -94,6 +101,7 @@ export class ProcessImagesUseCase {
       console.error(`Error setting up ${queueName} queue event listener:`, error);
     } finally {
       console.log(`${queueName} queue finally.`, new Date());
+      await this.processRepository.update(processId, { finishedAt: new Date() });
       cleanup();
     }
   }
