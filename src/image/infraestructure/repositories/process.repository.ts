@@ -16,6 +16,14 @@ export class ProcessRepository {
     });
   }
 
+  async getByProjectId(projectId: number): Promise<Process[]> {
+    return prisma.process.findMany({
+      where: {
+        projectId,
+      },
+    });
+  }
+
   async update(id: number, data: {
     finishedAt?: Date;
   }): Promise<Process> {
