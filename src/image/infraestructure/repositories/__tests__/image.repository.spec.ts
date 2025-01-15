@@ -66,6 +66,7 @@ describe('ImageRepository', () => {
         where: { name: imageName },
         update: {},
         create: {
+          projectId,
           name: imageName,
           path: hostImagePath,
           size: mockStats.size,
