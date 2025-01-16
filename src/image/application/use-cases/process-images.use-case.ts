@@ -80,6 +80,7 @@ export class ProcessImagesUseCase {
       ]);
     }
 
+    // TODO: improve, use MQTT broker, to inform client
     console.log('### before queuesFinished', new Date().toISOString());
     this.waitForQueueDrain(ImageTransformationQueue.queueName, transformProcess.id);
     this.waitForQueueDrain(ImageCategorizationQueue.queueName, categorizationProcess.id);

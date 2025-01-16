@@ -34,6 +34,9 @@ const transformImageWorker = new Worker(
       );
       
       const transformedImage = await commandBus.execute(command) as Sharp;
+
+      // TODO: improve, create a separate worker for the writing to the output folder
+      // and do bulk writing there
       await writeImageService.execute(transformedImage, image.name);
 
     } catch (error) {
