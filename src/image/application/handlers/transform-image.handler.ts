@@ -24,10 +24,13 @@ export class TransformImageHandler {
         watermarkText,
       });
 
+      // TODO: improve, use MQTT broker, and subscribe when image is transformed,
+      // and update corresponding tables in database
       await this.logRepository.createCompletedProcessLog(image.id, 'transformation');
       console.log('')
 
       // Publish progress through Redis
+      // improve, use MQTT broker, to inform client
       await RedisPublisherService.getInstance().publish({
         type: 'transformation-progress',
         data: {

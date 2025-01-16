@@ -40,6 +40,8 @@ A Node.js/Express API that processes images stored in an input path and outputs 
 
 - the writing in folders is an expensive operation, I didn't have the time to implement a bulk writing system, so I just wrote the images to the output folder one by one. Also, in order to separate concerns, another queue / worker could be added for the writing to the output folder.
 
+- MQTT broker could be used to inform the client when the image is transformed, and when the object detection is completed. This event driven approach would allow to improve the performance of the system, and to inform the client when the image is transformed, and when the object detection is completed.
+
 ## Architecture
 
 ### Clean Architecture Implementation
@@ -135,3 +137,10 @@ docker-compose could be optimized: trying to find an image small enough but that
 
 ### Retry policies
 retry policies could be added to the queues to improve the robustness of the system and when error in saving happens
+
+### DDD
+Only the basis of DDD was implemented, but it could be improved. I'd go section by section, and see that infraestructure only implements I/O and external operations, Domain contains the business logic and application contains the orchestration.
+Entities are missing, the factories to create them etc.
+
+### Dependency Injection
+Nestjs handles DI pretty handy, I've used a lightweight version of it with tsyringe. I didn't use DI in all the places due to time constraints. Benefits of DI are that it allows to easily mock dependencies for testing, and it allows to easily change dependencies.

@@ -31,6 +31,7 @@ export class DetectImageHandler {
       status: Status.COMPLETED
     });
 
+    // TODO: improve and use MQTT broker
     // Publish progress through Redis
     RedisPublisherService.getInstance().publish({
       type: 'detection-progress',
@@ -40,6 +41,8 @@ export class DetectImageHandler {
         image,
       }
     });
+
+    // TODO: improve, move to a separate worker, and do bulk writing there
     this.saveObjectPredictionsIntoImageUseCase.execute(image, predictions);
 
     for (const prediction of predictions) {
