@@ -15,15 +15,42 @@ export interface DetectedObjectPrediction {
 export class DetectObjectsService {
   constructor(private readonly model: cocoSsd.ObjectDetection) {}
 
-  private async resizeImage(inputImagePath: string): Promise<Buffer> {
+  private async resizeImage(inputImagePath: string): Promise<[Buffer, number, number]> {
     try {
-      return await sharp(inputImagePath)
+      // Get original image dimensions
+      const metadata = await sharp(inputImagePath).metadata();
+      const originalWidth = metadata.width || 640;
+      const originalHeight = metadata.height || 640;
+
+      const resizedBuffer = await sharp(inputImagePath)
         .resize(640, 640)
         .toFormat('jpeg')
         .toBuffer();
+
+      return [resizedBuffer, originalWidth, originalHeight];
     } catch (err) {
       throw new DetectionError('Failed to resize image: dimensions mismatch', err);
     }
+  }
+
+  private resizeBox(
+    bbox: [number, number, number, number],
+    originalWidth: number,
+    originalHeight: number
+  ): [number, number, number, number] {
+    const [x, y, width, height] = bbox;
+    
+    // Calculate scaling ratios
+    const widthRatio = originalWidth / 640;
+    const heightRatio = originalHeight / 640;
+
+    // Scale back the coordinates and dimensions
+    return [
+      x * widthRatio,
+      y * heightRatio,
+      width * widthRatio,
+      height * heightRatio
+    ];
   }
 
   async execute(image: Image): Promise<DetectedObjectPrediction[]> {
@@ -35,7 +62,7 @@ export class DetectObjectsService {
 
     try {
       // Step 1: Load and Resize the Image
-      const resizedImageBuffer = await this.resizeImage(inputImagePath);
+      const [resizedImageBuffer, originalWidth, originalHeight] = await this.resizeImage(inputImagePath);
 
       // Step 2: Decode the Image into a Tensor
       imageTensor = tf.node.decodeImage(resizedImageBuffer, 3) as tf.Tensor3D;
@@ -52,11 +79,14 @@ export class DetectObjectsService {
       const predictions = await this.model.detect(inputTensor);
 
       // transform predictions to real size
-      return predictions.map((prediction) => ({
-        class: prediction.class,
-        score: prediction.score,
-        bbox: prediction.bbox as [number, number, number, number],
-      }));
+      return predictions.map((prediction) => {
+        const resizedBox = this.resizeBox(prediction.bbox, originalWidth, originalHeight);
+        return {
+          class: prediction.class,
+          score: prediction.score,
+          bbox: resizedBox,
+        }
+      });
     } catch (err) {
       console.log('Caught in execute:', err);
       console.log('Error type:', err.constructor.name);

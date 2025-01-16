@@ -34,6 +34,12 @@ A Node.js/Express API that processes images stored in an input path and outputs 
 
 > Note: As framework, Express was chosen over Nestjs, since it was a task and not a real project, without authentication, authorization, deployment, real monitoring etc. If project would grow, Nestjs would be an option in order to leverage the benefits of the framework like dependency injection, better error handling, better monitoring, better testing etc.
 
+### Shortcuts
+
+- I've developed a quick nextjs app to see real live data. In order to see the data, I quickly implemented a websocket to communicate between the nextjs app and the node.js app. The workers send messages to websocket via redis, and websocket comunicates to client. Proper way to do it would be to use a broker like rabbitmq or kafka.
+
+- the writing in folders is an expensive operation, I didn't have the time to implement a bulk writing system, so I just wrote the images to the output folder one by one. Also, in order to separate concerns, another queue / worker could be added for the writing to the output folder.
+
 ## Architecture
 
 ### Clean Architecture Implementation
@@ -65,8 +71,8 @@ The project follows Clean Architecture principles with clear separation of conce
 
 ### CQRS Pattern
 In order to allow app to scale, we use CQRS pattern. Worker is only responsible for orchestrating which handler to use. Handler is responsible for the actual processing of the image, whether it's categorization, object detection or transformation.
-- **Command**: Send image to the queue
-- **Query**: Get image from the queue
+- **Command**: process data transformation process
+- **Query**: read processes
 
 ## Core Features
 

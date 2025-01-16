@@ -14,7 +14,7 @@ import { RedisPublisherService } from '../../../shared/services/redis-publisher.
 
 @injectable()
 export class ProcessImagesUseCase {
-  private readonly BATCH_SIZE = 50; // Reduce from 100 to 20
+  private readonly BATCH_SIZE = 20; // Reduce from 100 to 20
   
   constructor(
     @inject(ReadImagesNamesUseCase) 
@@ -56,6 +56,7 @@ export class ProcessImagesUseCase {
 
     for (const fileNameBatch of fileNameBatches) {
       const images = await this.createImagesInDbUseCase.executeMany(fileNameBatch, projectId);
+      console.log('### images', images);
       this.sendSavedImagesToSocket(images);
       await Promise.all([
         this.imageCategorizationQueue.addBulk(
@@ -89,6 +90,7 @@ export class ProcessImagesUseCase {
   private sendSavedImagesToSocket(images: Image[]) {
     // comment
     for (const image of images) {
+      console.log('### image', image);
       RedisPublisherService.getInstance().publish({
         type: 'saved-image',
         data: {
