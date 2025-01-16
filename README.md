@@ -76,6 +76,10 @@ In order to allow app to scale, we use CQRS pattern. Worker is only responsible 
 - **Command**: process data transformation process
 - **Query**: read processes
 
+### Docker
+
+- I've created a docker-compose file to run the app. I've used a small image for tensorflow.js, but it could be improved. More replicas could be added to improve performance for each worker.
+
 ## Core Features
 
 ### Image Processing

@@ -11,7 +11,6 @@ export class ProcessesStatsService {
 
   async execute(projectId: number) {
     const processes = await this.processRepository.getByProjectId(projectId);
-    console.log('processes', processes);
 
     const processesWithDurations = processes.map((process) => {
       return {

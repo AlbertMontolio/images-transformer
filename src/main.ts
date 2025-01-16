@@ -62,7 +62,6 @@ const server = createServer(app);
 
 // Initialize WebSocket with the HTTP server
 const wsService = WebSocketService.getInstance(server);
-console.log('wsService', wsService);
 
 // After WebSocket initialization
 const subscriber = createClient({
@@ -75,7 +74,6 @@ subscriber.connect().then(async () => {
   await subscriber.subscribe('websocket-channel', (message) => {
     try {
       const data = JSON.parse(message);
-      console.log('### send it to wsService data', data);
       wsService.broadcast(data);
     } catch (error) {
       console.error('Error processing message:', error);

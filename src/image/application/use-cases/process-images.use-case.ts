@@ -41,7 +41,6 @@ export class ProcessImagesUseCase {
 
   async execute(projectId: number) {
     const transformProcess = await this.processRepository.create({ name: ProcessName.TRANSFORMATION, projectId });
-    console.log('### transformProcess', transformProcess);
     const categorizationProcess = await this.processRepository.create({ name: ProcessName.CATEGORIZATION, projectId });
     const detectionProcess = await this.processRepository.create({ name: ProcessName.DETECTION, projectId });
 
@@ -56,8 +55,9 @@ export class ProcessImagesUseCase {
 
     for (const fileNameBatch of fileNameBatches) {
       const images = await this.createImagesInDbUseCase.executeMany(fileNameBatch, projectId);
-      console.log('### images', images);
+
       this.sendSavedImagesToSocket(images);
+
       await Promise.all([
         this.imageCategorizationQueue.addBulk(
           images.map(image => ({
@@ -81,17 +81,14 @@ export class ProcessImagesUseCase {
     }
 
     // TODO: improve, use MQTT broker, to inform client
-    console.log('### before queuesFinished', new Date().toISOString());
     this.waitForQueueDrain(ImageTransformationQueue.queueName, transformProcess.id);
     this.waitForQueueDrain(ImageCategorizationQueue.queueName, categorizationProcess.id);
     this.waitForQueueDrain(ImageDetectionQueue.queueName, detectionProcess.id);
-    console.log('### after queuesFinished', new Date().toISOString());
   }
 
   private sendSavedImagesToSocket(images: Image[]) {
     // comment
     for (const image of images) {
-      console.log('### image', image);
       RedisPublisherService.getInstance().publish({
         type: 'saved-image',
         data: {
@@ -104,8 +101,6 @@ export class ProcessImagesUseCase {
   }
 
   private async waitForQueueDrain(queueName: string, processId: number) {
-    console.log('### waitForQueueDrain', queueName, processId);
-    console.log('### piusc redisHost', redisHost);
     const queueEvents = new QueueEvents(queueName, {
       connection: {
         host: redisHost,
