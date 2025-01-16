@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 
+// TODO: instantiate prisma with a singleton pattern and use it in the app with DI
 console.log('PrismaClient instantiated');
 
 // Exported Prisma instance

@@ -30,7 +30,6 @@ export class WebSocketService {
   }
 
   public broadcast(data: any): void {
-    console.log('### Broadcasting:', data);
     this.io.emit('categorization-progress', data);
     console.log(`Broadcast sent to ${this.io.engine.clientsCount} clients`);
   }

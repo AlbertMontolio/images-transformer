@@ -113,6 +113,14 @@ In order to allow app to scale, we use CQRS pattern. Worker is only responsible 
 - handler calls the appropriate service to process the image.
 - in the case of writing transformed image to the output path, we use sharp to write the image to the output path and a bulk writing system with batches to improve performance
 
+## Testing
+
+quick coverage was added with jest. Many tests were generated quickly with the help of copilot. Since testing is very important in industries like IoT, banking and pharma, coverage should be improved, and tests should be written more thoroughly.
+
+## API documentation
+
+so that clients can use the API, swagger documentation was added: http://localhost:3000/api-docs/#/. Swagger offers more prodcuts to host documentation in the cloud and share it with clients or the team.
+
 ## Missing Features
 
 ### Error handling

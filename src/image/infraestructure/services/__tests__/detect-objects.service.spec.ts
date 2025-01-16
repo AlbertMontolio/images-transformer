@@ -44,6 +44,7 @@ describe('DetectObjectsService', () => {
       resize: jest.fn().mockReturnThis(),
       toFormat: jest.fn().mockReturnThis(),
       toBuffer: jest.fn().mockResolvedValue(mockResizedImageBuffer),
+      metadata: jest.fn().mockResolvedValue({ width: 640, height: 480 }),
     };
 
     (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
@@ -67,9 +68,18 @@ describe('DetectObjectsService', () => {
     const results = await service.execute(mockImage);
 
     // Assert
+    const heightRatio = 480/640;
     expect(results).toEqual([
-      { class: 'person', score: 0.95, bbox: [10, 20, 30, 40] },
-      { class: 'cat', score: 0.85, bbox: [50, 60, 70, 80] },
+      { 
+        class: 'person', 
+        score: 0.95, 
+        bbox: [10, 20 * heightRatio, 30, 40 * heightRatio] 
+      },
+      { 
+        class: 'cat', 
+        score: 0.85, 
+        bbox: [50, 60 * heightRatio, 70, 80 * heightRatio] 
+      },
     ]);
     
     const expectedPath = path.join(inputImagesDir, mockImage.name);
@@ -93,6 +103,7 @@ describe('DetectObjectsService', () => {
       resize: jest.fn().mockReturnThis(),
       toFormat: jest.fn().mockReturnThis(),
       toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-buffer')),
+      metadata: jest.fn().mockResolvedValue({ width: 640, height: 480 }),
     };
 
     (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(
@@ -101,7 +112,8 @@ describe('DetectObjectsService', () => {
 
     const mockTensor = { 
       dispose: jest.fn(),
-      toInt: jest.fn()
+      toInt: jest.fn().mockReturnThis(),
+      shape: [640, 640, 3]
     } as unknown as tf.Tensor3D;
 
     (tf.node.decodeImage as jest.Mock).mockReturnValue(mockTensor);
@@ -123,9 +135,10 @@ describe('DetectObjectsService', () => {
     });
 
     const mockSharpInstance: Partial<Sharp> = {
+      metadata: jest.fn().mockRejectedValue(new Error('Sharp error')),
       resize: jest.fn().mockReturnThis(),
       toFormat: jest.fn().mockReturnThis(),
-      toBuffer: jest.fn().mockRejectedValue(new Error('Sharp error')),
+      toBuffer: jest.fn().mockResolvedValue(Buffer.from('mock-buffer')),
     };
 
     (sharp as jest.MockedFunction<typeof sharp>).mockImplementation(

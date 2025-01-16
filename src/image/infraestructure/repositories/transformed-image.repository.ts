@@ -29,7 +29,7 @@ export class TransformedImageRepository {
 
       return transformedImage;
     } catch (err) {
-      console.log('### TransformedImageRepository#create err: ', err)
+      console.log('err: ', err)
       return null;
     }
   }
@@ -51,7 +51,7 @@ export class TransformedImageRepository {
         },
       });
     } catch (err) {
-      console.log('### TransformedImageRepository#update err: ', err);
+      console.log('err: ', err);
     }
   }
 
@@ -72,7 +72,7 @@ export class TransformedImageRepository {
         }
       });
     } catch (err) {
-      console.log('### TransformedImageRepository#updateMany err: ', err);
+      console.log('err: ', err);
       throw err;
     }
   }

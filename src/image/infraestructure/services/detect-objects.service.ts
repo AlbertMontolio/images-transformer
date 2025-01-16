@@ -88,10 +88,6 @@ export class DetectObjectsService {
         }
       });
     } catch (err) {
-      console.log('Caught in execute:', err);
-      console.log('Error type:', err.constructor.name);
-      console.log('Is DetectionError:', err instanceof DetectionError);
-      
       if (err instanceof DetectionError) {
         throw err;
       }

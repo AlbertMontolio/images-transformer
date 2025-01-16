@@ -52,7 +52,7 @@ describe('TransformedImageRepository', () => {
       // Assert
       expect(prisma.transformedImage.create).toHaveBeenCalledTimes(1);
       expect(consoleSpy).toHaveBeenCalledWith(
-        '### TransformedImageRepository#create err: ',
+        'err: ',
         mockError
       );
       expect(result).toBeNull();
@@ -91,7 +91,7 @@ describe('TransformedImageRepository', () => {
   
       // Assert
       expect(consoleSpy).toHaveBeenCalledWith(
-        '### TransformedImageRepository#update err: ',
+        'err: ',
         mockError
       );
   

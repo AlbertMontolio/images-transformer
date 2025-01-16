@@ -21,7 +21,7 @@ export class DetectedObjectRepository {
         data: inputWithImageId,
       })
     } catch (err) {
-      console.log('### err', err)
+      console.log('err', err)
     }
   }
 }

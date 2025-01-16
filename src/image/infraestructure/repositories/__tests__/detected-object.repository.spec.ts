@@ -64,7 +64,7 @@ describe('DetectedObjectRepository', () => {
       expect(prisma.detectedObject.create).toHaveBeenCalledWith({
         data: { ...input, imageId },
       });
-      expect(consoleSpy).toHaveBeenCalledWith('### err', mockError);
+      expect(consoleSpy).toHaveBeenCalledWith('err', mockError);
 
       consoleSpy.mockRestore();
     });

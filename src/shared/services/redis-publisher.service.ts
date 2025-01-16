@@ -6,7 +6,6 @@ export class RedisPublisherService {
   private publisher: any;
 
   private constructor() {
-    console.log('### redis publisher service constructor');
     this.publisher = createClient({
       url: `redis://${redisHost}:${process.env.REDIS_PORT}`
     });
